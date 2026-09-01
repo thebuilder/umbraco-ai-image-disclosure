@@ -1,6 +1,6 @@
 export const disclosurePropertyAlias = "aiDisclosure";
-export const generatedDisclosureValue = "Fully AI-generated";
-export const modifiedDisclosureValue = "Partially AI-modified";
+export const generatedDisclosureValue = "generated";
+export const modifiedDisclosureValue = "modified";
 
 type DisclosureValue = {
   alias: string;

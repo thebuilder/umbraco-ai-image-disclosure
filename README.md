@@ -2,7 +2,7 @@
 
 AI Image Disclosure classifies Umbraco Image media from signed C2PA Content Credentials. It adds three properties to the default Image media type:
 
-- `aiDisclosure`: empty when unknown, `Fully AI-generated`, or `Partially AI-modified`.
+- `aiDisclosure`: empty when unknown, `generated`, or `modified`.
 - `aiGenerator`: the software agent named by the manifest, when available.
 - `aiDisclosureSource`: read-only `C2PA` or `Manual`, so a manual override survives later file replacements.
 
@@ -10,7 +10,7 @@ The wording follows the European Commission's voluntary labels for fully AI-gene
 
 ## Backoffice badges
 
-The Media section's grid view overlays the matching European Commission badge on Image thumbnails whose `aiDisclosure` value is `Fully AI-generated` or `Partially AI-modified`. Undetermined images and other media remain unchanged. The badge is informational and does not alter thumbnail selection, navigation, or media actions.
+The Media section's grid view overlays the matching European Commission badge on Image thumbnails whose `aiDisclosure` value is `generated` or `modified`. Undetermined images and other media remain unchanged. The badge is informational and does not alter thumbnail selection, navigation, or media actions.
 
 The package intentionally limits this integration to the supported Media collection view. Media Picker dialogs use separate internal components and are left unchanged.
 
@@ -32,9 +32,9 @@ Only C2PA manifests whose validation state is `Valid` or `Trusted` are considere
 
 | C2PA evidence | Stored disclosure |
 | --- | --- |
-| `c2pa.created` with IPTC `trainedAlgorithmicMedia` | `Fully AI-generated` |
-| `c2pa.edited` with an AI source type | `Partially AI-modified` |
-| IPTC `compositeWithTrainedAlgorithmicMedia` | `Partially AI-modified` |
+| `c2pa.created` with IPTC `trainedAlgorithmicMedia` | `generated` |
+| `c2pa.edited` with an AI source type | `modified` |
+| IPTC `compositeWithTrainedAlgorithmicMedia` | `modified` |
 | No usable manifest or no positive AI evidence | Empty (unknown) |
 | Invalid or unreadable C2PA data | Existing manual values are preserved |
 
