@@ -1,0 +1,18 @@
+{
+  "name": "@thebuilder/ai-image-disclosure-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "blume dev",
+    "build": "pnpm run generate:og && blume build",
+    "generate:og": "umbraco-docs-og",
+    "check:og": "umbraco-docs-og --check"
+  },
+  "dependencies": {
+    "@thebuilder/umbraco-docs": "^1.0.4",
+    "blume": "^1.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}

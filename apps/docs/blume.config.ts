@@ -1,0 +1,35 @@
+import { defineConfig } from "blume";
+import { aiImageDisclosurePackage } from "./umbraco-package";
+
+export default defineConfig({
+  title: aiImageDisclosurePackage.name,
+  description: aiImageDisclosurePackage.summary,
+  logo: {
+    image: "/logo.png",
+    text: "AI Image Disclosure",
+  },
+  github: {
+    owner: "thebuilder",
+    repo: "umbraco-ai-generated",
+    dir: "apps/docs",
+  },
+  content: {
+    root: "content",
+  },
+  navigation: {
+    tabs: [{ label: "Docs", path: "/", href: "/overview" }],
+  },
+  deployment: {
+    output: "static",
+    site: "https://ai-image-disclosure.thebuilder.dk",
+  },
+  seo: {
+    og: { enabled: false },
+  },
+  theme: {
+    accent: "#7557e8",
+  },
+  ai: {
+    llmsTxt: true,
+  },
+});

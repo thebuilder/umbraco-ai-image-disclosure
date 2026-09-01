@@ -1,0 +1,25 @@
+{
+  "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+  "AuthorDetails": {
+    "Name": "Daniel Schmidt",
+    "Description": "Independent developer building focused Umbraco packages.",
+    "Url": "https://github.com/thebuilder",
+    "ImageUrl": "https://github.com/thebuilder.png",
+    "SyncContributorsFromRepository": true
+  },
+  "Category": "Artificial Intelligence",
+  "AlternateCategory": "Editor Tools",
+  "Title": "AI Image Disclosure",
+  "Description": "Classify AI-generated and AI-modified Umbraco images from signed C2PA Content Credentials, with clear backoffice badges and editor overrides.",
+  "DocumentationUrl": "https://ai-image-disclosure.thebuilder.dk/overview",
+  "IssueTrackerUrl": "https://github.com/thebuilder/umbraco-ai-generated/issues",
+  "LicenseTypes": ["Free"],
+  "PackageType": "Package",
+  "Screenshots": [
+    {
+      "ImageUrl": "https://raw.githubusercontent.com/thebuilder/umbraco-ai-generated/refs/heads/main/apps/docs/content/screenshots/media-library-badges.png",
+      "Caption": "AI disclosure badges in the Umbraco Media library"
+    }
+  ],
+  "Tags": ["AI", "C2PA", "Content Credentials", "image provenance", "AI-generated", "AI-modified", "media", "disclosure", "Delivery API"]
+}

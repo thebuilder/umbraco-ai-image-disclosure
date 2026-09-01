@@ -1,0 +1,138 @@
+---
+// @ts-nocheck - Blume's React island types flag valid Astro attributes.
+import PageLayout from "blume/components/layout/PageLayout.astro";
+import data from "blume:data";
+import { InstallCommand, LandingRoot } from "@thebuilder/umbraco-docs/astro";
+
+import "./_home/home.css";
+
+import backofficeShot from "../content/screenshots/media-library-badges.png";
+
+const { config } = data;
+const installCommand = "dotnet add package TheBuilder.AIImageDisclosure";
+const repoUrl = "https://github.com/thebuilder/umbraco-ai-generated";
+const deliveryResponse = `{
+  "aiDisclosure": "generated",
+  "aiGenerator": "gpt-image",
+  "aiDisclosureSource": "C2PA"
+}`;
+
+const features = [
+  {
+    title: "Signed provenance",
+    body: "Use positive AI evidence only after the C2PA manifest validates as Valid or Trusted.",
+  },
+  {
+    title: "Editorial control",
+    body: "Let editors set or clear the disclosure when metadata is missing, incomplete, or removed.",
+  },
+  {
+    title: "Small public contract",
+    body: "Deliver generated, modified, or empty through normal Umbraco media properties.",
+  },
+];
+---
+
+<PageLayout
+  site={{ title: config.title, description: config.description }}
+  logo={config.logo}
+  favicon={config.favicon}
+  banner={config.banner}
+  analytics={config.analytics}
+  navigation={data.navigation}
+  fontCssVars={data.fontCssVars}
+  themeMode={config.theme.mode}
+  searchEnabled={config.search.enabled}
+  siteUrl={config.site}
+  ogEnabled={config.og.enabled}
+  ogImage="/og/index.png"
+  page={{
+    title: "AI Image Disclosure for Umbraco",
+    description: config.description,
+    route: "/",
+  }}
+>
+  <LandingRoot class="home">
+    <section class="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="shell hero__inner">
+        <img class="hero__mark reveal" src="/logo.png" width="88" height="88" alt="AI Image Disclosure" style="--i: 0" decoding="async" />
+        <p class="eyebrow reveal" style="--i: 1">C2PA provenance for Umbraco media</p>
+        <h1 class="hero__title reveal" style="--i: 2">
+          Know how an image was made. <span>Show it clearly.</span>
+        </h1>
+        <p class="hero__lede reveal" style="--i: 3">
+          Classify fully AI-generated and partially AI-modified images from signed Content Credentials, then give editors the final say.
+        </p>
+        <div class="hero__actions reveal" style="--i: 4">
+          <a class="button button--primary" href="/quickstart">Get started</a>
+          <a class="button button--secondary" href={repoUrl} rel="noopener">View on GitHub</a>
+        </div>
+        <div class="install-shell reveal" style="--i: 5">
+          <InstallCommand command={installCommand} />
+        </div>
+        <p class="hero__compat reveal" style="--i: 6">Umbraco CMS 17.1 through 18.x · .NET 10</p>
+      </div>
+      <div class="shell">
+        <figure class="screenshot reveal" style="--i: 6">
+          <div class="screenshot__bar" aria-hidden="true"><span></span><span></span><span></span></div>
+          <img src={backofficeShot.src} width={backofficeShot.width} height={backofficeShot.height} alt="AI disclosure badges on image thumbnails in the Umbraco Media library" loading="eager" decoding="async" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="shell trust reveal">
+      <p><strong>Evidence first.</strong> Valid signed provenance sets the initial classification. Editors remain in control when the file cannot answer.</p>
+    </section>
+
+    <section class="shell section" aria-labelledby="features-title">
+      <div class="section-heading reveal">
+        <span class="rule" aria-hidden="true"></span>
+        <h2 id="features-title">A narrow job, handled end to end</h2>
+        <p>Detection, editorial review, backoffice visibility, and frontend delivery share one stable value.</p>
+      </div>
+      <div class="feature-grid">
+        {features.map((feature, index) => (
+          <article class="feature-card reveal" style={`--i: ${index + 1}`}>
+            <span aria-hidden="true">0{index + 1}</span>
+            <h3>{feature.title}</h3>
+            <p>{feature.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="shell classification" aria-labelledby="classification-title">
+      <div class="classification__copy reveal">
+        <span class="rule" aria-hidden="true"></span>
+        <h2 id="classification-title">Three values, no guesswork</h2>
+        <p>The machine-readable value stays simple even when the underlying provenance chain is complex.</p>
+        <a class="text-link" href="/classification">Read the classification rules <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="status-list reveal" style="--i: 1">
+        <div><strong>generated</strong><span>Fully AI-generated</span></div>
+        <div><strong>modified</strong><span>Partially AI-modified</span></div>
+        <div><strong>empty</strong><span>Not determined</span></div>
+      </div>
+    </section>
+
+    <section class="shell api" aria-labelledby="api-title">
+      <div class="api__copy reveal">
+        <span class="rule" aria-hidden="true"></span>
+        <h2 id="api-title">Ready for the Delivery API</h2>
+        <p>Request the three media properties and render the official public label where your frontend needs it.</p>
+        <a class="button button--secondary" href="/delivery-api">Read the API guide</a>
+      </div>
+      <figure class="code-preview reveal" style="--i: 1">
+        <figcaption>Media properties <span>JSON</span></figcaption>
+        <pre tabindex="0"><code>{deliveryResponse}</code></pre>
+      </figure>
+    </section>
+
+    <section class="shell closing reveal">
+      <h2>Make provenance visible to editors.</h2>
+      <p>Install the package, save an image, and keep the final classification clear and portable.</p>
+      <a class="button button--primary" href="/quickstart">Read the quickstart</a>
+    </section>
+  </LandingRoot>
+</PageLayout>

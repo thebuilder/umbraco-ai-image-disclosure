@@ -1,6 +1,11 @@
 bin/
 obj/
-node_modules/
+**/node_modules/
+**/dist/
+**/.astro/
+apps/docs/.blume/
+apps/docs/public/og/
+apps/docs/public/opengraph-image.png
 src/TheBuilder.AIImageDisclosure/Client/node_modules/
 .idea/
 .vs/
@@ -8,3 +13,4 @@ TestResults/
 *.user
 *.nupkg
 *.snupkg
+.DS_Store

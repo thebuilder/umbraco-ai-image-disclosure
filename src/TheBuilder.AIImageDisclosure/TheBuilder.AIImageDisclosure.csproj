@@ -16,6 +16,7 @@
     <RepositoryUrl>https://github.com/thebuilder/umbraco-ai-generated.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>See https://github.com/thebuilder/umbraco-ai-generated/releases for release notes.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <StaticWebAssetBasePath>App_Plugins/TheBuilderAIImageDisclosure</StaticWebAssetBasePath>
@@ -42,6 +43,7 @@
     <Content Remove="Client\**" />
     <None Include="Client\umbraco-package.json" Pack="false" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
     <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" />
   </ItemGroup>
