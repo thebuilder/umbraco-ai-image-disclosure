@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>TheBuilder.AIImageDisclosure</PackageId>
+    <Product>AI Image Disclosure</Product>
+    <Title>AI Image Disclosure for Umbraco</Title>
+    <Version>0.1.0</Version>
+    <Authors>Daniel Schmidt</Authors>
+    <Description>Classify fully AI-generated and partially AI-modified Umbraco images from C2PA Content Credentials.</Description>
+    <PackageTags>umbraco;umbraco-marketplace;umbraco-cms;image;c2pa;ai;content-credentials</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/thebuilder/umbraco-ai-generated</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/thebuilder/umbraco-ai-generated.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>See https://github.com/thebuilder/umbraco-ai-generated/releases for release notes.</PackageReleaseNotes>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ContentAuthenticity" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" VersionOverride="$(UmbracoVersion)" />
+    <!-- Security floors for dependencies inherited from the supported Umbraco range. -->
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Microsoft.OpenApi" />
+    <PackageReference Include="MimeKit" />
+    <PackageReference Include="System.Security.Cryptography.Xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

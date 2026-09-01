@@ -1,0 +1,13 @@
+using Umbraco.Cms.Core.Packaging;
+
+namespace TheBuilder.AIImageDisclosure.Migrations;
+
+internal sealed class AiImageDisclosurePackageMigrationPlan : PackageMigrationPlan
+{
+    public AiImageDisclosurePackageMigrationPlan() : base(Constants.PackageName)
+    {
+    }
+
+    protected override void DefinePlan() =>
+        To<InstallAiImageDisclosureSchema>(new Guid("a1488504-e8cf-4e22-a18b-128529ba22e7"));
+}

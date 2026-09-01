@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/TheBuilder.AIGeneratedImages/TheBuilder.AIGeneratedImages.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/TheBuilder.AIGeneratedImages.Tests/TheBuilder.AIGeneratedImages.Tests.csproj" />
-  </Folder>
-</Solution>

@@ -1,0 +1,23 @@
+using Microsoft.Extensions.DependencyInjection;
+using TheBuilder.AIImageDisclosure.Detection;
+using TheBuilder.AIImageDisclosure.Media;
+using TheBuilder.AIImageDisclosure.Migrations;
+using Umbraco.Cms.Core.Composing;
+using Umbraco.Cms.Core.DependencyInjection;
+using Umbraco.Cms.Core.Notifications;
+using Umbraco.Extensions;
+
+namespace TheBuilder.AIImageDisclosure.Composers;
+
+/// <summary>Registers AI image disclosure detection with Umbraco.</summary>
+public sealed class AiImageDisclosureComposer : IComposer
+{
+    /// <inheritdoc />
+    public void Compose(IUmbracoBuilder builder)
+    {
+        builder.Services.AddSingleton<IImageAiMetadataReader, C2paImageAiMetadataReader>();
+        builder.Services.AddSingleton<IMediaAiMetadataProcessor, MediaAiMetadataProcessor>();
+        builder.AddNotificationHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();
+        builder.PackageMigrationPlans().Add(typeof(AiImageDisclosurePackageMigrationPlan));
+    }
+}

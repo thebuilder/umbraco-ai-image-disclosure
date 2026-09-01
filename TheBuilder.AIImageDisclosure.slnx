@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/TheBuilder.AIImageDisclosure/TheBuilder.AIImageDisclosure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TheBuilder.AIImageDisclosure.Tests/TheBuilder.AIImageDisclosure.Tests.csproj" />
+  </Folder>
+</Solution>
