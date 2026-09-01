@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "blume dev",
-    "build": "pnpm run generate:og && blume build",
+    "build": "pnpm run generate:brand && pnpm run generate:og && blume build",
+    "generate:brand": "node scripts/generate-brand.mjs",
     "generate:og": "umbraco-docs-og",
     "check:og": "umbraco-docs-og --check"
   },
@@ -13,6 +14,7 @@
     "blume": "^1.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0"
+    "@types/node": "^26.2.0",
+    "sharp": "^0.35.4"
   }
 }

@@ -5,7 +5,7 @@ export default defineConfig({
   title: aiImageDisclosurePackage.name,
   description: aiImageDisclosurePackage.summary,
   logo: {
-    image: "/logo.png",
+    image: "/logo-mark.svg",
     text: "AI Image Disclosure",
   },
   github: {

@@ -12,7 +12,7 @@ export const aiImageDisclosurePackage = defineUmbracoPackage({
       "https://marketplace.umbraco.com/package/thebuilder.aiimagedisclosure",
     github: "https://github.com/thebuilder/umbraco-ai-generated",
   },
-  logo: "/logo.png",
+  logo: "/logo-mark.svg",
   compatibility: {
     umbraco: ">=17.1 <19",
     dotnet: ">=10",

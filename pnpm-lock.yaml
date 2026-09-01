@@ -20,6 +20,9 @@ importers:
       '@types/node':
         specifier: ^26.2.0
         version: 26.4.1
+      sharp:
+        specifier: ^0.35.4
+        version: 0.35.4(@types/node@26.4.1)
 
   src/TheBuilder.AIImageDisclosure/Client:
     devDependencies:

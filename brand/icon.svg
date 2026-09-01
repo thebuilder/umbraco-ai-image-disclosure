@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">AI Image Disclosure</title>
+  <defs>
+    <linearGradient id="tile" x1="72" y1="24" x2="440" y2="488" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1C2759"/>
+      <stop offset=".48" stop-color="#121832"/>
+      <stop offset="1" stop-color="#080C1A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(256 205) rotate(90) scale(252)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7069DA" stop-opacity=".26"/>
+      <stop offset="1" stop-color="#11162D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#tile)"/>
+  <rect width="512" height="512" rx="104" fill="url(#glow)"/>
+  <g transform="translate(92 93) scale(5.15)">
+    <rect x="5" y="9" width="31" height="31" rx="8" fill="#4798F3"/>
+    <rect x="15" y="15" width="34" height="34" rx="9" fill="#8C69E7"/>
+    <rect x="25" y="22" width="34" height="34" rx="9" fill="#E557B1"/>
+    <circle cx="53" cy="52" r="9" fill="#8067E8"/>
+    <circle cx="53" cy="52" r="3.5" fill="#F4EFFF"/>
+  </g>
+</svg>

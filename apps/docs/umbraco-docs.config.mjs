@@ -7,7 +7,7 @@ export default defineOgConfig({
   prefix: "/og",
   brand: "TheBuilder · AI Image Disclosure",
   accent: "#7557e8",
-  logo: "/logo.png",
+  logo: "/logo-mark.svg",
   root: {
     title: "AI Image Disclosure for Umbraco",
     description:
