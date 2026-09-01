@@ -260,7 +260,7 @@ u.styles = [
       .disclosure-badge {
         position: absolute;
         inset: auto var(--uui-size-space-3)
-          calc(var(--uui-size-layout-2) + var(--uui-size-space-5)) auto;
+          calc(var(--uui-size-layout-2) + var(--uui-size-space-2)) auto;
         width: min(7rem, calc(100% - 2 * var(--uui-size-space-3)));
         pointer-events: none;
       }
@@ -300,4 +300,4 @@ export {
   u as AiDisclosureMediaGridElement,
   m1 as default
 };
-//# sourceMappingURL=ai-disclosure-media-grid.element-BMQqKnbM.js.map
+//# sourceMappingURL=ai-disclosure-media-grid.element-Ct8slfON.js.map

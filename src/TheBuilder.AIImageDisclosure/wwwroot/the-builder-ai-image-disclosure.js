@@ -6,7 +6,7 @@ const o = [
     type: "collectionView",
     alias: i,
     name: "AI disclosure media grid",
-    element: () => import("./ai-disclosure-media-grid.element-BMQqKnbM.js"),
+    element: () => import("./ai-disclosure-media-grid.element-Ct8slfON.js"),
     weight: 300,
     meta: {
       label: "Grid",
