@@ -1,12 +1,18 @@
 # AI Image Disclosure for Umbraco
 
-AI Image Disclosure classifies Umbraco Image media from signed C2PA Content Credentials. It adds two editable properties to the default Image media type:
+AI Image Disclosure classifies Umbraco Image media from signed C2PA Content Credentials. It adds three properties to the default Image media type:
 
 - `aiDisclosure`: empty when unknown, `Fully AI-generated`, or `Partially AI-modified`.
 - `aiGenerator`: the software agent named by the manifest, when available.
 - `aiDisclosureSource`: read-only `C2PA` or `Manual`, so a manual override survives later file replacements.
 
 The wording follows the European Commission's voluntary labels for fully AI-generated and partially AI-modified content. This package supplies metadata that a site can use when rendering a label; it does not add an icon to the public website.
+
+## Backoffice badges
+
+The Media section's grid view overlays the matching European Commission badge on Image thumbnails whose `aiDisclosure` value is `Fully AI-generated` or `Partially AI-modified`. Undetermined images and other media remain unchanged. The badge is informational and does not alter thumbnail selection, navigation, or media actions.
+
+The package intentionally limits this integration to the supported Media collection view. Media Picker dialogs use separate internal components and are left unchanged.
 
 ## Install
 
@@ -16,7 +22,7 @@ The package supports Umbraco CMS 17.1 through 18.x on .NET 10.
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the Umbraco application after installing. The package creates an **AI image disclosure** dropdown and adds both properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
+Restart the Umbraco application after installing. The package creates an **AI image disclosure** dropdown and adds all three properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
 
 Editors can change either property manually. This matters because removing metadata is easy and many AI tools do not emit Content Credentials.
 

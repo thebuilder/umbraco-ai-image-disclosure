@@ -1,5 +1,7 @@
 bin/
 obj/
+node_modules/
+src/TheBuilder.AIImageDisclosure/Client/node_modules/
 .idea/
 .vs/
 TestResults/

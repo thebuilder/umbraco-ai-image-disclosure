@@ -1,0 +1,11 @@
+{
+  "name": "thebuilder-ai-image-disclosure",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "build": "pnpm --recursive --if-present run build",
+    "client:build": "pnpm --filter @thebuilder/ai-image-disclosure-client build",
+    "client:test": "pnpm --filter @thebuilder/ai-image-disclosure-client test",
+    "client:watch": "pnpm --filter @thebuilder/ai-image-disclosure-client watch"
+  }
+}

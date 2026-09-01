@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -10,7 +10,7 @@
     <Version>0.1.0</Version>
     <Authors>Daniel Schmidt</Authors>
     <Description>Classify fully AI-generated and partially AI-modified Umbraco images from C2PA Content Credentials.</Description>
-    <PackageTags>umbraco;umbraco-marketplace;umbraco-cms;image;c2pa;ai;content-credentials</PackageTags>
+    <PackageTags>umbraco;umbraco-marketplace;umbraco-cms;backoffice;image;c2pa;ai;content-credentials</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/thebuilder/umbraco-ai-generated</PackageProjectUrl>
     <RepositoryUrl>https://github.com/thebuilder/umbraco-ai-generated.git</RepositoryUrl>
@@ -18,6 +18,13 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>See https://github.com/thebuilder/umbraco-ai-generated/releases for release notes.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <StaticWebAssetBasePath>App_Plugins/TheBuilderAIImageDisclosure</StaticWebAssetBasePath>
+    <BackofficeClientDirectory>$(MSBuildProjectDirectory)/Client</BackofficeClientDirectory>
+    <BackofficeAssetsPattern>wwwroot/**/*</BackofficeAssetsPattern>
+    <BackofficeAssetsDirectory>$(MSBuildProjectDirectory)/wwwroot</BackofficeAssetsDirectory>
+    <BackofficeManifest>$(BackofficeAssetsDirectory)/umbraco-package.json</BackofficeManifest>
+    <BackofficeEntryPoint>$(BackofficeAssetsDirectory)/the-builder-ai-image-disclosure.js</BackofficeEntryPoint>
+    <BackofficeBuildStamp>$(MSBuildProjectDirectory)/obj/backoffice-$(PackageVersion).stamp</BackofficeBuildStamp>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,9 +39,49 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Client\**" />
+    <None Include="Client\umbraco-package.json" Pack="false" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
     <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot/**/*" />
+    <Folder Include="wwwroot\" />
+    <BackofficeBuildInput Include="$(BackofficeClientDirectory)/src/**/*" />
+    <BackofficeBuildInput Include="$(BackofficeClientDirectory)/package.json" />
+    <BackofficeBuildInput Include="$(BackofficeClientDirectory)/tsconfig.json" />
+    <BackofficeBuildInput Include="$(BackofficeClientDirectory)/vite.config.ts" />
+    <BackofficeBuildInput Include="$(BackofficeClientDirectory)/umbraco-package.json" />
+    <BackofficeBuildInput Include="$(MSBuildProjectDirectory)/../../pnpm-lock.yaml" />
+  </ItemGroup>
+
+  <Target Name="BuildBackofficeAssetsForPack"
+          Condition="'$(_IsPacking)' == 'true' and '$(NoBuild)' != 'true'"
+          Inputs="@(BackofficeBuildInput)"
+          Outputs="$(BackofficeManifest);$(BackofficeEntryPoint);$(BackofficeBuildStamp)">
+    <Exec Command="corepack pnpm build"
+          WorkingDirectory="$(BackofficeClientDirectory)"
+          EnvironmentVariables="PACKAGE_VERSION=$(PackageVersion)" />
+    <Touch Files="$(BackofficeBuildStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="RefreshBackofficeStaticWebAssets"
+          BeforeTargets="ResolveProjectStaticWebAssets"
+          DependsOnTargets="BuildBackofficeAssetsForPack">
+    <ItemGroup>
+      <Content Include="$(BackofficeAssetsPattern)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ValidateBackofficeAssetsForPack"
+          BeforeTargets="IncludeStaticWebAssetsPackItems"
+          Condition="'$(_IsPacking)' == 'true'">
+    <Error Condition="!Exists('$(BackofficeManifest)')"
+           Text="Cannot pack TheBuilder.AIImageDisclosure because the backoffice manifest is missing. Build the client first." />
+    <Error Condition="!Exists('$(BackofficeEntryPoint)')"
+           Text="Cannot pack TheBuilder.AIImageDisclosure because the backoffice entry point is missing. Build the client first." />
+  </Target>
 
 </Project>
