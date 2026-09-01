@@ -365,7 +365,8 @@ export class AiDisclosureMediaGridElement extends UmbLitElement {
 
       .disclosure-badge {
         position: absolute;
-        inset: var(--uui-size-space-3) auto auto var(--uui-size-space-3);
+        inset: auto var(--uui-size-space-3)
+          calc(var(--uui-size-layout-2) + var(--uui-size-space-5)) auto;
         width: min(7rem, calc(100% - 2 * var(--uui-size-space-3)));
         pointer-events: none;
       }
