@@ -1,6 +1,8 @@
 ---
 title: C2PA, Content Credentials, and the EU AI Act
 description: Understand how C2PA provenance supports AI-generated image disclosure and EU AI Act Article 50 labelling workflows in Umbraco.
+sidebar:
+  label: C2PA and EU AI Act
 seo:
   image: /og/c2pa-eu-ai-act.png
 ---
