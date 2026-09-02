@@ -9,6 +9,8 @@ seo:
 
 Uploading or replacing `umbracoFile` on Umbraco's default `Image` media type runs C2PA detection synchronously. Positive evidence stores `generated` or `modified`, sets the source to `C2PA`, and records the AI action's software agent when the credential provides one.
 
+**AI generator** is read-only. It records evidence from the validated C2PA action and is not an editorial attribution field.
+
 Saving a name, crop, or another media property does not rerun detection. Existing media is not scanned after installation.
 
 ## Override manually
@@ -18,6 +20,8 @@ Change **AI disclosure** to `generated`, `modified`, or empty and save. The sour
 Clearing the disclosure also clears the generator so an undetermined item cannot retain stale generator text. An empty disclosure means no classification was established; it does not assert that the image is human-made.
 
 ## Resume automatic detection
+
+**AI disclosure source** is normally managed by the package. Do not select `C2PA` or `Manual` directly. Use **Resume automatic detection** only when leaving manual mode.
 
 Choose **Resume automatic detection** in **AI disclosure source**, then save. The package immediately inspects the current file, even though `umbracoFile` did not change.
 

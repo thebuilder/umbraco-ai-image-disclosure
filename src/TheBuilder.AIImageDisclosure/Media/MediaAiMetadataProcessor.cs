@@ -91,8 +91,7 @@ internal sealed class MediaAiMetadataProcessor(
             StringComparison.Ordinal);
 
     private static bool HasDirtyMetadata(IMedia media) =>
-        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias)
-        || media.IsPropertyDirty(Constants.AiGeneratorPropertyAlias);
+        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias);
 
     private static void ClearAutomaticMetadata(IMedia media)
     {

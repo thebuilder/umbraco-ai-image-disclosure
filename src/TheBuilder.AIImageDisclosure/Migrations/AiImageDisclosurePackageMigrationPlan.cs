@@ -8,6 +8,9 @@ internal sealed class AiImageDisclosurePackageMigrationPlan : PackageMigrationPl
     {
     }
 
-    protected override void DefinePlan() =>
+    protected override void DefinePlan()
+    {
         To<InstallAiImageDisclosureSchema>(new Guid("a1488504-e8cf-4e22-a18b-128529ba22e7"));
+        To<UpgradePreviewAiImageDisclosureSchema>(new Guid("72a663b7-ff33-47b5-96e8-25cfbe4d5d53"));
+    }
 }

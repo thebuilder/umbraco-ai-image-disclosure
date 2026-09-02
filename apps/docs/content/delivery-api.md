@@ -30,26 +30,29 @@ Request the three scalar properties with the media item:
 GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
 ```
 
-A classified response contains values like:
+A relevant response fragment contains values like:
 
 ```json
 {
-  "aiDisclosure": "generated",
-  "aiGenerator": "gpt-image",
-  "aiDisclosureSource": "C2PA"
+  "properties": {
+    "aiDisclosure": "generated",
+    "aiGenerator": "gpt-image",
+    "aiDisclosureSource": "C2PA"
+  }
 }
 ```
 
 ## Rendering rules
 
 ```ts
-const labels = {
-  generated: "Fully AI-generated",
-  modified: "Partially AI-modified",
-} as const;
-
 const disclosure = media.properties.aiDisclosure;
-const label = disclosure ? labels[disclosure] : undefined;
+
+const label =
+  disclosure === "generated"
+    ? "Fully AI-generated"
+    : disclosure === "modified"
+      ? "Partially AI-modified"
+      : undefined;
 ```
 
 - Render from `aiDisclosure`, never from `aiGenerator` or `aiDisclosureSource`.

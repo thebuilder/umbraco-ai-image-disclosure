@@ -94,6 +94,24 @@ public sealed class MediaSavingHandlerTests
             Constants.ManualDisclosureSourceValue);
     }
 
+    [Fact]
+    public void GeneratorChangeDoesNotCreateManualOverride()
+    {
+        var processor = Substitute.For<IMediaAiMetadataProcessor>();
+        var media = CreateMedia(isImage: true, fileDirty: false);
+        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias).Returns(false);
+        media.IsPropertyDirty(Constants.AiGeneratorPropertyAlias).Returns(true);
+        var handler = new AiImageDisclosureMediaSavingHandler(
+            processor,
+            Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
+
+        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+
+        media.DidNotReceive().SetValue(
+            Constants.AiDisclosureSourcePropertyAlias,
+            Constants.ManualDisclosureSourceValue);
+    }
+
     private static IMedia CreateMedia(bool isImage, bool fileDirty)
     {
         var mediaType = Substitute.For<ISimpleContentType>();

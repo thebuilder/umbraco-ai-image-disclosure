@@ -1,10 +1,60 @@
 using NSubstitute;
+using System.Text.Json;
 using TheBuilder.AIImageDisclosure.Detection;
 
 namespace TheBuilder.AIImageDisclosure.Tests;
 
 public sealed class C2paIntegrationTests
 {
+    [Fact]
+    public void ReaderPolicyDisablesAllNetworkAccess()
+    {
+        using var settings = JsonDocument.Parse(C2paImageAiMetadataReader.OfflineReaderSettings);
+
+        Assert.False(settings.RootElement
+            .GetProperty("verify")
+            .GetProperty("remote_manifest_fetch")
+            .GetBoolean());
+        Assert.Empty(settings.RootElement
+            .GetProperty("core")
+            .GetProperty("allowed_network_hosts")
+            .EnumerateArray());
+    }
+
+    [Fact]
+    public void RemoteManifestReferenceDoesNotInvokeResolver()
+    {
+        var resolver = Substitute.For<ContentAuthenticity.IHttpResolver>();
+        // Source: contentauth/c2pa-rs sdk/tests/fixtures/libpng-test_with_url.png.
+        var imageBytes = Convert.FromBase64String(
+            File.ReadAllText(Fixture("remote-manifest-reference.png.b64")));
+        Assert.Contains(
+            "http://localhost:5000/libpng-test.c2pa",
+            System.Text.Encoding.UTF8.GetString(imageBytes),
+            StringComparison.Ordinal);
+        using var image = new MemoryStream(imageBytes);
+
+        var result = new C2paImageAiMetadataReader(resolver).Read(image, "image/png");
+
+        Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
+        resolver.DidNotReceive().Resolve(Arg.Any<ContentAuthenticity.HttpResolverRequest>());
+    }
+
+    [Fact]
+    public void OfflineResolverRejectsEveryRequest()
+    {
+        var resolver = new C2paImageAiMetadataReader.DenyAllHttpResolver();
+
+        var response = resolver.Resolve(new ContentAuthenticity.HttpResolverRequest
+        {
+            Url = new Uri("https://example.invalid/manifest.c2pa"),
+            Method = "GET",
+        });
+
+        Assert.Equal(403, response.Status);
+        Assert.Empty(response.Body);
+    }
+
     [Fact]
     public void ReadsFreshlyGeneratedOpenAiImage()
     {

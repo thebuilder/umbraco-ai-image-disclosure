@@ -14,10 +14,8 @@ namespace TheBuilder.AIImageDisclosure.Migrations;
 internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
 {
     private static readonly Guid MigrationUserKey = Umbraco.Cms.Core.Constants.Security.SuperUserKey;
-    private readonly IDataTypeService _dataTypeService;
+    private readonly AiImageDisclosureDataTypeProvider _dataTypes;
     private readonly IMediaTypeService _mediaTypeService;
-    private readonly PropertyEditorCollection _propertyEditors;
-    private readonly IConfigurationEditorJsonSerializer _configurationSerializer;
     private readonly IShortStringHelper _shortStringHelper;
 
     public InstallAiImageDisclosureSchema(
@@ -43,10 +41,8 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
             context,
             packageMigrationsSettings)
     {
-        _dataTypeService = dataTypeService;
+        _dataTypes = new AiImageDisclosureDataTypeProvider(dataTypeService, propertyEditors, configurationSerializer);
         _mediaTypeService = mediaTypeService;
-        _propertyEditors = propertyEditors;
-        _configurationSerializer = configurationSerializer;
         _shortStringHelper = shortStringHelper;
     }
 
@@ -55,11 +51,11 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
         var imageMediaType = _mediaTypeService.Get(Constants.DefaultImageMediaTypeAlias)
             ?? throw new InvalidOperationException("The default Umbraco Image media type was not found.");
 
-        var aiDisclosureDataType = await GetOrCreateDisclosureDataTypeAsync();
-        var aiGeneratorDataType = await GetRequiredDataTypeAsync(
-            Umbraco.Cms.Core.Constants.DataTypes.Guids.TextstringGuid,
-            "Textstring");
-        var aiDisclosureSourceDataType = await GetOrCreateDisclosureSourceDataTypeAsync();
+        var aiDisclosureDataType = await _dataTypes.GetDisclosureAsync();
+        var aiGeneratorDataType = await _dataTypes.GetRequiredAsync(
+            Umbraco.Cms.Core.Constants.DataTypes.Guids.LabelStringGuid,
+            "Label (string)");
+        var aiDisclosureSourceDataType = await _dataTypes.GetDisclosureSourceAsync();
 
         var imageGroup = imageMediaType.PropertyGroups.FirstOrDefault(group =>
             group.PropertyTypes?.Any(property => property.Alias == Constants.SourcePropertyAlias) is true);
@@ -76,7 +72,7 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
             aiGeneratorDataType,
             Constants.AiGeneratorPropertyAlias,
             "AI generator",
-            "Software agent attached to the AI-relevant C2PA action, when provided by the credential.");
+            Constants.AiGeneratorPropertyDescription);
         changed |= AddPropertyIfMissing(
             imageMediaType,
             imageGroup,
@@ -87,65 +83,6 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
 
         if (changed)
             await _mediaTypeService.UpdateAsync(imageMediaType, MigrationUserKey);
-    }
-
-    private async Task<IDataType> GetRequiredDataTypeAsync(Guid key, string name)
-    {
-        return await _dataTypeService.GetAsync(key)
-            ?? throw new InvalidOperationException($"The built-in Umbraco {name} data type was not found.");
-    }
-
-    private async Task<IDataType> GetOrCreateDisclosureDataTypeAsync()
-        => await GetOrCreateSingleSelectDataTypeAsync(
-            AiDisclosureSchema.DataTypeKey,
-            Constants.AiDisclosureDataTypeName,
-            [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
-            AiImageDisclosureSchemaGuard.EnsureDisclosureDataTypeIsCompatible);
-
-    private async Task<IDataType> GetOrCreateDisclosureSourceDataTypeAsync()
-        => await GetOrCreateSingleSelectDataTypeAsync(
-            AiDisclosureSchema.SourceDataTypeKey,
-            Constants.AiDisclosureSourceDataTypeName,
-            [
-                Constants.C2paDisclosureSourceValue,
-                Constants.ManualDisclosureSourceValue,
-                Constants.ResumeAutomaticDisclosureSourceValue,
-            ],
-            AiImageDisclosureSchemaGuard.EnsureDisclosureSourceDataTypeIsCompatible);
-
-    private async Task<IDataType> GetOrCreateSingleSelectDataTypeAsync(
-        Guid key,
-        string name,
-        string[] items,
-        Action<IDataType> ensureCompatible)
-    {
-        var existing = await _dataTypeService.GetAsync(key);
-        if (existing is not null)
-        {
-            ensureCompatible(existing);
-            return existing;
-        }
-
-        if (!_propertyEditors.TryGet(Constants.DropDownPropertyEditorAlias, out IDataEditor? editor) || editor is null)
-        {
-            throw new InvalidOperationException(
-                $"The Umbraco editor {Constants.DropDownPropertyEditorAlias} is not available.");
-        }
-
-        var dataType = new DataType(editor, _configurationSerializer, -1)
-        {
-            Key = key,
-            Name = name,
-            EditorUiAlias = Constants.DropDownPropertyEditorUiAlias,
-            ConfigurationData = new Dictionary<string, object>
-            {
-                ["multiple"] = false,
-                ["items"] = items,
-            },
-        };
-
-        await _dataTypeService.CreateAsync(dataType, MigrationUserKey);
-        return dataType;
     }
 
     private bool AddPropertyIfMissing(

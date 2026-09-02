@@ -10,6 +10,8 @@ internal static class Constants
     public const string AiDisclosureSourcePropertyAlias = "aiDisclosureSource";
     public const string AiDisclosureDataTypeName = "AI image disclosure";
     public const string AiDisclosureSourceDataTypeName = "AI image disclosure source";
+    public const string AiGeneratorPropertyDescription =
+        "Read-only software agent attached to the AI-relevant C2PA action, when provided by the credential.";
     public const string DropDownPropertyEditorAlias = "Umbraco.DropDown.Flexible";
     public const string DropDownPropertyEditorUiAlias = "Umb.PropertyEditorUi.Dropdown";
     public const string GeneratedDisclosureValue = "generated";

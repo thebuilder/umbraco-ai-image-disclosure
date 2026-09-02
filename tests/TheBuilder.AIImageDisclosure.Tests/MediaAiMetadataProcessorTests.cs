@@ -81,7 +81,6 @@ public sealed class MediaAiMetadataProcessorTests
     {
         var media = Substitute.For<IMedia>();
         media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias).Returns(true);
-        media.IsPropertyDirty(Constants.AiGeneratorPropertyAlias).Returns(true);
 
         MediaAiMetadataProcessor.Apply(media, AiImageMetadata.NotDetected);
 
@@ -90,6 +89,21 @@ public sealed class MediaAiMetadataProcessorTests
             Constants.ManualDisclosureSourceValue);
         media.DidNotReceive().SetValue(Constants.AiDisclosurePropertyAlias, Arg.Any<object?>());
         media.DidNotReceive().SetValue(Constants.AiGeneratorPropertyAlias, Arg.Any<object?>());
+    }
+
+    [Fact]
+    public void GeneratorOnlyChangeDoesNotSuppressAutomaticDetection()
+    {
+        var media = Substitute.For<IMedia>();
+        media.IsPropertyDirty(Constants.AiGeneratorPropertyAlias).Returns(true);
+
+        MediaAiMetadataProcessor.Apply(media, AiImageMetadata.Generated("gpt-image"));
+
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
+        media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "gpt-image");
+        media.Received(1).SetValue(
+            Constants.AiDisclosureSourcePropertyAlias,
+            Constants.C2paDisclosureSourceValue);
     }
 
     [Fact]

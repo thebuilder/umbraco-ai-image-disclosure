@@ -20,7 +20,7 @@ AI Image Disclosure reads valid C2PA Content Credentials when a file is uploaded
 The package adds three properties to the default Image media type:
 
 - `aiDisclosure`: empty when unknown, `generated`, or `modified`.
-- `aiGenerator`: the software agent attached to the AI-relevant C2PA action, when provided by the credential.
+- `aiGenerator`: read-only software agent evidence from the AI-relevant C2PA action, when provided by the credential.
 - `aiDisclosureSource`: `C2PA`, `Manual`, or empty, plus a backoffice action to resume automatic detection.
 
 Editors can review the classification, generator evidence, and detection source on the media item. Public sites decide where and how to render their own label.
@@ -41,7 +41,7 @@ AI Image Disclosure supports Umbraco CMS 17.1 through 18.x on .NET 10.
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the application after installation. The package creates the **AI image disclosure** data type and adds all three properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
+Restart the application after installation. The package creates the **AI image disclosure** and **AI image disclosure source** data types and adds three properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
 
 Editors can override the disclosure. This matters because metadata is easy to remove and many AI tools do not emit Content Credentials. Choose **Resume automatic detection** in `aiDisclosureSource` to reprocess the current file and leave manual mode.
 
@@ -62,6 +62,8 @@ Composite evidence takes precedence. An image created entirely by AI and then ed
 A missing disclosure never means that an image is human-made.
 
 Detection is bounded: images over 64 MiB, extracted manifest JSON over 4 MiB, and manifest stores over 1,024 manifests are left undetermined for manual classification. Detection failures never block a media save.
+
+AI Image Disclosure reads embedded Content Credentials only. It does not fetch remote manifests or make outbound network requests while processing uploaded images.
 
 ## Delivery API
 

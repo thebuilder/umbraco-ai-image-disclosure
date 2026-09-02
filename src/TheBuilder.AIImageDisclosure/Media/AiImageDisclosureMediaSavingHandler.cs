@@ -54,8 +54,7 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
         && media.HasProperty(Constants.AiDisclosureSourcePropertyAlias);
 
     private static bool HasManualMetadataChange(IMedia media) =>
-        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias)
-        || media.IsPropertyDirty(Constants.AiGeneratorPropertyAlias);
+        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias);
 
     private static bool ShouldResumeAutomaticDetection(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias)

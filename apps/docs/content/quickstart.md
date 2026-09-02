@@ -27,16 +27,15 @@ Installation stops rather than overwriting an existing data type or media proper
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the application. On first startup, the package creates the **AI image disclosure** data type and adds its properties to the default Image media type.
+Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds three properties to the default Image media type.
 
 ## Test an image
 
 1. Open the **Media** section.
 2. [Download the known-good C2PA test image](/test-assets/openai-generated-c2pa.png).
-3. Upload that image to the default `Image` media type.
+3. Upload the image in the Media section. It must use Umbraco's default `Image` media type.
 4. Save the media item.
-5. Check **AI disclosure**, **AI generator**, and **AI disclosure source**.
-6. Save the media item and confirm that the three properties contain the expected values.
+5. Confirm that **AI disclosure**, **AI generator**, and **AI disclosure source** contain the expected values.
 
 The expected values are:
 

@@ -4,7 +4,29 @@ namespace TheBuilder.AIImageDisclosure.Detection;
 
 internal sealed class C2paImageAiMetadataReader : IImageAiMetadataReader
 {
+    private readonly IHttpResolver httpResolver;
+
     internal const long MaximumImageBytes = 64L * 1024 * 1024;
+    internal const string OfflineReaderSettings = """
+        {
+          "verify": {
+            "remote_manifest_fetch": false
+          },
+          "core": {
+            "allowed_network_hosts": []
+          }
+        }
+        """;
+
+    public C2paImageAiMetadataReader()
+        : this(DenyAllHttpResolver.Instance)
+    {
+    }
+
+    internal C2paImageAiMetadataReader(IHttpResolver httpResolver)
+    {
+        this.httpResolver = httpResolver;
+    }
 
     public AiImageMetadata Read(Stream image, string mediaType)
     {
@@ -15,7 +37,11 @@ internal sealed class C2paImageAiMetadataReader : IImageAiMetadataReader
             if ((image.CanSeek && image.Length > MaximumImageBytes) || source.Length > MaximumImageBytes)
                 return AiImageMetadata.InvalidMetadata;
 
-            using var reader = new Reader().WithStream(source, mediaType);
+            using var contextBuilder = new ContextBuilder();
+            contextBuilder.SetSettings(OfflineReaderSettings, "json");
+            contextBuilder.SetHttpResolver(httpResolver);
+            using var context = contextBuilder.Build();
+            using var reader = new Reader(context).WithStream(source, mediaType);
             return C2paManifestParser.Parse(reader.Json);
         }
         catch (C2paException exception) when (exception.Type == "ManifestNotFound")
@@ -54,5 +80,16 @@ internal sealed class C2paImageAiMetadataReader : IImageAiMetadataReader
 
         destination.Position = 0;
         return destination;
+    }
+
+    internal sealed class DenyAllHttpResolver : IHttpResolver
+    {
+        public static readonly DenyAllHttpResolver Instance = new();
+
+        public HttpResolverResponse Resolve(HttpResolverRequest request) => new()
+        {
+            Status = 403,
+            Body = [],
+        };
     }
 }

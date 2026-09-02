@@ -76,6 +76,65 @@ public sealed class SchemaGuardTests
         AiImageDisclosureSchemaGuard.EnsureDisclosureSourceDataTypeIsCompatible(dataType);
     }
 
+    [Fact]
+    public void AppliesTargetDataTypeInPlace()
+    {
+        var previewDataTypeKey = Guid.NewGuid();
+        var targetDataTypeKey = Guid.NewGuid();
+        var property = Substitute.For<IPropertyType>();
+        property.Alias.Returns(Constants.AiDisclosureSourcePropertyAlias);
+        property.DataTypeKey.Returns(previewDataTypeKey);
+        var target = Substitute.For<IDataType>();
+        target.Id.Returns(42);
+        target.Key.Returns(targetDataTypeKey);
+        target.EditorAlias.Returns(Constants.DropDownPropertyEditorAlias);
+        target.DatabaseType.Returns(ValueStorageType.Nvarchar);
+
+        var changed = UpgradePreviewAiImageDisclosureSchema.ApplyDataType(property, target);
+
+        Assert.True(changed);
+        property.Received().DataTypeId = 42;
+        property.Received().DataTypeKey = targetDataTypeKey;
+        property.Received().PropertyEditorAlias = Constants.DropDownPropertyEditorAlias;
+        property.Received().ValueStorageType = ValueStorageType.Nvarchar;
+    }
+
+    [Fact]
+    public void AcceptsKnownPreviewPropertyDataType()
+    {
+        var previewDataTypeKey = Guid.NewGuid();
+        var property = Substitute.For<IPropertyType>();
+        property.Alias.Returns(Constants.AiDisclosureSourcePropertyAlias);
+        property.DataTypeKey.Returns(previewDataTypeKey);
+        var mediaType = Substitute.For<IMediaType>();
+        mediaType.PropertyTypes.Returns([property]);
+
+        var result = UpgradePreviewAiImageDisclosureSchema.GetUpgradeableProperty(
+            mediaType,
+            Constants.AiDisclosureSourcePropertyAlias,
+            previewDataTypeKey,
+            Guid.NewGuid());
+
+        Assert.Same(property, result);
+    }
+
+    [Fact]
+    public void RejectsUnknownPreviewPropertyDataType()
+    {
+        var mediaType = Substitute.For<IMediaType>();
+        var property = Substitute.For<IPropertyType>();
+        property.Alias.Returns(Constants.AiDisclosureSourcePropertyAlias);
+        property.DataTypeKey.Returns(Guid.NewGuid());
+        mediaType.PropertyTypes.Returns([property]);
+
+        Assert.Throws<AiImageDisclosureSchemaCollisionException>(() =>
+            UpgradePreviewAiImageDisclosureSchema.GetUpgradeableProperty(
+                mediaType,
+                Constants.AiDisclosureSourcePropertyAlias,
+                Guid.NewGuid(),
+                Guid.NewGuid()));
+    }
+
     private static IDataType DisclosureDataType(params string[] items)
     {
         var dataType = Substitute.For<IDataType>();
