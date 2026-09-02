@@ -2,15 +2,19 @@
 // @ts-nocheck - Blume's React island types flag valid Astro attributes.
 import PageLayout from "blume/components/layout/PageLayout.astro";
 import data from "blume:data";
-import { InstallCommand, LandingRoot } from "@thebuilder/umbraco-docs/astro";
+import { EcosystemSection, InstallCommand, LandingRoot } from "@thebuilder/umbraco-docs/astro";
 
 import "./_home/home.css";
 
 import backofficeShot from "../content/screenshots/media-library-badges.png";
+import { aiImageDisclosurePackage, ecosystemPackages } from "../umbraco-package";
 
 const { config } = data;
 const installCommand = "dotnet add package TheBuilder.AIImageDisclosure";
 const repoUrl = "https://github.com/thebuilder/umbraco-ai-generated";
+const nugetUrl = "https://www.nuget.org/packages/TheBuilder.AIImageDisclosure";
+const marketplaceUrl =
+  "https://marketplace.umbraco.com/package/thebuilder.aiimagedisclosure";
 const deliveryResponse = `{
   "aiDisclosure": "generated",
   "aiGenerator": "gpt-image",
@@ -56,7 +60,7 @@ const features = [
     <section class="hero">
       <div class="hero__glow" aria-hidden="true"></div>
       <div class="shell hero__inner">
-        <img class="hero__mark reveal" src="/logo-mark.svg" width="88" height="88" alt="AI Image Disclosure" style="--i: 0" decoding="async" />
+        <img class="hero__mark reveal" src="/logo-mark.svg" width="72" height="72" alt="AI Image Disclosure" style="--i: 0" decoding="async" />
         <p class="eyebrow reveal" style="--i: 1">C2PA Content Credentials for Umbraco</p>
         <h1 class="hero__title reveal" style="--i: 2">
           Know how an image was made. <span>Show it clearly.</span>
@@ -157,5 +161,25 @@ const features = [
       <p>Install the package, save an image, and keep the final classification clear and portable.</p>
       <a class="button button--primary" href="/quickstart">Read the quickstart</a>
     </section>
+
+    <EcosystemSection
+      packages={ecosystemPackages}
+      currentPackageId={aiImageDisclosurePackage.id}
+    />
   </LandingRoot>
+
+  <footer class="home-footer" slot="footer">
+    <div class="shell home-footer__inner">
+      <div>
+        <strong>AI Image Disclosure</strong>
+        <span>MIT licensed · built by <a href="https://github.com/thebuilder" rel="noopener">thebuilder</a></span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="/overview">Docs</a>
+        <a href={repoUrl} rel="noopener">GitHub</a>
+        <a href={nugetUrl} rel="noopener">NuGet</a>
+        <a href={marketplaceUrl} rel="noopener">Marketplace</a>
+      </nav>
+    </div>
+  </footer>
 </PageLayout>

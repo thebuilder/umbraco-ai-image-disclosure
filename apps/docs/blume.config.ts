@@ -29,6 +29,9 @@ export default defineConfig({
   },
   theme: {
     accent: "#7557e8",
+    fonts: {
+      display: "inter-tight",
+    },
   },
   ai: {
     llmsTxt: true,
