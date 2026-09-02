@@ -1,4 +1,4 @@
-import { UMB_MEDIA_DETAIL_STORE_CONTEXT as N, UMB_EDIT_MEDIA_WORKSPACE_PATH_PATTERN as V, UMB_MEDIA_PLACEHOLDER_ENTITY_TYPE as z } from "@umbraco-cms/backoffice/media";
+import { UMB_MEDIA_DETAIL_STORE_CONTEXT as N, UMB_EDIT_MEDIA_WORKSPACE_PATH_PATTERN as z, UMB_MEDIA_PLACEHOLDER_ENTITY_TYPE as V } from "@umbraco-cms/backoffice/media";
 import { MediaService as G } from "@umbraco-cms/backoffice/external/backend-api";
 import { tryExecute as F } from "@umbraco-cms/backoffice/resources";
 import { UMB_COLLECTION_CONTEXT as X } from "@umbraco-cms/backoffice/collection";
@@ -94,7 +94,7 @@ k = async function(e) {
   this.items = e ?? [], r(this, a, W).call(this);
   const t = await Promise.all(
     this.items.map(async (i) => {
-      const l = await c(this, d)?.requestItemHref?.(i) ?? V.generateAbsolute({ unique: i.unique });
+      const l = await c(this, d)?.requestItemHref?.(i) ?? z.generateAbsolute({ unique: i.unique });
       return l ? [i.unique, l] : void 0;
     })
   );
@@ -180,7 +180,7 @@ q = function(e, s) {
   s ? i.set(e, s) : i.delete(e), this.disclosureByUnique = i;
 };
 L = function(e) {
-  if (e.entityType === z)
+  if (e.entityType === V)
     return r(this, a, R).call(this, e);
   const s = this.itemHrefs.get(e.unique), t = r(this, a, H).call(this, e);
   return _`
@@ -259,7 +259,7 @@ u.styles = [
 
       .disclosure-badge {
         position: absolute;
-        inset: auto 0 var(--uui-size-layout-2) auto;
+        inset: auto 0 calc(var(--uui-size-layout-2) + var(--uui-size-space-2)) auto;
         width: min(7rem, 100%);
         pointer-events: none;
       }
@@ -299,4 +299,4 @@ export {
   u as AiDisclosureMediaGridElement,
   m1 as default
 };
-//# sourceMappingURL=ai-disclosure-media-grid.element-CluI3Z7t.js.map
+//# sourceMappingURL=ai-disclosure-media-grid.element-BZh0w2bc.js.map
