@@ -4,7 +4,7 @@ import { aiImageDisclosurePackage } from "./umbraco-package";
 export default defineConfig({
   title: aiImageDisclosurePackage.name,
   description:
-    "Detect AI-generated and AI-modified images from C2PA Content Credentials and support EU AI Act disclosure workflows in Umbraco.",
+    "Classify new and replaced Umbraco Image files from valid C2PA Content Credentials and support editor-reviewed disclosure workflows.",
   logo: {
     image: "/logo-mark.svg",
     text: "AI Image Disclosure",

@@ -56,6 +56,44 @@ public sealed class MediaSavingHandlerTests
         processor.DidNotReceive().Inspect(Arg.Any<IMedia>());
     }
 
+    [Fact]
+    public void ResumeAutomaticDetectionReprocessesCurrentFile()
+    {
+        var processor = Substitute.For<IMediaAiMetadataProcessor>();
+        var media = CreateMedia(isImage: true, fileDirty: false);
+        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias).Returns(false);
+        media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias).Returns(true);
+        media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias)
+            .Returns(Constants.ResumeAutomaticDisclosureSourceValue);
+        processor.ResumeAutomaticDetection(media).Returns(AiImageMetadata.Generated("gpt-image"));
+        var handler = new AiImageDisclosureMediaSavingHandler(
+            processor,
+            Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
+
+        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+
+        processor.Received(1).ResumeAutomaticDetection(media);
+        processor.DidNotReceive().Inspect(Arg.Any<IMedia>());
+    }
+
+    [Fact]
+    public void ClearingDisclosureAlsoClearsStaleGenerator()
+    {
+        var processor = Substitute.For<IMediaAiMetadataProcessor>();
+        var media = CreateMedia(isImage: true, fileDirty: false);
+        media.GetValue<string>(Constants.AiDisclosurePropertyAlias).Returns(string.Empty);
+        var handler = new AiImageDisclosureMediaSavingHandler(
+            processor,
+            Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
+
+        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+
+        media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
+        media.Received(1).SetValue(
+            Constants.AiDisclosureSourcePropertyAlias,
+            Constants.ManualDisclosureSourceValue);
+    }
+
     private static IMedia CreateMedia(bool isImage, bool fileDirty)
     {
         var mediaType = Substitute.For<ISimpleContentType>();

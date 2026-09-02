@@ -5,10 +5,11 @@ export default defineMeta({
   pages: [
     "overview",
     "quickstart",
-    "c2pa-eu-ai-act",
-    "classification",
+    "editor-workflow",
     "delivery-api",
+    "classification",
     "operations",
+    "c2pa-eu-ai-act",
     "license",
   ],
 });

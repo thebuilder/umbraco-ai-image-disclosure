@@ -65,14 +65,27 @@ public sealed class SchemaGuardTests
             AiImageDisclosureSchemaGuard.EnsureDisclosureDataTypeIsCompatible(dataType));
     }
 
-    private static IDataType DisclosureDataType()
+    [Fact]
+    public void AcceptsDisclosureSourceDataTypeUsingOwnedConfiguration()
+    {
+        var dataType = DisclosureDataType(
+            Constants.C2paDisclosureSourceValue,
+            Constants.ManualDisclosureSourceValue,
+            Constants.ResumeAutomaticDisclosureSourceValue);
+
+        AiImageDisclosureSchemaGuard.EnsureDisclosureSourceDataTypeIsCompatible(dataType);
+    }
+
+    private static IDataType DisclosureDataType(params string[] items)
     {
         var dataType = Substitute.For<IDataType>();
         dataType.EditorAlias.Returns(Constants.DropDownPropertyEditorAlias);
         dataType.EditorUiAlias.Returns(Constants.DropDownPropertyEditorUiAlias);
         dataType.ConfigurationObject.Returns(new DropDownFlexibleConfiguration
         {
-            Items = [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
+            Items = items.Length > 0
+                ? items.ToList()
+                : [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
             Multiple = false,
         });
         return dataType;

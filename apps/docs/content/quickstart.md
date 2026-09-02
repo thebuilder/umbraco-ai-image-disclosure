@@ -10,6 +10,16 @@ seo:
 - Umbraco CMS 17.1 through 18.x
 - .NET 10
 - A supported native platform listed under [Operations](/operations)
+- Umbraco's default media type with the exact alias `Image`
+
+> **Package scope**
+>
+> - Processes new uploads and file replacements only.
+> - Does not backfill existing media.
+> - Shows badges in the package-provided Media Grid view only.
+> - Does not add disclosure labels to public pages.
+
+Installation stops rather than overwriting an existing data type or media property that uses one of the package's aliases with an incompatible definition.
 
 ## Install
 
@@ -22,10 +32,19 @@ Restart the application. On first startup, the package creates the **AI image di
 ## Test an image
 
 1. Open the **Media** section.
-2. Upload an image with signed C2PA Content Credentials.
-3. Save the media item.
-4. Check **AI disclosure**, **AI generator**, and **AI disclosure source**.
-5. Return to the Media collection and confirm the badge appears on the thumbnail.
+2. [Download the known-good C2PA test image](/test-assets/openai-generated-c2pa.png).
+3. Upload that image to the default `Image` media type.
+4. Save the media item.
+5. Check **AI disclosure**, **AI generator**, and **AI disclosure source**.
+6. Return to the Media collection's Grid view and confirm the badge appears on the thumbnail.
+
+The expected values are:
+
+```text
+aiDisclosure: generated
+aiGenerator: gpt-image
+aiDisclosureSource: C2PA
+```
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
@@ -33,6 +52,10 @@ Detection runs when an image file is uploaded or replaced. A detection failure n
 
 ## Set a manual value
 
-Select **Fully AI-generated** or **Partially AI-modified** in the disclosure property, then save. The source changes to `Manual` so later file processing does not silently replace the editor's decision.
+Select `generated` or `modified` in **AI disclosure**, then save. The source changes to `Manual` so later file processing does not silently replace the editor's decision.
 
-Clear the selection when the classification is unknown. Do not use an empty value to assert that an image is human-made.
+Clearing **AI disclosure** also clears **AI generator** and records a manual, undetermined result. It does not mean the image is human-made.
+
+## Resume automatic detection
+
+Choose **Resume automatic detection** in **AI disclosure source**, then save. The package immediately reprocesses the current file and replaces the manual values with the detected result, or clears them when the file contains no usable AI evidence. Replacing the image file is not required.

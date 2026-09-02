@@ -59,9 +59,7 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
         var aiGeneratorDataType = await GetRequiredDataTypeAsync(
             Umbraco.Cms.Core.Constants.DataTypes.Guids.TextstringGuid,
             "Textstring");
-        var aiDisclosureSourceDataType = await GetRequiredDataTypeAsync(
-            Umbraco.Cms.Core.Constants.DataTypes.Guids.LabelStringGuid,
-            "Label (string)");
+        var aiDisclosureSourceDataType = await GetOrCreateDisclosureSourceDataTypeAsync();
 
         var imageGroup = imageMediaType.PropertyGroups.FirstOrDefault(group =>
             group.PropertyTypes?.Any(property => property.Alias == Constants.SourcePropertyAlias) is true);
@@ -78,14 +76,14 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
             aiGeneratorDataType,
             Constants.AiGeneratorPropertyAlias,
             "AI generator",
-            "Software agent named by the C2PA manifest, when available.");
+            "Software agent attached to the AI-relevant C2PA action, when provided by the credential.");
         changed |= AddPropertyIfMissing(
             imageMediaType,
             imageGroup,
             aiDisclosureSourceDataType,
             Constants.AiDisclosureSourcePropertyAlias,
             "AI disclosure source",
-            "C2PA when detected from Content Credentials, or Manual after an editor override.");
+            "C2PA when detected automatically, Manual after an editor override, or choose Resume automatic detection to reprocess the current file.");
 
         if (changed)
             await _mediaTypeService.UpdateAsync(imageMediaType, MigrationUserKey);
@@ -98,11 +96,33 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
     }
 
     private async Task<IDataType> GetOrCreateDisclosureDataTypeAsync()
+        => await GetOrCreateSingleSelectDataTypeAsync(
+            AiDisclosureSchema.DataTypeKey,
+            Constants.AiDisclosureDataTypeName,
+            [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
+            AiImageDisclosureSchemaGuard.EnsureDisclosureDataTypeIsCompatible);
+
+    private async Task<IDataType> GetOrCreateDisclosureSourceDataTypeAsync()
+        => await GetOrCreateSingleSelectDataTypeAsync(
+            AiDisclosureSchema.SourceDataTypeKey,
+            Constants.AiDisclosureSourceDataTypeName,
+            [
+                Constants.C2paDisclosureSourceValue,
+                Constants.ManualDisclosureSourceValue,
+                Constants.ResumeAutomaticDisclosureSourceValue,
+            ],
+            AiImageDisclosureSchemaGuard.EnsureDisclosureSourceDataTypeIsCompatible);
+
+    private async Task<IDataType> GetOrCreateSingleSelectDataTypeAsync(
+        Guid key,
+        string name,
+        string[] items,
+        Action<IDataType> ensureCompatible)
     {
-        var existing = await _dataTypeService.GetAsync(AiDisclosureSchema.DataTypeKey);
+        var existing = await _dataTypeService.GetAsync(key);
         if (existing is not null)
         {
-            AiImageDisclosureSchemaGuard.EnsureDisclosureDataTypeIsCompatible(existing);
+            ensureCompatible(existing);
             return existing;
         }
 
@@ -114,17 +134,13 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
 
         var dataType = new DataType(editor, _configurationSerializer, -1)
         {
-            Key = AiDisclosureSchema.DataTypeKey,
-            Name = Constants.AiDisclosureDataTypeName,
+            Key = key,
+            Name = name,
             EditorUiAlias = Constants.DropDownPropertyEditorUiAlias,
             ConfigurationData = new Dictionary<string, object>
             {
                 ["multiple"] = false,
-                ["items"] = new[]
-                {
-                    Constants.GeneratedDisclosureValue,
-                    Constants.ModifiedDisclosureValue,
-                },
+                ["items"] = items,
             },
         };
 

@@ -5,29 +5,29 @@ seo:
   image: /og/overview.png
 ---
 
-AI Image Disclosure classifies Umbraco Image media from signed C2PA Content Credentials. The result gives editors and frontends a small, predictable contract without exposing the complete manifest.
+AI Image Disclosure classifies Umbraco's default `Image` media type from signed C2PA Content Credentials. Detection runs when a file is uploaded or replaced; existing media is not scanned automatically. The result gives editors and frontends a small, predictable contract without exposing the complete manifest.
 
 ## What is C2PA?
 
 The Coalition for Content Provenance and Authenticity, or C2PA, publishes an open standard for cryptographically verifiable media provenance. A C2PA **Content Credential** can record where an asset came from, how it was changed, which tools were involved, and whether AI played a role.
 
-AI Image Disclosure verifies the signed credential before using its claims. It does not treat the presence of metadata as proof on its own. Read the [official C2PA explainer](https://c2pa.org/specifications/specifications/2.2/explainer/Explainer.html) or see [C2PA and the EU AI Act](/c2pa-eu-ai-act) for the complete distinction.
+AI Image Disclosure verifies the signed credential before using its claims. It does not treat the presence of metadata as proof on its own. Read the [official C2PA explainer](https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html) or see [C2PA and the EU AI Act](/c2pa-eu-ai-act) for the complete distinction.
 
 ## Stored properties
 
 | Alias | Value | Purpose |
 | --- | --- | --- |
 | `aiDisclosure` | `generated`, `modified`, or empty | The public classification |
-| `aiGenerator` | Text or empty | The software agent named by C2PA |
-| `aiDisclosureSource` | `C2PA`, `Manual`, or empty | How the current value was set |
+| `aiGenerator` | Text or empty | The software agent attached to the AI-relevant action |
+| `aiDisclosureSource` | `C2PA`, `Manual`, or empty | How the current value was set; also offers a resume-automatic action in the backoffice |
 
 The empty value means **not determined**. It does not mean the image is human-made.
 
 ## Backoffice experience
 
-Classified images receive the matching European Commission disclosure badge in the supported Media collection view. Editors can change the disclosure when metadata is absent or the classification needs correction. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the available label variants and their intended use.
+Classified images receive the matching European Commission disclosure badge in the package-provided Grid view in the Media section. Editors can change the disclosure when metadata is absent or the classification needs correction. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the available label variants and their intended use.
 
-The package does not replace Umbraco's native media picker or thumbnail components. It only adds a badge through a supported collection extension point.
+The package replaces Umbraco's native Media Grid collection view under the same extension alias so it can add badges while reusing native cards and thumbnails. Other Media Grid overrides may conflict with it, and badges are not added to the table view, media pickers, or other thumbnail presentations.
 
 ## What detection can establish
 

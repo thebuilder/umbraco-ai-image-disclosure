@@ -4,7 +4,7 @@ export const aiImageDisclosurePackage = defineUmbracoPackage({
   id: "thebuilder.aiimagedisclosure",
   name: "AI Image Disclosure",
   summary:
-    "Classify AI-generated and AI-modified Umbraco images from signed C2PA Content Credentials.",
+    "Classify new and replaced Umbraco Image files from valid signed C2PA Content Credentials.",
   links: {
     docs: "https://ai-image-disclosure.thebuilder.dk",
     nuget: "https://www.nuget.org/packages/TheBuilder.AIImageDisclosure",
@@ -17,7 +17,7 @@ export const aiImageDisclosurePackage = defineUmbracoPackage({
     umbraco: ">=17.1 <19",
     dotnet: ">=10",
   },
-  status: "stable",
+  status: "preview",
   categories: ["Artificial Intelligence", "Editor Tools"],
 });
 

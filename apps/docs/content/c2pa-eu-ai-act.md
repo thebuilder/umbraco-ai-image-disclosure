@@ -20,7 +20,7 @@ The Coalition for Content Provenance and Authenticity, or C2PA, publishes an ope
 
 A valid signature makes changes to the credential detectable. It does not prove that every real-world claim is true, and the absence of a credential does not prove that an image is human-made.
 
-[Read the official C2PA and Content Credentials explainer](https://c2pa.org/specifications/specifications/2.2/explainer/Explainer.html).
+[Read the official C2PA and Content Credentials explainer](https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html).
 
 ## How AI Image Disclosure uses C2PA
 
@@ -30,6 +30,8 @@ The package validates the C2PA manifest, follows the active claim and its ingred
 - `modified`: pre-existing content was partially modified using AI
 
 When the file cannot establish either classification, the value remains empty and an editor can decide manually.
+
+C2PA 2.4 also defines a `c2pa.ai-disclosure` assertion for model identification, content profiles, human oversight, and related metadata. This package does not currently store that assertion.
 
 ## EU AI Act transparency
 

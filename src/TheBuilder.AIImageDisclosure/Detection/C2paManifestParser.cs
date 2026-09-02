@@ -138,7 +138,7 @@ internal static class C2paManifestParser
                     continue;
                 }
 
-                var generator = GetSoftwareAgentName(action) ?? GetGeneratorName(manifest);
+                var generator = GetSoftwareAgentName(action);
                 if (actionName is not ("c2pa.created" or "c2pa.edited"))
                 {
                     continue;
@@ -200,23 +200,6 @@ internal static class C2paManifestParser
             JsonValueKind.Object when agent.TryGetProperty("name", out var name) => name.GetString(),
             _ => null,
         };
-    }
-
-    private static string? GetGeneratorName(JsonElement manifest)
-    {
-        if (!manifest.TryGetProperty("claim_generator_info", out var generators)
-            || generators.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        foreach (var generator in generators.EnumerateArray())
-        {
-            if (generator.TryGetProperty("name", out var name) && name.GetString() is { Length: > 0 } value)
-                return value;
-        }
-
-        return null;
     }
 
     private enum AiSourceType

@@ -13,21 +13,23 @@
 
 ![AI disclosure badges in the Umbraco Media library](apps/docs/content/screenshots/media-library-badges.png)
 
-AI Image Disclosure reads signed C2PA Content Credentials when an Umbraco Image is saved. It stores a small, stable classification that editors and frontends can rely on, while preserving manual control when provenance is absent or incomplete.
+AI Image Disclosure reads valid C2PA Content Credentials when a file is uploaded to, or replaced on, Umbraco's default `Image` media type. It stores a small, stable classification that editors and frontends can rely on, while preserving manual control when provenance is absent or incomplete. Existing media is not scanned automatically.
 
 ## What it adds
 
 The package adds three properties to the default Image media type:
 
 - `aiDisclosure`: empty when unknown, `generated`, or `modified`.
-- `aiGenerator`: the software agent named by the manifest, when available.
-- `aiDisclosureSource`: `C2PA` or `Manual`, so an editor override survives later file replacements.
+- `aiGenerator`: the software agent attached to the AI-relevant C2PA action, when provided by the credential.
+- `aiDisclosureSource`: `C2PA` or `Manual`, plus a backoffice action to resume automatic detection.
 
 The Media library overlays the matching European Commission disclosure badge on classified image thumbnails. Undetermined images and other media stay unchanged. Public sites decide where and how to render their own label.
 
+Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package supplies the Media section's Grid view under Umbraco's native extension alias; other packages that replace the same view may conflict. Table views, media pickers, and public pages are unchanged.
+
 ## C2PA and EU disclosure
 
-[C2PA Content Credentials](https://c2pa.org/specifications/specifications/2.2/explainer/Explainer.html) provide cryptographically verifiable provenance about an image's origin, edits, tools, and use of AI. AI Image Disclosure validates that evidence before mapping it to a simple editorial value.
+[C2PA Content Credentials](https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html) provide cryptographically verifiable provenance about an image's origin, edits, tools, and use of AI. AI Image Disclosure validates that evidence before mapping it to a simple editorial value.
 
 The European Commission provides optional icons for fully AI-generated and partially AI-modified content as part of its guidance for EU AI Act Article 50 disclosure workflows. [View the official EU icons and placement guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content). Using an icon does not establish legal compliance by itself.
 
@@ -41,7 +43,7 @@ dotnet add package TheBuilder.AIImageDisclosure
 
 Restart the application after installation. The package creates the **AI image disclosure** data type and adds all three properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
 
-Editors can override the disclosure. This matters because metadata is easy to remove and many AI tools do not emit Content Credentials.
+Editors can override the disclosure. This matters because metadata is easy to remove and many AI tools do not emit Content Credentials. Choose **Resume automatic detection** in `aiDisclosureSource` to reprocess the current file and leave manual mode.
 
 ## Classification policy
 
@@ -59,14 +61,14 @@ Composite evidence takes precedence. An image created entirely by AI and then ed
 
 A missing disclosure never means that an image is human-made.
 
-Detection is bounded: images over 64 MiB, extracted manifest JSON over 4 MiB, and manifest stores over 1,024 claims are left undetermined for manual classification. Detection failures never block a media save.
+Detection is bounded: images over 64 MiB, extracted manifest JSON over 4 MiB, and manifest stores over 1,024 manifests are left undetermined for manual classification. Detection failures never block a media save.
 
 ## Delivery API
 
 When Umbraco's media Delivery API is enabled, request the properties as normal media properties:
 
 ```http
-GET /umbraco/delivery/api/v2/media/item/{mediaId}?expand=properties[$all]&fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
+GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
 ```
 
 Render the public label from `aiDisclosure`. Treat an empty value as not determined, not as proof that an image is not AI-generated.
@@ -75,7 +77,7 @@ Render the public label from `aiDisclosure`. Treat an empty value as not determi
 
 C2PA is the primary signal because it can carry signed provenance and a standardized digital source type. Potential complementary signals include:
 
-- C2PA 2.4 `c2pa.ai-disclosure` assertions for more detailed model and training disclosures.
+- C2PA 2.4 `c2pa.ai-disclosure` assertions for model identification, content profiles, human oversight, and related metadata.
 - Vendor watermark detectors such as SynthID when a supported provider exposes a verification service.
 - XMP or EXIF software tags as a weak hint only. They are unsigned and easy to edit.
 

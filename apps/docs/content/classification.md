@@ -17,7 +17,16 @@ Only manifests whose validation state is `Valid` or `Trusted` contribute evidenc
 
 Composite evidence takes precedence. An image created entirely by AI and then edited without a composite source remains `generated`. An AI edit signal without that creation evidence is `modified`.
 
-The parser also recognizes `compositedWithTrainedAlgorithmicMedia`, a spelling found in some C2PA guidance.
+The parser also recognizes `compositedWithTrainedAlgorithmicMedia`, a spelling found in some C2PA guidance. When a `parentOf` ingredient references an unavailable manifest, a supported `digitalSourceType` directly on that ingredient is used as fallback evidence.
+
+`aiGenerator` is populated only from the `softwareAgent` on the relevant AI action. The credential's `claim_generator_info` identifies software that created the Content Credential and is not treated as the image generator.
+
+## Replacing a file
+
+- Valid positive AI evidence sets an automatic value and source `C2PA`.
+- A valid credential without recognised AI evidence clears a previous automatic value.
+- Missing or invalid credentials also clear previous automatic values.
+- Manual values remain untouched until an editor chooses **Resume automatic detection**.
 
 ## Why the package does not guess
 

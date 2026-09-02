@@ -5,10 +5,29 @@ seo:
   image: /og/delivery-api.png
 ---
 
-When Umbraco's media Delivery API is enabled, request the stored properties with the media item:
+Umbraco's Media Delivery API is disabled by default, even when the Content Delivery API is enabled. Enable both the parent API and its media section in `appsettings.json`:
+
+```json
+{
+  "Umbraco": {
+    "CMS": {
+      "DeliveryApi": {
+        "Enabled": true,
+        "Media": {
+          "Enabled": true
+        }
+      }
+    }
+  }
+}
+```
+
+See the [official Media Delivery API documentation](https://docs.umbraco.com/umbraco-cms/reference/content-delivery-api/media-delivery-api) for public-access and API-key options.
+
+Request the three scalar properties with the media item:
 
 ```http
-GET /umbraco/delivery/api/v2/media/item/{mediaId}?expand=properties[$all]&fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
+GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
 ```
 
 A classified response contains values like:
@@ -23,9 +42,19 @@ A classified response contains values like:
 
 ## Rendering rules
 
-- Render the generated label when `aiDisclosure === "generated"`.
-- Render the modified label when `aiDisclosure === "modified"`.
-- Treat an empty or missing value as not determined.
-- Do not infer the label from `aiGenerator` or `aiDisclosureSource`.
+```ts
+const labels = {
+  generated: "Fully AI-generated",
+  modified: "Partially AI-modified",
+} as const;
 
-The package adds badges to the Umbraco backoffice only. Your public website remains in control of placement, wording, and the official label asset it renders.
+const disclosure = media.properties.aiDisclosure;
+const label = disclosure ? labels[disclosure] : undefined;
+```
+
+- Render from `aiDisclosure`, never from `aiGenerator` or `aiDisclosureSource`.
+- Treat an empty or missing value as not determined, not proof that the image is non-AI.
+- Decide through editorial policy whether undetermined images need manual review.
+- Give a visible icon accompanying text or an accessible name.
+
+The package does not expose stable frontend icon assets. Obtain the public labels from the [European Commission's official icon downloads](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) rather than referencing hashed files from the backoffice bundle. Your public website remains in control of placement, wording, and accessibility.

@@ -6,4 +6,6 @@ namespace TheBuilder.AIImageDisclosure.Media;
 internal interface IMediaAiMetadataProcessor
 {
     AiImageMetadata Inspect(IMedia media);
+
+    AiImageMetadata ResumeAutomaticDetection(IMedia media);
 }

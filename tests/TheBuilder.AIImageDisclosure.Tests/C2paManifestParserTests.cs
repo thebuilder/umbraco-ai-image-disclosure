@@ -37,7 +37,7 @@ public sealed class C2paManifestParserTests
     }
 
     [Fact]
-    public void FollowsParentIngredientToAiGeneratedSource()
+    public void DoesNotTreatClaimGeneratorAsAiGenerator()
     {
         const string json = """
             {
@@ -64,7 +64,7 @@ public sealed class C2paManifestParserTests
         var result = C2paManifestParser.Parse(json);
 
         Assert.Equal(AiImageDetectionStatus.Generated, result.Status);
-        Assert.Equal("OpenAI Media Service API", result.Generator);
+        Assert.Null(result.Generator);
     }
 
     [Theory]

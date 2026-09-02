@@ -22,7 +22,7 @@ public sealed class C2paIntegrationTests
         var result = C2paManifestParser.Parse(File.ReadAllText(Fixture("google-generated-c2pa.json")));
 
         Assert.Equal(AiImageDetectionStatus.Generated, result.Status);
-        Assert.Equal("Google C2PA Core Generator Library", result.Generator);
+        Assert.Null(result.Generator);
     }
 
     [Fact]

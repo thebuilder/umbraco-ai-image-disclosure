@@ -11,9 +11,17 @@ Detection is intentionally bounded. The following inputs remain undetermined and
 
 - Images larger than 64 MiB
 - Extracted manifest JSON larger than 4 MiB
-- Manifest stores with more than 1,024 claims
+- Manifest stores with more than 1,024 manifests
 
-Unreadable or invalid data never blocks a media save. Existing manual values are preserved.
+Detection runs synchronously while a new image file or replacement is saved, so C2PA parsing can add processing time to that request. Existing media is not scanned or queued in the background, and saving unrelated fields does not trigger detection.
+
+Unreadable or invalid data never blocks a media save. A replacement without usable positive AI evidence clears previous automatic values; existing manual values are preserved.
+
+## Schema lifecycle
+
+Installation adds owned data types and properties to Umbraco's default `Image` media type. Existing aliases with incompatible definitions stop the migration so the package does not overwrite another schema.
+
+Removing the NuGet package does not remove the data types, properties, or stored values. This is intentional: uninstalling code should not silently delete editorial data. Remove that schema manually only after confirming it is no longer needed.
 
 ## Native platform support
 
@@ -25,12 +33,19 @@ The pinned `ContentAuthenticity` dependency bundles native C2PA binaries for:
 
 Intel macOS is not included by that dependency release. The native binaries also make restore and publish output larger than a managed-only package.
 
+## Compatibility status
+
+The package remains preview while Media Grid smoke coverage expands. CI runs backend tests against Umbraco 17.1, the latest 17.x, and the latest 18.x. The included example application builds and has been browser-smoke-tested on Umbraco 18.1.1. The backoffice client compiles against Umbraco 17.1.0.
+
 ## Troubleshooting
 
 If an expected badge is missing:
 
-1. Open the media item and check whether `aiDisclosure` has a value.
-2. Confirm the image still contains its original Content Credentials. Re-encoding often removes them.
-3. Confirm the media item was saved after installation.
-4. Check application logs for a bounded detection warning.
-5. Set a manual value when reliable file-level evidence is unavailable.
+1. Confirm the item uses the media type alias `Image`.
+2. Confirm the Media section is using the Grid view.
+3. Upload a new file or replace `umbracoFile`; saving other fields is insufficient.
+4. Test with the [known-good C2PA image](/test-assets/openai-generated-c2pa.png).
+5. Inspect `aiDisclosure` and `aiDisclosureSource` on the media item.
+6. Confirm the image still contains its original Content Credentials. Re-encoding often removes them.
+7. Check application logs for a detection warning.
+8. Use a manual value only when reliable file-level evidence is unavailable.

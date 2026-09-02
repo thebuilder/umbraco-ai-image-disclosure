@@ -108,6 +108,23 @@ public sealed class MediaAiMetadataProcessorTests
         media.DidNotReceive().SetValue(Constants.AiGeneratorPropertyAlias, Arg.Any<object?>());
     }
 
+    [Fact]
+    public void AutomaticResumeReplacesManualMetadata()
+    {
+        var media = Substitute.For<IMedia>();
+        media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias)
+            .Returns(Constants.ManualDisclosureSourceValue);
+        media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias).Returns(true);
+
+        MediaAiMetadataProcessor.ApplyAutomatic(media, AiImageMetadata.Generated("gpt-image"));
+
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
+        media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "gpt-image");
+        media.Received(1).SetValue(
+            Constants.AiDisclosureSourcePropertyAlias,
+            Constants.C2paDisclosureSourceValue);
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(2)]

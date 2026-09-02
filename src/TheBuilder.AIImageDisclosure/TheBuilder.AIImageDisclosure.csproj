@@ -17,7 +17,6 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageReleaseNotes>See https://github.com/thebuilder/umbraco-ai-image-disclosure/releases for release notes.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <StaticWebAssetBasePath>App_Plugins/TheBuilderAIImageDisclosure</StaticWebAssetBasePath>
     <BackofficeClientDirectory>$(MSBuildProjectDirectory)/Client</BackofficeClientDirectory>

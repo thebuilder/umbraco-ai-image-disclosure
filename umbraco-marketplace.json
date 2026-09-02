@@ -10,7 +10,7 @@
   "Category": "Artificial Intelligence",
   "AlternateCategory": "Editor Tools",
   "Title": "AI Image Disclosure",
-  "Description": "Classify AI-generated and AI-modified Umbraco images from signed C2PA Content Credentials, with EU AI Act disclosure labels and editor overrides.",
+  "Description": "Read valid C2PA Content Credentials on new or replaced files, store generated or modified on Umbraco Image media, and support editor overrides without pixel guessing.",
   "DocumentationUrl": "https://ai-image-disclosure.thebuilder.dk/overview",
   "IssueTrackerUrl": "https://github.com/thebuilder/umbraco-ai-image-disclosure/issues",
   "LicenseTypes": ["Free"],

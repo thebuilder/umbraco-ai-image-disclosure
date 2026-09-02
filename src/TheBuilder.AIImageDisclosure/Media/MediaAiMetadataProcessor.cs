@@ -16,25 +16,35 @@ internal sealed class MediaAiMetadataProcessor(
 {
     public AiImageMetadata Inspect(IMedia media)
     {
+        var result = Read(media);
+        Apply(media, result);
+        return result;
+    }
+
+    public AiImageMetadata ResumeAutomaticDetection(IMedia media)
+    {
+        var result = Read(media);
+        ApplyAutomatic(media, result);
+        return result;
+    }
+
+    private AiImageMetadata Read(IMedia media)
+    {
         string? mediaPath = null;
         try
         {
             if (!media.TryGetMediaPath(Constants.SourcePropertyAlias, mediaUrlGenerators, out mediaPath)
                 || string.IsNullOrWhiteSpace(mediaPath))
             {
-                Apply(media, AiImageMetadata.InvalidMetadata);
                 return AiImageMetadata.InvalidMetadata;
             }
 
             using var source = mediaService.GetMediaFileContentStream(mediaPath);
-            var result = metadataReader.Read(source, MimeTypes.GetMimeType(mediaPath));
-            Apply(media, result);
-            return result;
+            return metadataReader.Read(source, MimeTypes.GetMimeType(mediaPath));
         }
         catch (Exception exception) when (!IsFatal(exception))
         {
             logger.LogWarning(exception, "Could not inspect image media {MediaKey} at {MediaPath}", media.Key, mediaPath);
-            Apply(media, AiImageMetadata.InvalidMetadata);
             return AiImageMetadata.InvalidMetadata;
         }
     }
@@ -47,6 +57,11 @@ internal sealed class MediaAiMetadataProcessor(
             return;
         }
 
+        ApplyAutomatic(media, result);
+    }
+
+    internal static void ApplyAutomatic(IMedia media, AiImageMetadata result)
+    {
         switch (result.Status)
         {
             case AiImageDetectionStatus.Generated:

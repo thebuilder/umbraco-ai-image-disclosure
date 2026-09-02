@@ -8,6 +8,25 @@ internal sealed class AiImageDisclosureSchemaCollisionException(string message) 
 internal static class AiImageDisclosureSchemaGuard
 {
     public static void EnsureDisclosureDataTypeIsCompatible(IDataType dataType)
+        => EnsureSingleSelectDataTypeIsCompatible(
+            dataType,
+            Constants.AiDisclosureDataTypeName,
+            [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue]);
+
+    public static void EnsureDisclosureSourceDataTypeIsCompatible(IDataType dataType)
+        => EnsureSingleSelectDataTypeIsCompatible(
+            dataType,
+            Constants.AiDisclosureSourceDataTypeName,
+            [
+                Constants.C2paDisclosureSourceValue,
+                Constants.ManualDisclosureSourceValue,
+                Constants.ResumeAutomaticDisclosureSourceValue,
+            ]);
+
+    private static void EnsureSingleSelectDataTypeIsCompatible(
+        IDataType dataType,
+        string dataTypeName,
+        IReadOnlyCollection<string> expectedItems)
     {
         var configuration = dataType.ConfigurationObject as DropDownFlexibleConfiguration;
         if (dataType.EditorAlias != Constants.DropDownPropertyEditorAlias
@@ -15,12 +34,10 @@ internal static class AiImageDisclosureSchemaGuard
             || configuration is null
             || configuration.Multiple
             || configuration.Items is not { } items
-            || !items.SequenceEqual(
-                [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
-                StringComparer.Ordinal))
+            || !items.SequenceEqual(expectedItems, StringComparer.Ordinal))
         {
             throw new AiImageDisclosureSchemaCollisionException(
-                $"The data type {Constants.AiDisclosureDataTypeName} already exists with incompatible editor settings.");
+                $"The data type {dataTypeName} already exists with incompatible editor settings.");
         }
     }
 

@@ -14,20 +14,34 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
     {
         foreach (var media in notification.SavedEntities.Where(IsDisclosureImage))
         {
-            if (media.IsPropertyDirty(Constants.SourcePropertyAlias))
+            if (ShouldResumeAutomaticDetection(media))
             {
-                if (processor.Inspect(media).Status == AiImageDetectionStatus.InvalidMetadata)
-                {
-                    logger.LogWarning(
-                        "Could not validate C2PA metadata for image media {MediaKey}; manual AI metadata was preserved",
-                        media.Key);
-                }
+                LogInvalidMetadata(media, processor.ResumeAutomaticDetection(media));
+            }
+            else if (media.IsPropertyDirty(Constants.SourcePropertyAlias))
+            {
+                LogInvalidMetadata(media, processor.Inspect(media));
             }
             else if (HasManualMetadataChange(media))
             {
+                if (media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias)
+                    && string.IsNullOrWhiteSpace(media.GetValue<string>(Constants.AiDisclosurePropertyAlias)))
+                {
+                    media.SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
+                }
+
                 media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.ManualDisclosureSourceValue);
             }
         }
+    }
+
+    private void LogInvalidMetadata(IMedia media, AiImageMetadata result)
+    {
+        if (result.Status != AiImageDetectionStatus.InvalidMetadata) return;
+
+        logger.LogWarning(
+            "Could not validate C2PA metadata for image media {MediaKey}; no automatic AI disclosure was applied",
+            media.Key);
     }
 
     internal static bool ShouldInspect(IMedia media) =>
@@ -42,4 +56,11 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
     private static bool HasManualMetadataChange(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias)
         || media.IsPropertyDirty(Constants.AiGeneratorPropertyAlias);
+
+    private static bool ShouldResumeAutomaticDetection(IMedia media) =>
+        media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias)
+        && !string.Equals(
+            media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias),
+            Constants.ManualDisclosureSourceValue,
+            StringComparison.Ordinal);
 }
