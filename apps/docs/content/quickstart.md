@@ -29,6 +29,8 @@ Restart the application. On first startup, the package creates the **AI image di
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
+![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
+
 ## Set a manual value
 
 Select **Fully AI-generated** or **Partially AI-modified** in the disclosure property, then save. The source changes to `Manual` so later file processing does not silently replace the editor's decision.
