@@ -48,7 +48,7 @@ AI Image Disclosure connects the two layers:
 1. C2PA provides signed, machine-readable evidence when it is present and valid.
 2. Umbraco stores a simple `generated`, `modified`, or empty value.
 3. Editors can correct or add the disclosure when file-level evidence is unavailable.
-4. The backoffice shows the corresponding EU badge in the Media collection.
+4. An editor reviews the stored classification on the media item.
 5. Frontends can request the value through the Delivery API and render an appropriate disclosure.
 
 This package supports a disclosure workflow. It is not legal advice and cannot determine whether a particular publication falls within Article 50.

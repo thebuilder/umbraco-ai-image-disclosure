@@ -16,7 +16,7 @@ seo:
 >
 > - Processes new uploads and file replacements only.
 > - Does not backfill existing media.
-> - Shows badges in the package-provided Media Grid view only.
+> - Leaves Umbraco's native Media collection views unchanged.
 > - Does not add disclosure labels to public pages.
 
 Installation stops rather than overwriting an existing data type or media property that uses one of the package's aliases with an incompatible definition.
@@ -36,7 +36,7 @@ Restart the application. On first startup, the package creates the **AI image di
 3. Upload that image to the default `Image` media type.
 4. Save the media item.
 5. Check **AI disclosure**, **AI generator**, and **AI disclosure source**.
-6. Return to the Media collection's Grid view and confirm the badge appears on the thumbnail.
+6. Save the media item and confirm that the three properties contain the expected values.
 
 The expected values are:
 

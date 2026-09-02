@@ -17,8 +17,8 @@
   "PackageType": "Package",
   "Screenshots": [
     {
-      "ImageUrl": "https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/content/screenshots/media-library-badges.png",
-      "Caption": "AI disclosure badges in the Umbraco Media library"
+      "ImageUrl": "https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/content/screenshots/media-details.png",
+      "Caption": "AI disclosure properties on an Umbraco image"
     }
   ],
   "Tags": ["AI", "C2PA", "Content Credentials", "image provenance", "AI-generated", "AI-modified", "media", "disclosure", "Delivery API"]

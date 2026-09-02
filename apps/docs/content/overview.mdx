@@ -25,9 +25,9 @@ The empty value means **not determined**. It does not mean the image is human-ma
 
 ## Backoffice experience
 
-Classified images receive the matching European Commission disclosure badge in the package-provided Grid view in the Media section. Editors can change the disclosure when metadata is absent or the classification needs correction. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the available label variants and their intended use.
+Editors can review and change the disclosure when metadata is absent or the classification needs correction. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the public label variants and their intended use.
 
-The package replaces Umbraco's native Media Grid collection view under the same extension alias so it can add badges while reusing native cards and thumbnails. Other Media Grid overrides may conflict with it, and badges are not added to the table view, media pickers, or other thumbnail presentations.
+The package does not replace or decorate Umbraco's Media Grid, table view, media pickers, or other thumbnail presentations. This keeps the extension compatible with Umbraco's native collection UI and with packages that provide their own collection views.
 
 ## What detection can establish
 

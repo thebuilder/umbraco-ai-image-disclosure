@@ -11,7 +11,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure?style=flat-square" alt="MIT license"></a>
 </p>
 
-![AI disclosure badges in the Umbraco Media library](apps/docs/content/screenshots/media-library-badges.png)
+![AI disclosure properties on an Umbraco image](apps/docs/content/screenshots/media-details.png)
 
 AI Image Disclosure reads valid C2PA Content Credentials when a file is uploaded to, or replaced on, Umbraco's default `Image` media type. It stores a small, stable classification that editors and frontends can rely on, while preserving manual control when provenance is absent or incomplete. Existing media is not scanned automatically.
 
@@ -21,11 +21,11 @@ The package adds three properties to the default Image media type:
 
 - `aiDisclosure`: empty when unknown, `generated`, or `modified`.
 - `aiGenerator`: the software agent attached to the AI-relevant C2PA action, when provided by the credential.
-- `aiDisclosureSource`: `C2PA` or `Manual`, plus a backoffice action to resume automatic detection.
+- `aiDisclosureSource`: `C2PA`, `Manual`, or empty, plus a backoffice action to resume automatic detection.
 
-The Media library overlays the matching European Commission disclosure badge on classified image thumbnails. Undetermined images and other media stay unchanged. Public sites decide where and how to render their own label.
+Editors can review the classification, generator evidence, and detection source on the media item. Public sites decide where and how to render their own label.
 
-Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package supplies the Media section's Grid view under Umbraco's native extension alias; other packages that replace the same view may conflict. Table views, media pickers, and public pages are unchanged.
+Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package does not replace or modify Umbraco's native Media Grid, table view, media pickers, or public pages.
 
 ## C2PA and EU disclosure
 

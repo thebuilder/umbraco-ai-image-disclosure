@@ -35,17 +35,16 @@ Intel macOS is not included by that dependency release. The native binaries also
 
 ## Compatibility status
 
-The package remains preview while Media Grid smoke coverage expands. CI runs backend tests against Umbraco 17.1, the latest 17.x, and the latest 18.x. The included example application builds and has been browser-smoke-tested on Umbraco 18.1.1. The backoffice client compiles against Umbraco 17.1.0.
+The package remains preview. CI runs backend tests against Umbraco 17.1, the latest 17.x, and the latest 18.x. The included example application builds and has been browser-smoke-tested on Umbraco 18.1.1. The package does not replace Umbraco's Media collection views.
 
 ## Troubleshooting
 
-If an expected badge is missing:
+If an expected classification is missing:
 
 1. Confirm the item uses the media type alias `Image`.
-2. Confirm the Media section is using the Grid view.
-3. Upload a new file or replace `umbracoFile`; saving other fields is insufficient.
-4. Test with the [known-good C2PA image](/test-assets/openai-generated-c2pa.png).
-5. Inspect `aiDisclosure` and `aiDisclosureSource` on the media item.
-6. Confirm the image still contains its original Content Credentials. Re-encoding often removes them.
-7. Check application logs for a detection warning.
-8. Use a manual value only when reliable file-level evidence is unavailable.
+2. Upload a new file or replace `umbracoFile`; saving other fields is insufficient.
+3. Test with the [known-good C2PA image](/test-assets/openai-generated-c2pa.png).
+4. Inspect `aiDisclosure` and `aiDisclosureSource` on the media item.
+5. Confirm the image still contains its original Content Credentials. Re-encoding often removes them.
+6. Check application logs for a detection warning.
+7. Use a manual value only when reliable file-level evidence is unavailable.
