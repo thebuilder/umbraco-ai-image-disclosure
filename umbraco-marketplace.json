@@ -12,12 +12,12 @@
   "Title": "AI Image Disclosure",
   "Description": "Classify AI-generated and AI-modified Umbraco images from signed C2PA Content Credentials, with EU AI Act disclosure labels and editor overrides.",
   "DocumentationUrl": "https://ai-image-disclosure.thebuilder.dk/overview",
-  "IssueTrackerUrl": "https://github.com/thebuilder/umbraco-ai-generated/issues",
+  "IssueTrackerUrl": "https://github.com/thebuilder/umbraco-ai-image-disclosure/issues",
   "LicenseTypes": ["Free"],
   "PackageType": "Package",
   "Screenshots": [
     {
-      "ImageUrl": "https://raw.githubusercontent.com/thebuilder/umbraco-ai-generated/refs/heads/main/apps/docs/content/screenshots/media-library-badges.png",
+      "ImageUrl": "https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/content/screenshots/media-library-badges.png",
       "Caption": "AI disclosure badges in the Umbraco Media library"
     }
   ],

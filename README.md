@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/thebuilder/umbraco-ai-generated/refs/heads/main/icon.png" width="128" height="128" alt="AI Image Disclosure logo">
+  <img src="https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/icon.png" width="128" height="128" alt="AI Image Disclosure logo">
 </p>
 
 <h1 align="center">AI Image Disclosure for Umbraco</h1>
@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://www.nuget.org/packages/TheBuilder.AIImageDisclosure"><img src="https://img.shields.io/nuget/vpre/TheBuilder.AIImageDisclosure?style=flat-square" alt="NuGet version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/thebuilder/umbraco-ai-generated?style=flat-square" alt="MIT license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure?style=flat-square" alt="MIT license"></a>
 </p>
 
 ![AI disclosure badges in the Umbraco Media library](apps/docs/content/screenshots/media-library-badges.png)

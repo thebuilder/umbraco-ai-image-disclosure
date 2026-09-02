@@ -10,7 +10,7 @@ export const aiImageDisclosurePackage = defineUmbracoPackage({
     nuget: "https://www.nuget.org/packages/TheBuilder.AIImageDisclosure",
     marketplace:
       "https://marketplace.umbraco.com/package/thebuilder.aiimagedisclosure",
-    github: "https://github.com/thebuilder/umbraco-ai-generated",
+    github: "https://github.com/thebuilder/umbraco-ai-image-disclosure",
   },
   logo: "/logo-mark.svg",
   compatibility: {

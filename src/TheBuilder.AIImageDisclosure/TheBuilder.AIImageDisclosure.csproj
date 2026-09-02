@@ -12,12 +12,12 @@
     <Description>Classify fully AI-generated and partially AI-modified Umbraco images from C2PA Content Credentials.</Description>
     <PackageTags>umbraco;umbraco-marketplace;umbraco-cms;backoffice;image;c2pa;ai;content-credentials</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/thebuilder/umbraco-ai-generated</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/thebuilder/umbraco-ai-generated.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/thebuilder/umbraco-ai-image-disclosure</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/thebuilder/umbraco-ai-image-disclosure.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageReleaseNotes>See https://github.com/thebuilder/umbraco-ai-generated/releases for release notes.</PackageReleaseNotes>
+    <PackageReleaseNotes>See https://github.com/thebuilder/umbraco-ai-image-disclosure/releases for release notes.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <StaticWebAssetBasePath>App_Plugins/TheBuilderAIImageDisclosure</StaticWebAssetBasePath>
     <BackofficeClientDirectory>$(MSBuildProjectDirectory)/Client</BackofficeClientDirectory>

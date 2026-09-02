@@ -11,7 +11,7 @@ export default defineConfig({
   },
   github: {
     owner: "thebuilder",
-    repo: "umbraco-ai-generated",
+    repo: "umbraco-ai-image-disclosure",
     dir: "apps/docs",
   },
   content: {

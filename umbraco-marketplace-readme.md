@@ -1,4 +1,4 @@
-![AI disclosure badges in the Umbraco Media library](https://raw.githubusercontent.com/thebuilder/umbraco-ai-generated/refs/heads/main/apps/docs/content/screenshots/media-library-badges.png)
+![AI disclosure badges in the Umbraco Media library](https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/content/screenshots/media-library-badges.png)
 
 # AI Image Disclosure
 
