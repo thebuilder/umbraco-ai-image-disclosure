@@ -25,6 +25,12 @@ The package adds three properties to the default Image media type:
 
 The Media library overlays the matching European Commission disclosure badge on classified image thumbnails. Undetermined images and other media stay unchanged. Public sites decide where and how to render their own label.
 
+## C2PA and EU disclosure
+
+[C2PA Content Credentials](https://c2pa.org/specifications/specifications/2.2/explainer/Explainer.html) provide cryptographically verifiable provenance about an image's origin, edits, tools, and use of AI. AI Image Disclosure validates that evidence before mapping it to a simple editorial value.
+
+The European Commission provides optional icons for fully AI-generated and partially AI-modified content as part of its guidance for EU AI Act Article 50 disclosure workflows. [View the official EU icons and placement guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content). Using an icon does not establish legal compliance by itself.
+
 ## Install
 
 AI Image Disclosure supports Umbraco CMS 17.1 through 18.x on .NET 10.

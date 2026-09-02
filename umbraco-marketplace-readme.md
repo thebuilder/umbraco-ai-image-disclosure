@@ -4,6 +4,8 @@
 
 AI Image Disclosure helps editors understand how an image was made. It reads signed C2PA Content Credentials when an Image is saved, classifies the result as fully AI-generated or partially AI-modified, and shows the matching disclosure badge in the Media library.
 
+The stored values align with the European Commission's optional labels for fully AI-generated and partially AI-modified content. [View the official EU icons and guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content).
+
 ## Key features
 
 - Verifies signed C2PA manifests before using their claims.

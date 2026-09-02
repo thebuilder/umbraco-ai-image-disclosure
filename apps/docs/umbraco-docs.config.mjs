@@ -11,6 +11,6 @@ export default defineOgConfig({
   root: {
     title: "AI Image Disclosure for Umbraco",
     description:
-      "Classify AI-generated and AI-modified images from signed C2PA Content Credentials.",
+      "Detect AI-generated and AI-modified images from C2PA Content Credentials and support EU AI Act disclosure workflows in Umbraco.",
   },
 });

@@ -5,6 +5,7 @@ export default defineMeta({
   pages: [
     "overview",
     "quickstart",
+    "c2pa-eu-ai-act",
     "classification",
     "delivery-api",
     "operations",
