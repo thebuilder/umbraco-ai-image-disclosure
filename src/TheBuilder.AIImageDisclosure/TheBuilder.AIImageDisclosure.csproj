@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
     <PackageId>TheBuilder.AIImageDisclosure</PackageId>
     <Product>AI Image Disclosure</Product>
     <Title>AI Image Disclosure for Umbraco</Title>
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="ContentAuthenticity" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" VersionOverride="$(UmbracoVersion)" />
     <PackageReference Include="Umbraco.Cms.Web.Common" VersionOverride="$(UmbracoVersion)" />
     <!-- Security floors for dependencies inherited from the supported Umbraco range. -->
     <PackageReference Include="MailKit" />

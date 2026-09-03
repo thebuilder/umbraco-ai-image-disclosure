@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageVersion Include="ContentAuthenticity" Version="0.90.16" />
     <PackageVersion Include="Umbraco.Cms.Web.Common" Version="$(UmbracoVersion)" />
+    <PackageVersion Include="Umbraco.Cms.Api.Management" Version="$(UmbracoVersion)" />
     <PackageVersion Include="MailKit" Version="4.17.0" />
     <PackageVersion Include="MessagePack" Version="3.1.8" />
     <PackageVersion Include="Microsoft.OpenApi" Version="2.11.0" />

@@ -37,7 +37,7 @@ Intel macOS is not included by that dependency release. The native binaries also
 
 ## Compatibility status
 
-The package remains preview. CI runs backend tests against Umbraco 17.1, the latest 17.x, and the latest 18.x. The included example application builds and has been browser-smoke-tested on Umbraco 18.1.1. The package does not replace Umbraco's Media collection views.
+The package remains preview. CI runs backend tests against Umbraco 17.1, the latest 17.x, and the latest 18.x. The included example application builds and has been browser-smoke-tested on Umbraco 18.1.1. Backoffice badges use Umbraco's native flag and sign extension points. Umbraco's current Media Grid cards do not host entity signs, so the package does not add a badge there or replace the collection view.
 
 ## Troubleshooting
 

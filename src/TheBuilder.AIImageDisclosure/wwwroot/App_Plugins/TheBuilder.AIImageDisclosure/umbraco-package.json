@@ -1,0 +1,30 @@
+{
+  "$schema": "../../umbraco-package-schema.json",
+  "name": "AI Image Disclosure",
+  "extensions": [
+    {
+      "type": "entitySign",
+      "kind": "icon",
+      "alias": "TheBuilder.AIImageDisclosure.EntitySign.Generated",
+      "name": "AI-generated media sign",
+      "forEntityTypes": ["media"],
+      "forEntityFlags": ["TheBuilder.AIImageDisclosure.Generated"],
+      "meta": {
+        "iconName": "icon-wand",
+        "label": "AI generated"
+      }
+    },
+    {
+      "type": "entitySign",
+      "kind": "icon",
+      "alias": "TheBuilder.AIImageDisclosure.EntitySign.Modified",
+      "name": "AI-modified media sign",
+      "forEntityTypes": ["media"],
+      "forEntityFlags": ["TheBuilder.AIImageDisclosure.Modified"],
+      "meta": {
+        "iconName": "icon-edit",
+        "label": "AI modified"
+      }
+    }
+  ]
+}

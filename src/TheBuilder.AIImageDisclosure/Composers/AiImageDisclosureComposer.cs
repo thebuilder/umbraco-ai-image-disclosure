@@ -6,6 +6,7 @@ using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Extensions;
+using TheBuilder.AIImageDisclosure.Backoffice;
 
 namespace TheBuilder.AIImageDisclosure.Composers;
 
@@ -18,6 +19,7 @@ public sealed class AiImageDisclosureComposer : IComposer
         builder.Services.AddSingleton<IImageAiMetadataReader, C2paImageAiMetadataReader>();
         builder.Services.AddSingleton<IMediaAiMetadataProcessor, MediaAiMetadataProcessor>();
         builder.AddNotificationHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();
+        builder.FlagProviders().Append<AiDisclosureFlagProvider>();
         builder.PackageMigrationPlans().Add(typeof(AiImageDisclosurePackageMigrationPlan));
     }
 }
