@@ -11,19 +11,25 @@ namespace TheBuilder.AIImageDisclosure.Tests;
 public sealed class AiDisclosureFlagProviderTests
 {
     [Fact]
-    public async Task AddsDisclosureFlagsWithOneMediaLookup()
+    public async Task AddsDisclosureFlagsForDetectedAndEditorValuesWithOneMediaLookup()
     {
         Guid generatedKey = Guid.NewGuid();
         Guid modifiedKey = Guid.NewGuid();
+        Guid editorGeneratedKey = Guid.NewGuid();
+        Guid editorModifiedKey = Guid.NewGuid();
         IMedia generated = CreateImage(generatedKey, Constants.GeneratedDisclosureValue);
         IMedia modified = CreateImage(modifiedKey, Constants.ModifiedDisclosureValue);
+        IMedia editorGenerated = CreateImage(editorGeneratedKey, "[\"generated\"]");
+        IMedia editorModified = CreateImage(editorModifiedKey, "[\"modified\"]");
         var mediaService = Substitute.For<IMediaService>();
-        mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([generated, modified]);
+        mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([generated, modified, editorGenerated, editorModified]);
         var provider = new AiDisclosureFlagProvider(mediaService, new ConfigurationBuilder().Build());
         var items = new[]
         {
             new MediaTreeItemResponseModel { Id = generatedKey },
             new MediaTreeItemResponseModel { Id = modifiedKey },
+            new MediaTreeItemResponseModel { Id = editorGeneratedKey },
+            new MediaTreeItemResponseModel { Id = editorModifiedKey },
         };
 
         Assert.True(provider.CanProvideFlags<MediaTreeItemResponseModel>());
@@ -31,7 +37,9 @@ public sealed class AiDisclosureFlagProviderTests
 
         Assert.Contains(items[0].Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
         Assert.Contains(items[1].Flags, flag => flag.Alias == Constants.ModifiedFlagAlias);
-        mediaService.Received(1).GetByIds(Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { generatedKey, modifiedKey })));
+        Assert.Contains(items[2].Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
+        Assert.Contains(items[3].Flags, flag => flag.Alias == Constants.ModifiedFlagAlias);
+        mediaService.Received(1).GetByIds(Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { generatedKey, modifiedKey, editorGeneratedKey, editorModifiedKey })));
     }
 
     [Fact]

@@ -11,6 +11,9 @@ internal sealed class AiDisclosureFlagProvider(
     IMediaService mediaService,
     IConfiguration configuration) : IFlagProvider
 {
+    private const string GeneratedDropdownValue = "[\"generated\"]";
+    private const string ModifiedDropdownValue = "[\"modified\"]";
+
     public bool CanProvideFlags<TItem>()
         where TItem : IHasFlags =>
         typeof(TItem) == typeof(MediaTreeItemResponseModel);
@@ -37,9 +40,11 @@ internal sealed class AiDisclosureFlagProvider(
             switch (media.GetValue<string>(Constants.AiDisclosurePropertyAlias))
             {
                 case Constants.GeneratedDisclosureValue:
+                case GeneratedDropdownValue:
                     item.AddFlag(Constants.GeneratedFlagAlias);
                     break;
                 case Constants.ModifiedDisclosureValue:
+                case ModifiedDropdownValue:
                     item.AddFlag(Constants.ModifiedFlagAlias);
                     break;
             }

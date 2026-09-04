@@ -4,25 +4,23 @@
   "extensions": [
     {
       "type": "entitySign",
-      "kind": "icon",
       "alias": "TheBuilder.AIImageDisclosure.EntitySign.Generated",
       "name": "AI-generated media sign",
+      "js": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-entity-sign.js",
       "forEntityTypes": ["media"],
       "forEntityFlags": ["TheBuilder.AIImageDisclosure.Generated"],
       "meta": {
-        "iconName": "icon-wand",
         "label": "AI generated"
       }
     },
     {
       "type": "entitySign",
-      "kind": "icon",
       "alias": "TheBuilder.AIImageDisclosure.EntitySign.Modified",
       "name": "AI-modified media sign",
+      "js": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-entity-sign.js",
       "forEntityTypes": ["media"],
       "forEntityFlags": ["TheBuilder.AIImageDisclosure.Modified"],
       "meta": {
-        "iconName": "icon-edit",
         "label": "AI modified"
       }
     }
