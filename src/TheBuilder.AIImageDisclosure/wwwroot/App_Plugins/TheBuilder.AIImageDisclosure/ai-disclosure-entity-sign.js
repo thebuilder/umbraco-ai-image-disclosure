@@ -9,7 +9,7 @@ class AiDisclosureEntitySignElement extends HTMLElement {
       <style>
         :host {
           display: inline-flex;
-          vertical-align: middle;
+          vertical-align: top;
         }
 
         span {
@@ -26,6 +26,7 @@ class AiDisclosureEntitySignElement extends HTMLElement {
           color: var(--uui-color-surface, #fff);
           font: 700 0.5rem/1 var(--uui-font-family, sans-serif);
           letter-spacing: 0.02em;
+          transform: translateX(-0.125rem);
         }
       </style>
       <span aria-hidden="true">AI</span>
