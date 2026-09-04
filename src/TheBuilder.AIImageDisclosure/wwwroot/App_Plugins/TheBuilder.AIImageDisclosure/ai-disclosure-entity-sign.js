@@ -15,11 +15,11 @@ class AiDisclosureEntitySignElement extends HTMLElement {
         span {
           display: inline-flex;
           box-sizing: border-box;
-          min-width: 1rem;
+          min-width: 0.75rem;
           height: 0.625rem;
           align-items: center;
           justify-content: center;
-          padding-inline: 0.125rem;
+          padding-inline: 0;
           border: 1px solid var(--uui-color-surface, #fff);
           border-radius: 999px;
           background: var(--uui-color-text, #1b264f);
