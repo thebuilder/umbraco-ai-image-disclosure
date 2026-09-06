@@ -36,7 +36,7 @@ internal sealed class MediaAiMetadataProcessor(
             if (!media.TryGetMediaPath(Constants.SourcePropertyAlias, mediaUrlGenerators, out mediaPath)
                 || string.IsNullOrWhiteSpace(mediaPath))
             {
-                return AiImageMetadata.InvalidMetadata;
+                return AiImageMetadata.Unreadable;
             }
 
             using var source = mediaService.GetMediaFileContentStream(mediaPath);
@@ -45,7 +45,7 @@ internal sealed class MediaAiMetadataProcessor(
         catch (Exception exception) when (!IsFatal(exception))
         {
             logger.LogWarning(exception, "Could not inspect image media {MediaKey} at {MediaPath}", media.Key, mediaPath);
-            return AiImageMetadata.InvalidMetadata;
+            return AiImageMetadata.Unreadable;
         }
     }
 
@@ -68,15 +68,18 @@ internal sealed class MediaAiMetadataProcessor(
                 media.SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
                 media.SetValue(Constants.AiGeneratorPropertyAlias, result.Generator ?? string.Empty);
                 media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+                SetReason(media, result);
                 break;
             case AiImageDetectionStatus.Modified:
                 media.SetValue(Constants.AiDisclosurePropertyAlias, Constants.ModifiedDisclosureValue);
                 media.SetValue(Constants.AiGeneratorPropertyAlias, result.Generator ?? string.Empty);
                 media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+                SetReason(media, result);
                 break;
             case AiImageDetectionStatus.NotDetected:
             case AiImageDetectionStatus.InvalidMetadata:
                 ClearAutomaticMetadata(media);
+                SetReason(media, result);
                 break;
             default:
                 throw new InvalidOperationException($"Unsupported AI image detection status {result.Status}.");
@@ -99,6 +102,9 @@ internal sealed class MediaAiMetadataProcessor(
         media.SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
     }
+
+    private static void SetReason(IMedia media, AiImageMetadata result) =>
+        media.SetValue(Constants.AiDisclosureReasonPropertyAlias, result.Reason.ToStoredValue());
 
     private static bool IsFatal(Exception exception) =>
         exception is OutOfMemoryException or StackOverflowException or AccessViolationException;

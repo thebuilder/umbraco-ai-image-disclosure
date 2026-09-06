@@ -18,6 +18,8 @@ public sealed class AiImageDisclosureComposer : IComposer
     {
         builder.Services.AddSingleton<IImageAiMetadataReader, C2paImageAiMetadataReader>();
         builder.Services.AddSingleton<IMediaAiMetadataProcessor, MediaAiMetadataProcessor>();
+        builder.Services.AddSingleton<MediaAiRescanService>();
+        builder.Services.AddControllers().AddApplicationPart(typeof(Controllers.AiImageDisclosureController).Assembly);
         builder.AddNotificationHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();
         builder.FlagProviders().Append<AiDisclosureFlagProvider>();
         builder.PackageMigrationPlans().Add(typeof(AiImageDisclosurePackageMigrationPlan));

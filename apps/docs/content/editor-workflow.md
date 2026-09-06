@@ -11,6 +11,8 @@ Uploading or replacing `umbracoFile` on Umbraco's default `Image` media type run
 
 **AI generator** is read-only. It records evidence from the validated C2PA action and is not an editorial attribution field.
 
+**AI disclosure reason** is also read-only. It explains an automatic non-positive result, such as **No content credentials**, **Invalid content credentials**, **Image exceeds scan size limit**, **Content credentials exceed scan limits**, **No AI declaration**, or **Image could not be read**. Positive AI results leave this property empty.
+
 Saving a name, crop, or another media property does not rerun detection. Existing media is not scanned after installation.
 
 ## Override manually
@@ -30,3 +32,5 @@ Choose **Resume automatic detection** in **AI disclosure source**, then save. Th
 - A detection failure never blocks the media save.
 
 The resume option is an action, not a stored source value. After saving, the source is either `C2PA` or empty.
+
+Administrators can rescan existing Image media from the Media section's **AI disclosure scan** tab. Manual values are preserved; each request is bounded to 50 media entities and the dashboard can stop after the current batch.

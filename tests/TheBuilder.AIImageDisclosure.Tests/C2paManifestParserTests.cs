@@ -15,6 +15,34 @@ public sealed class C2paManifestParserTests
         Assert.Equal("gpt-image", result.Generator);
     }
 
+    [Theory]
+    [InlineData("c2pa.metadata", "Iptc4xmpExt:DigitalSourceType")]
+    [InlineData("stds.iptc", "Iptc4xmpExt:DigitalSourceType")]
+    [InlineData("stds.iptc.photometadata", "Iptc4xmpExt:DigitalSourceType")]
+    public void DetectsAiSourceFromMetadataAssertions(string label, string sourceProperty)
+    {
+        var json = $$"""
+            { "active_manifest": "active", "manifests": { "active": {
+              "assertions": [{ "label": "{{label}}", "data": { "{{sourceProperty}}": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" } }]
+            } }, "validation_state": "Valid" }
+            """;
+
+        Assert.Equal(AiImageDetectionStatus.Generated, C2paManifestParser.Parse(json).Status);
+    }
+
+    [Fact]
+    public void InputToAndUnrelatedHistoryDoNotMarkImageAsAi()
+    {
+        const string json = """
+            { "active_manifest": "active", "manifests": {
+              "active": { "ingredients": [{ "relationship": "inputTo", "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" }] },
+              "other": { "assertions": [{ "label": "c2pa.ingredient.v3", "data": { "relationship": "inputTo", "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" } }] }
+            }, "validation_state": "Valid" }
+            """;
+
+        Assert.Equal(AiImageDetectionStatus.NotDetected, C2paManifestParser.Parse(json).Status);
+    }
+
     [Fact]
     public void ClassifiesAiEditedImageAsPartiallyModified()
     {
@@ -116,7 +144,7 @@ public sealed class C2paManifestParserTests
     {
         var json = new string(' ', C2paManifestParser.MaximumManifestJsonCharacters + 1);
 
-        Assert.Equal(AiImageDetectionStatus.InvalidMetadata, C2paManifestParser.Parse(json).Status);
+        Assert.Equal(AiImageDetectionReason.ManifestLimitExceeded, C2paManifestParser.Parse(json).Reason);
     }
 
     [Fact]

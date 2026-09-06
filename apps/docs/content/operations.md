@@ -12,8 +12,9 @@ Detection is intentionally bounded. The following inputs remain undetermined and
 - Images larger than 64 MiB
 - Extracted manifest JSON larger than 4 MiB
 - Manifest stores with more than 1,024 manifests
+- Content Credentials that exceed the reader's internal resource limits
 
-Detection runs synchronously while a new image file or replacement is saved, so C2PA parsing can add processing time to that request. Existing media is not scanned or queued in the background, and saving unrelated fields does not trigger detection.
+Detection runs synchronously while a new image file or replacement is saved, so C2PA parsing can add processing time to that request. Existing media is not scanned automatically or queued in the background, and saving unrelated fields does not trigger detection. Administrators can start the bounded Media dashboard scan manually; it processes at most 50 media entities per request, preserves manual values, and reports failed saves.
 
 AI Image Disclosure reads embedded Content Credentials only. Remote manifest fetching is disabled, the network host allow-list is empty, and the reader uses a deny-all HTTP resolver. Processing an uploaded image does not make outbound network requests.
 

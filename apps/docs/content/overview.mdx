@@ -20,12 +20,13 @@ AI Image Disclosure verifies the signed credential before using its claims. It d
 | `aiDisclosure` | `generated`, `modified`, or empty | The public classification |
 | `aiGenerator` | Read-only text or empty | The software agent attached to the AI-relevant action |
 | `aiDisclosureSource` | `C2PA`, `Manual`, or empty | How the current value was set; also offers a resume-automatic action in the backoffice |
+| `aiDisclosureReason` | Read-only text or empty | Human-readable reason for the latest automatic non-positive result |
 
 The empty value means **not determined**. It does not mean the image is human-made.
 
 ## Backoffice experience
 
-Editors can review and change the disclosure when metadata is absent or the classification needs correction. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the public label variants and their intended use.
+Editors can review and change the disclosure when metadata is absent or the classification needs correction. Administrators also get an **AI disclosure scan** tab in Media for bounded batches of existing Image media. It reports progress, preserves manual values, and can stop after the current batch. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the public label variants and their intended use.
 
 The package does not replace or decorate Umbraco's Media Grid, table view, media pickers, or other thumbnail presentations. This keeps the extension compatible with Umbraco's native collection UI and with packages that provide their own collection views.
 

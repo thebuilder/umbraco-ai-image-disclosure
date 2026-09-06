@@ -17,7 +17,7 @@ Only manifests whose validation state is `Valid` or `Trusted` contribute evidenc
 
 Composite evidence takes precedence. An image created entirely by AI and then edited without a composite source remains `generated`. An AI edit signal without that creation evidence is `modified`.
 
-The parser also recognizes `compositedWithTrainedAlgorithmicMedia`, a spelling found in some C2PA guidance. When a `parentOf` ingredient references an unavailable manifest, a supported `digitalSourceType` directly on that ingredient is used as fallback evidence.
+The parser also recognizes `compositedWithTrainedAlgorithmicMedia`, a spelling found in some C2PA guidance. It reads `c2pa.metadata` with namespaced `Iptc4xmpExt:DigitalSourceType`, plus the legacy `stds.iptc` and `stds.iptc.photometadata` labels. A `componentOf` AI ingredient marks the result `modified` only when the component is placed in the resulting claim and not subsequently removed. The reference is resolved within its owning manifest; `inputTo` ingredients and unrelated history do not count.
 
 `aiGenerator` is populated only from the `softwareAgent` on the relevant AI action. The credential's `claim_generator_info` identifies software that created the Content Credential and is not treated as the image generator.
 

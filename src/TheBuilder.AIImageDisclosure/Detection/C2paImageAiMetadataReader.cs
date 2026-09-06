@@ -35,7 +35,7 @@ internal sealed class C2paImageAiMetadataReader : IImageAiMetadataReader
             using var buffered = image.CanSeek ? null : BufferNonSeekableStream(image);
             var source = buffered ?? image;
             if ((image.CanSeek && image.Length > MaximumImageBytes) || source.Length > MaximumImageBytes)
-                return AiImageMetadata.InvalidMetadata;
+                return AiImageMetadata.ImageTooLarge;
 
             using var contextBuilder = new ContextBuilder();
             contextBuilder.SetSettings(OfflineReaderSettings, "json");
@@ -44,9 +44,9 @@ internal sealed class C2paImageAiMetadataReader : IImageAiMetadataReader
             using var reader = new Reader(context).WithStream(source, mediaType);
             return C2paManifestParser.Parse(reader.Json);
         }
-        catch (C2paException exception) when (exception.Type == "ManifestNotFound")
+        catch (C2paException exception) when (exception.Type.TrimEnd(':') == "ManifestNotFound")
         {
-            return AiImageMetadata.NotDetected;
+            return AiImageMetadata.NoContentCredentials;
         }
         catch (C2paException)
         {
@@ -54,7 +54,7 @@ internal sealed class C2paImageAiMetadataReader : IImageAiMetadataReader
         }
         catch (Exception exception) when (!IsFatal(exception))
         {
-            return AiImageMetadata.InvalidMetadata;
+            return AiImageMetadata.Unreadable;
         }
     }
 

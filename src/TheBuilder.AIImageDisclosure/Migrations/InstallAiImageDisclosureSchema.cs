@@ -80,6 +80,13 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
             Constants.AiDisclosureSourcePropertyAlias,
             "AI disclosure source",
             "C2PA when detected automatically, Manual after an editor override, or choose Resume automatic detection to reprocess the current file.");
+        changed |= AddPropertyIfMissing(
+            imageMediaType,
+            imageGroup,
+            aiGeneratorDataType,
+            Constants.AiDisclosureReasonPropertyAlias,
+            "AI disclosure reason",
+            Constants.AiDisclosureReasonPropertyDescription);
 
         if (changed)
             await _mediaTypeService.UpdateAsync(imageMediaType, MigrationUserKey);

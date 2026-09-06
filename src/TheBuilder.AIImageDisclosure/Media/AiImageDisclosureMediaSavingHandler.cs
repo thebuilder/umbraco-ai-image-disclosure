@@ -58,8 +58,8 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
 
     private static bool ShouldResumeAutomaticDetection(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias)
-        && !string.Equals(
+        && string.Equals(
             media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias),
-            Constants.ManualDisclosureSourceValue,
+            Constants.ResumeAutomaticDisclosureSourceValue,
             StringComparison.Ordinal);
 }

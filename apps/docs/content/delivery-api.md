@@ -24,10 +24,10 @@ Umbraco's Media Delivery API is disabled by default, even when the Content Deliv
 
 See the [official Media Delivery API documentation](https://docs.umbraco.com/umbraco-cms/reference/content-delivery-api/media-delivery-api) for public-access and API-key options.
 
-Request the three scalar properties with the media item:
+Request the four scalar properties with the media item:
 
 ```http
-GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
+GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource,aiDisclosureReason]
 ```
 
 A relevant response fragment contains values like:
@@ -37,7 +37,8 @@ A relevant response fragment contains values like:
   "properties": {
     "aiDisclosure": "generated",
     "aiGenerator": "gpt-image",
-    "aiDisclosureSource": "C2PA"
+    "aiDisclosureSource": "C2PA",
+    "aiDisclosureReason": ""
   }
 }
 ```

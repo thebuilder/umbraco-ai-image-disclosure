@@ -112,6 +112,20 @@ public sealed class MediaSavingHandlerTests
             Constants.ManualDisclosureSourceValue);
     }
 
+    [Fact]
+    public void ResubmittingC2paSourceDoesNotOverrideAnEditorialChange()
+    {
+        var processor = Substitute.For<IMediaAiMetadataProcessor>();
+        var media = CreateMedia(isImage: true, fileDirty: false);
+        media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias).Returns(true);
+        media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias).Returns("C2PA");
+        var handler = new AiImageDisclosureMediaSavingHandler(processor,
+            Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
+        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        processor.DidNotReceive().ResumeAutomaticDetection(media);
+        media.Received().SetValue(Constants.AiDisclosureSourcePropertyAlias, "Manual");
+    }
+
     private static IMedia CreateMedia(bool isImage, bool fileDirty)
     {
         var mediaType = Substitute.For<ISimpleContentType>();

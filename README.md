@@ -17,11 +17,12 @@ AI Image Disclosure reads valid C2PA Content Credentials when a file is uploaded
 
 ## What it adds
 
-The package adds three properties to the default Image media type:
+The package adds four properties to the default Image media type:
 
 - `aiDisclosure`: empty when unknown, `generated`, or `modified`.
 - `aiGenerator`: read-only software agent evidence from the AI-relevant C2PA action, when provided by the credential.
 - `aiDisclosureSource`: `C2PA`, `Manual`, or empty, plus a backoffice action to resume automatic detection.
+- `aiDisclosureReason`: read-only human-readable reason for the latest automatic result; empty after positive AI detection.
 
 Editors can review the classification, generator evidence, and detection source on the media item. Umbraco's native signs mark classified items in the Media tree. Public sites decide where and how to render their own label.
 
@@ -41,7 +42,7 @@ AI Image Disclosure supports Umbraco CMS 17.1 through 18.x on .NET 10.
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the application after installation. The package creates the **AI image disclosure** and **AI image disclosure source** data types and adds three properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
+Restart the application after installation. The package creates the **AI image disclosure** and **AI image disclosure source** data types and adds four properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
 
 Editors can override the disclosure. This matters because metadata is easy to remove and many AI tools do not emit Content Credentials. Choose **Resume automatic detection** in `aiDisclosureSource` to reprocess the current file and leave manual mode.
 
@@ -73,9 +74,13 @@ Composite evidence takes precedence. An image created entirely by AI and then ed
 
 A missing disclosure never means that an image is human-made.
 
+The detector also reads validated `c2pa.metadata` declarations using namespaced `Iptc4xmpExt:DigitalSourceType`, plus the legacy `stds.iptc` and `stds.iptc.photometadata` assertion labels. A placed AI component is `modified`; a removed component does not count, and `inputTo` ingredients are ignored.
+
 Detection is bounded: images over 64 MiB, extracted manifest JSON over 4 MiB, and manifest stores over 1,024 manifests are left undetermined for manual classification. Detection failures never block a media save.
 
 AI Image Disclosure reads embedded Content Credentials only. It does not fetch remote manifests or make outbound network requests while processing uploaded images.
+
+Administrators can open the **AI disclosure scan** tab in the Media section to scan existing Image media in batches of up to 50. The dashboard reports scanned, manually preserved, and failed saves, and can stop after the current batch or resume after an error. The cursor is not durable after a page reload.
 
 ## Delivery API
 

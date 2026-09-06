@@ -83,6 +83,7 @@ public sealed class C2paIntegrationTests
         var result = new C2paImageAiMetadataReader().Read(image, "image/png");
 
         Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
+        Assert.Equal(AiImageDetectionReason.InvalidCredentials, result.Reason);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public sealed class C2paIntegrationTests
 
         var result = new C2paImageAiMetadataReader().Read(image, "image/png");
 
-        Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
+        Assert.Equal(AiImageDetectionReason.ImageTooLarge, result.Reason);
     }
 
     [Fact]
@@ -105,6 +106,14 @@ public sealed class C2paIntegrationTests
         var result = new C2paImageAiMetadataReader().Read(image, "image/png");
 
         Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
+    }
+
+    [Fact]
+    public void ReportsMissingCredentialsSeparatelyFromInvalidCredentials()
+    {
+        using var image = File.OpenRead(Fixture("unsigned.png"));
+        var result = new C2paImageAiMetadataReader().Read(image, "image/png");
+        Assert.Equal(AiImageDetectionReason.NoContentCredentials, result.Reason);
     }
 
     private static string Fixture(string name) => Path.Combine(AppContext.BaseDirectory, "Fixtures", name);

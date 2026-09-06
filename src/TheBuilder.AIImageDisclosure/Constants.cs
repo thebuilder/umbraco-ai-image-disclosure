@@ -11,6 +11,7 @@ internal static class Constants
     public const string AiDisclosurePropertyAlias = "aiDisclosure";
     public const string AiGeneratorPropertyAlias = "aiGenerator";
     public const string AiDisclosureSourcePropertyAlias = "aiDisclosureSource";
+    public const string AiDisclosureReasonPropertyAlias = "aiDisclosureReason";
     public const string AiDisclosureDataTypeName = "AI image disclosure";
     public const string AiDisclosureSourceDataTypeName = "AI image disclosure source";
     public const string AiGeneratorPropertyDescription =
@@ -22,4 +23,6 @@ internal static class Constants
     public const string C2paDisclosureSourceValue = "C2PA";
     public const string ManualDisclosureSourceValue = "Manual";
     public const string ResumeAutomaticDisclosureSourceValue = "Resume automatic detection";
+    public const string AiDisclosureReasonPropertyDescription =
+        "Read-only reason for the latest automatic detection result, when no AI disclosure was found.";
 }

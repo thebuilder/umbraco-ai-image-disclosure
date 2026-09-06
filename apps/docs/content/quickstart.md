@@ -14,8 +14,8 @@ seo:
 
 > **Package scope**
 >
-> - Processes new uploads and file replacements only.
-> - Does not backfill existing media.
+> - Processes new uploads and file replacements automatically.
+> - Existing media is scanned only when an administrator starts the Media section's **AI disclosure scan** dashboard.
 > - Uses Umbraco's native signs without replacing its Media collection views.
 > - Does not add disclosure labels to public pages.
 
@@ -27,7 +27,7 @@ Installation stops rather than overwriting an existing data type or media proper
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds three properties to the default Image media type.
+Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds four properties to the default Image media type.
 
 ## Test an image
 
@@ -60,3 +60,7 @@ Clearing **AI disclosure** also clears **AI generator** and records a manual, un
 ## Resume automatic detection
 
 Choose **Resume automatic detection** in **AI disclosure source**, then save. The package immediately reprocesses the current file and replaces the manual values with the detected result, or clears them when the file contains no usable AI evidence. Replacing the image file is not required.
+
+## Scan existing media
+
+Administrators can open the **AI disclosure scan** tab in the Media section and choose **Start scan**. Each request handles at most 50 media entities; non-Image media is ignored. The dashboard shows scanned, manually preserved, and failed-save counts. **Stop after current batch** leaves the next page ready to resume, while a request error can be retried from the same page. The cursor is reset if the browser page is reloaded.
