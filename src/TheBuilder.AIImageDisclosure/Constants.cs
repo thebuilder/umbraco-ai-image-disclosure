@@ -3,6 +3,9 @@ namespace TheBuilder.AIImageDisclosure;
 internal static class Constants
 {
     public const string PackageName = "TheBuilder.AIImageDisclosure";
+    public const string ShowBackofficeBadgesSetting = "TheBuilder:AIImageDisclosure:ShowBackofficeBadges";
+    public const string GeneratedFlagAlias = PackageName + ".Generated";
+    public const string ModifiedFlagAlias = PackageName + ".Modified";
     public const string DefaultImageMediaTypeAlias = "Image";
     public const string SourcePropertyAlias = "umbracoFile";
     public const string AiDisclosurePropertyAlias = "aiDisclosure";

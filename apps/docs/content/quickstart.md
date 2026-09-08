@@ -16,7 +16,7 @@ seo:
 >
 > - Processes new uploads and file replacements only.
 > - Does not backfill existing media.
-> - Leaves Umbraco's native Media collection views unchanged.
+> - Uses Umbraco's native signs without replacing its Media collection views.
 > - Does not add disclosure labels to public pages.
 
 Installation stops rather than overwriting an existing data type or media property that uses one of the package's aliases with an incompatible definition.
@@ -46,6 +46,8 @@ aiDisclosureSource: C2PA
 ```
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
+
+AI-generated and AI-modified images also receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `TheBuilder:AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
 
 ![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
 

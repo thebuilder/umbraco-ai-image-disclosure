@@ -23,9 +23,9 @@ The package adds three properties to the default Image media type:
 - `aiGenerator`: read-only software agent evidence from the AI-relevant C2PA action, when provided by the credential.
 - `aiDisclosureSource`: `C2PA`, `Manual`, or empty, plus a backoffice action to resume automatic detection.
 
-Editors can review the classification, generator evidence, and detection source on the media item. Public sites decide where and how to render their own label.
+Editors can review the classification, generator evidence, and detection source on the media item. Umbraco's native signs mark classified items in the Media tree. Public sites decide where and how to render their own label.
 
-Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package does not replace or modify Umbraco's native Media Grid, table view, media pickers, or public pages.
+Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package does not replace Umbraco's Media Grid, table view, media pickers, or public pages.
 
 ## C2PA and EU disclosure
 
@@ -44,6 +44,18 @@ dotnet add package TheBuilder.AIImageDisclosure
 Restart the application after installation. The package creates the **AI image disclosure** and **AI image disclosure source** data types and adds three properties to the default Image media type. Uploading or replacing an image runs detection when that media item is saved.
 
 Editors can override the disclosure. This matters because metadata is easy to remove and many AI tools do not emit Content Credentials. Choose **Resume automatic detection** in `aiDisclosureSource` to reprocess the current file and leave manual mode.
+
+Backoffice signs are enabled by default. Umbraco's current Media Grid cards do not render entity signs, and this package does not replace the grid or its card renderer. To hide signs while keeping detection and the media properties active, add:
+
+```json
+{
+  "TheBuilder": {
+    "AIImageDisclosure": {
+      "ShowBackofficeBadges": false
+    }
+  }
+}
+```
 
 ## Classification policy
 
