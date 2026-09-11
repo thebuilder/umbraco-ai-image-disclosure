@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@thebuilder/umbraco-docs": "^1.0.4",
-    "blume": "^1.4.3"
+    "blume": "^1.6.4"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
