@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TheBuilder.AIImageDisclosure.Watermarks;
+using TheBuilder.AIImageDisclosure.Media;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Web.Common.Controllers;
@@ -17,6 +18,8 @@ public sealed class OpenAiProvenanceComposer : IComposer
         builder.Services.AddSingleton<OpenAiProvenanceSettingsStore>();
         builder.Services.AddSingleton<OpenAiConnectionResolver>();
         builder.Services.AddSingleton<OpenAiWatermarkVerifier>();
+        builder.Services.AddSingleton(OpenAiWatermarkVerifier.Provider);
+        builder.Services.Configure<MediaAiRescanOptions>(options => options.MaximumBatchSize = 1);
         builder.Services.AddHttpClient("TheBuilder.AIImageDisclosure.OpenAI", client =>
             {
                 client.Timeout = Timeout.InfiniteTimeSpan;

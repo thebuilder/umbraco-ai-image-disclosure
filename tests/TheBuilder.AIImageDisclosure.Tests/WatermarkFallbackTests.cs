@@ -27,7 +27,7 @@ public sealed class WatermarkFallbackTests
         await processor.InspectAsync(media, TestContext.Current.CancellationToken);
 
         await verifier.Received(expectedCheck ? 1 : 0).VerifyAsync(
-            Arg.Any<Stream>(), "image/png", TestContext.Current.CancellationToken);
+            Arg.Any<Func<Stream>>(), "image/png", TestContext.Current.CancellationToken);
         Assert.Equal(string.Empty, values[Constants.AiDisclosurePropertyAlias]);
         Assert.Equal(expectedCheck ? Constants.OpenAiWatermarkDetected : string.Empty,
             values[Constants.AiWatermarkPropertyAlias]);
@@ -57,7 +57,7 @@ public sealed class WatermarkFallbackTests
         var (processor, media, verifier, values) = Create(AiImageMetadata.NoContentCredentials);
         values[Constants.AiDisclosureSourcePropertyAlias] = "Manual";
         await processor.ResumeAutomaticDetectionAsync(media, TestContext.Current.CancellationToken);
-        await verifier.Received(1).VerifyAsync(Arg.Any<Stream>(), "image/png", TestContext.Current.CancellationToken);
+        await verifier.Received(1).VerifyAsync(Arg.Any<Func<Stream>>(), "image/png", TestContext.Current.CancellationToken);
         Assert.Equal(Constants.OpenAiWatermarkDetected, values[Constants.AiWatermarkPropertyAlias]);
         Assert.Equal(string.Empty, values[Constants.AiDisclosurePropertyAlias]);
     }
@@ -66,10 +66,10 @@ public sealed class WatermarkFallbackTests
     public async Task ExternalFailureDoesNotFailMediaProcessingOrClaimNegativeEvidence()
     {
         var (processor, media, verifier, values) = Create(AiImageMetadata.NoContentCredentials);
-        verifier.VerifyAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        verifier.VerifyAsync(Arg.Any<Func<Stream>>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns<Task<ImageWatermarkResult>>(_ => throw new HttpRequestException("private response"));
         await processor.InspectAsync(media, TestContext.Current.CancellationToken);
-        Assert.Equal("OpenAI watermark check unavailable", values[Constants.AiWatermarkPropertyAlias]);
+        Assert.Equal("Watermark check unavailable", values[Constants.AiWatermarkPropertyAlias]);
         Assert.Equal(string.Empty, values[Constants.AiDisclosurePropertyAlias]);
     }
 
@@ -77,10 +77,10 @@ public sealed class WatermarkFallbackTests
     public async Task DoesNotApplyResultWhenFileChangesDuringVerification()
     {
         var (processor, media, verifier, values) = Create(AiImageMetadata.NoContentCredentials);
-        verifier.VerifyAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        verifier.VerifyAsync(Arg.Any<Func<Stream>>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(_ =>
         {
             values[Constants.SourcePropertyAlias] = "/media/replacement.png";
-            return Task.FromResult(new ImageWatermarkResult(ImageWatermarkStatus.Detected));
+            return Task.FromResult(new ImageWatermarkResult(ImageWatermarkStatus.Detected, new ImageWatermarkProvider("OpenAI", "SynthID")));
         });
         await processor.InspectAsync(media, TestContext.Current.CancellationToken);
         Assert.Equal(string.Empty, values[Constants.AiWatermarkPropertyAlias]);
@@ -90,7 +90,7 @@ public sealed class WatermarkFallbackTests
     public async Task DoesNotApplyFailedCheckToAReplacementFile()
     {
         var (processor, media, verifier, values) = Create(AiImageMetadata.NoContentCredentials);
-        verifier.VerifyAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        verifier.VerifyAsync(Arg.Any<Func<Stream>>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns<Task<ImageWatermarkResult>>(_ =>
             {
                 values[Constants.SourcePropertyAlias] = "/media/replacement.png";
@@ -100,8 +100,29 @@ public sealed class WatermarkFallbackTests
         Assert.Equal(string.Empty, values[Constants.AiWatermarkPropertyAlias]);
     }
 
+    [Fact]
+    public async Task DisabledVerifierDoesNotReopenMediaOrProduceUnavailableEvidence()
+    {
+        var opened = 0;
+        var (processor, media, _, values) = Create(AiImageMetadata.NoContentCredentials,
+            new DisabledImageWatermarkVerifier(), () => opened++);
+        await processor.InspectAsync(media, TestContext.Current.CancellationToken);
+        Assert.Equal(1, opened); // Only local C2PA inspection opens storage.
+        Assert.Equal(string.Empty, values[Constants.AiWatermarkPropertyAlias]);
+    }
+
+    [Fact]
+    public async Task StoresTheActualProviderInsteadOfAttributingAllEvidenceToOpenAi()
+    {
+        var (processor, media, verifier, values) = Create(AiImageMetadata.NoContentCredentials);
+        verifier.VerifyAsync(Arg.Any<Func<Stream>>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ImageWatermarkResult(ImageWatermarkStatus.Detected, new ImageWatermarkProvider("Example", "TestMark")));
+        await processor.InspectAsync(media, TestContext.Current.CancellationToken);
+        Assert.Equal("Example TestMark detected", values[Constants.AiWatermarkPropertyAlias]);
+    }
+
     private static (MediaAiMetadataProcessor Processor, IMedia Media, IImageWatermarkVerifier Verifier, Dictionary<string, string> Values)
-        Create(AiImageMetadata result)
+        Create(AiImageMetadata result, IImageWatermarkVerifier? actualVerifier = null, Action? onOpen = null)
     {
         var media = Substitute.For<IMedia>();
         var values = new Dictionary<string, string> { [Constants.SourcePropertyAlias] = "/media/test.png" };
@@ -124,11 +145,11 @@ public sealed class WatermarkFallbackTests
         var reader = Substitute.For<IImageAiMetadataReader>();
         reader.Read(Arg.Any<Stream>(), Arg.Any<string>()).Returns(result);
         var service = Substitute.For<IMediaService>();
-        service.GetMediaFileContentStream(Arg.Any<string>()).Returns(_ => new MemoryStream([1, 2, 3]));
+        service.GetMediaFileContentStream(Arg.Any<string>()).Returns(_ => { onOpen?.Invoke(); return new MemoryStream([1, 2, 3]); });
         var verifier = Substitute.For<IImageWatermarkVerifier>();
-        verifier.VerifyAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new ImageWatermarkResult(ImageWatermarkStatus.Detected));
+        verifier.VerifyAsync(Arg.Any<Func<Stream>>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ImageWatermarkResult(ImageWatermarkStatus.Detected, new ImageWatermarkProvider("OpenAI", "SynthID")));
         return (new MediaAiMetadataProcessor(reader, service, new MediaUrlGeneratorCollection(() => [generator]),
-            Substitute.For<ILogger<MediaAiMetadataProcessor>>(), verifier), media, verifier, values);
+            Substitute.For<ILogger<MediaAiMetadataProcessor>>(), actualVerifier ?? verifier), media, verifier, values);
     }
 }

@@ -5,7 +5,7 @@ internal static class Constants
     internal const string AiWatermarkPropertyAlias = "aiWatermark";
     internal const string OpenAiWatermarkDetected = "OpenAI SynthID detected";
     internal const string WatermarkFlagAlias = "TheBuilder.AIImageDisclosure.Watermark";
-    internal const string AiWatermarkPropertyDescription = "Read-only OpenAI watermark evidence. A detected watermark does not distinguish full AI generation from partial editing.";
+    internal const string AiWatermarkPropertyDescription = "Read-only watermark evidence. A detected watermark does not distinguish full AI generation from partial editing.";
 
     public const string PackageName = "TheBuilder.AIImageDisclosure";
     public const string ShowBackofficeBadgesSetting = "TheBuilder:AIImageDisclosure:ShowBackofficeBadges";

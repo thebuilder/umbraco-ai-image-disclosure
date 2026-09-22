@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
 using TheBuilder.AIImageDisclosure.Backoffice;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using Umbraco.Cms.Api.Management.ViewModels.Tree;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -23,7 +24,7 @@ public sealed class AiDisclosureFlagProviderTests
         IMedia editorModified = CreateImage(editorModifiedKey, "[\"modified\"]");
         var mediaService = Substitute.For<IMediaService>();
         mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([generated, modified, editorGenerated, editorModified]);
-        var provider = new AiDisclosureFlagProvider(mediaService, new ConfigurationBuilder().Build());
+        var provider = new AiDisclosureFlagProvider(mediaService, new ConfigurationBuilder().Build(), []);
         var items = new[]
         {
             new MediaTreeItemResponseModel { Id = generatedKey },
@@ -52,7 +53,7 @@ public sealed class AiDisclosureFlagProviderTests
                 [Constants.ShowBackofficeBadgesSetting] = "false",
             })
             .Build();
-        var provider = new AiDisclosureFlagProvider(mediaService, configuration);
+        var provider = new AiDisclosureFlagProvider(mediaService, configuration, []);
         var item = new MediaTreeItemResponseModel { Id = Guid.NewGuid() };
 
         await provider.PopulateFlagsAsync([item]);
@@ -73,9 +74,22 @@ public sealed class AiDisclosureFlagProviderTests
         var service = Substitute.For<IMediaService>();
         service.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([media]);
         var item = new MediaTreeItemResponseModel { Id = media.Key };
-        await new AiDisclosureFlagProvider(service, new ConfigurationBuilder().Build()).PopulateFlagsAsync([item]);
+        await new AiDisclosureFlagProvider(service, new ConfigurationBuilder().Build(), []).PopulateFlagsAsync([item]);
         Assert.Equal(expected, item.Flags.Any(flag => flag.Alias == Constants.WatermarkFlagAlias));
         Assert.DoesNotContain(item.Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
+    }
+
+    [Fact]
+    public async Task RecognizesRegisteredProviderEvidenceWithoutOpenAiAttribution()
+    {
+        var watermarkProvider = new ImageWatermarkProvider("Example", "TestMark");
+        var media = CreateImage(Guid.NewGuid(), string.Empty);
+        media.GetValue<string>(Constants.AiWatermarkPropertyAlias).Returns(watermarkProvider.DetectedValue);
+        var service = Substitute.For<IMediaService>();
+        service.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([media]);
+        var item = new MediaTreeItemResponseModel { Id = media.Key };
+        await new AiDisclosureFlagProvider(service, new ConfigurationBuilder().Build(), [watermarkProvider]).PopulateFlagsAsync([item]);
+        Assert.Contains(item.Flags, flag => flag.Alias == Constants.WatermarkFlagAlias);
     }
 
     private static IMedia CreateImage(Guid key, string disclosure)

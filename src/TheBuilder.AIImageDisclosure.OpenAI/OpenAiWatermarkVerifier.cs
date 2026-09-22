@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TheBuilder.AIImageDisclosure.Watermarks;
 
@@ -19,54 +18,49 @@ internal sealed class OpenAiWatermarkVerifier(
     private static readonly Uri Endpoint = new("https://api.openai.com/v1/content_provenance_checks");
     private static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(10);
     private readonly TimeSpan effectiveRequestTimeout = requestTimeout == default ? DefaultRequestTimeout : requestTimeout;
-    private readonly object cooldownSync = new();
-    private DateTimeOffset cooldownUntil;
-
-    /// <inheritdoc />
-    public int MaximumRescanBatchSize => 1;
+    private readonly OpenAiConnectionCooldowns cooldowns = new();
+    internal static readonly ImageWatermarkProvider Provider = new("OpenAI", "SynthID");
 
     public async Task<ImageWatermarkResult> VerifyAsync(
-        Stream image,
+        Func<Stream> openImage,
         string mediaType,
         CancellationToken cancellationToken = default)
     {
         var settings = settingsStore.Get();
         if (!settings.Enabled || settings.ConnectionId is not { } connectionId)
             return new ImageWatermarkResult(ImageWatermarkStatus.Disabled);
-        if (IsCoolingDown()) return Unavailable("The OpenAI provenance check is temporarily unavailable.");
-        var connection = await connectionResolver.ResolveAsync(connectionId, cancellationToken);
-        if (connection is null) return Unavailable("The selected OpenAI connection is unavailable or unsupported.");
-        return await SendAsync(image, mediaType, connection, cancellationToken);
+        return await VerifyConnectionAsync(connectionId, openImage, mediaType, cancellationToken);
     }
 
     internal async Task<ImageWatermarkResult> VerifyConnectionAsync(
         Guid connectionId,
-        Stream image,
+        Func<Stream> openImage,
         string mediaType,
         CancellationToken cancellationToken = default)
     {
-        if (IsCoolingDown()) return Unavailable("The OpenAI provenance check is temporarily unavailable.");
+        if (cooldowns.IsCoolingDown(connectionId)) return Unavailable("The OpenAI provenance check is temporarily unavailable.");
         var connection = await connectionResolver.ResolveAsync(connectionId, cancellationToken);
         if (connection is null) return Unavailable("The selected OpenAI connection is unavailable or unsupported.");
-        return await SendAsync(image, mediaType, connection, cancellationToken);
+        return await SendAsync(openImage, mediaType, connection, cancellationToken);
     }
 
     internal async Task<ImageWatermarkResult> SendAsync(
-        Stream image,
+        Func<Stream> openImage,
         string mediaType,
         ResolvedOpenAiConnection connection,
         CancellationToken cancellationToken = default)
     {
-        if (IsCoolingDown()) return Unavailable("The OpenAI provenance check is temporarily unavailable.");
+        if (cooldowns.IsCoolingDown(connection.Id)) return Unavailable("The OpenAI provenance check is temporarily unavailable.");
         if (!TryGetExtension(mediaType, out var extension))
-            return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Reason: "Only PNG, JPEG, and WebP images are supported.");
-        if (!image.CanRead) return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Reason: "The image could not be read.");
+            return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Provider, Reason: "Only PNG, JPEG, and WebP images are supported.");
 
         using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutSource.CancelAfter(effectiveRequestTimeout);
         var requestToken = timeoutSource.Token;
         try
         {
+            using var image = openImage();
+            if (!image.CanRead) return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Provider, Reason: "The image could not be read.");
             await using var buffer = new MemoryStream();
             var copyBuffer = new byte[81920];
             while (true)
@@ -74,10 +68,10 @@ internal sealed class OpenAiWatermarkVerifier(
                 var read = await image.ReadAsync(copyBuffer, requestToken);
                 if (read == 0) break;
                 if (buffer.Length + read > MaximumImageBytes)
-                    return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Reason: "The image exceeds the 50 MiB limit.");
+                    return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Provider, Reason: "The image exceeds the 50 MiB limit.");
                 await buffer.WriteAsync(copyBuffer.AsMemory(0, read), requestToken);
             }
-            if (buffer.Length == 0) return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Reason: "The image is empty.");
+            if (buffer.Length == 0) return new ImageWatermarkResult(ImageWatermarkStatus.Unsupported, Provider, Reason: "The image is empty.");
             buffer.Position = 0;
             using var multipart = new MultipartFormDataContent();
             using var file = new StreamContent(buffer);
@@ -91,7 +85,9 @@ internal sealed class OpenAiWatermarkVerifier(
                 request, HttpCompletionOption.ResponseHeadersRead, requestToken);
             if (!response.IsSuccessStatusCode)
             {
-                SetCooldown(response);
+                var delay = GetCooldownDuration(response);
+                if (delay is { } duration && duration > TimeSpan.Zero)
+                    cooldowns.Extend(connection.Id, GetCooldownUntil(DateTimeOffset.UtcNow, duration));
                 var message = response.StatusCode switch
                 {
                     HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.NotFound =>
@@ -143,7 +139,7 @@ internal sealed class OpenAiWatermarkVerifier(
             if (!recognized) return Unavailable("OpenAI did not return a SynthID check result.");
             return new ImageWatermarkResult(
                 detected ? ImageWatermarkStatus.Detected : ImageWatermarkStatus.NotDetected,
-                model);
+                Provider, model);
         }
         catch (Exception exception) when (exception is JsonException or InvalidOperationException or ArgumentException)
         {
@@ -165,18 +161,6 @@ internal sealed class OpenAiWatermarkVerifier(
             await buffer.WriteAsync(chunk.AsMemory(0, read), cancellationToken);
         }
         return System.Text.Encoding.UTF8.GetString(buffer.ToArray());
-    }
-
-    private bool IsCoolingDown()
-    {
-        lock (cooldownSync) return DateTimeOffset.UtcNow < cooldownUntil;
-    }
-
-    private void SetCooldown(HttpResponseMessage response)
-    {
-        var duration = GetCooldownDuration(response);
-        if (duration is null || duration <= TimeSpan.Zero) return;
-        lock (cooldownSync) cooldownUntil = GetCooldownUntil(DateTimeOffset.UtcNow, duration.Value);
     }
 
     internal static TimeSpan? GetCooldownDuration(HttpResponseMessage response)
@@ -211,7 +195,7 @@ internal sealed class OpenAiWatermarkVerifier(
         return extension.Length != 0;
     }
 
-    private static ImageWatermarkResult Unavailable(string reason) => new(ImageWatermarkStatus.Unavailable, Reason: reason);
+    private static ImageWatermarkResult Unavailable(string reason) => new(ImageWatermarkStatus.Unavailable, Provider, Reason: reason);
     private static TimeSpan Max(TimeSpan left, TimeSpan right) => left > right ? left : right;
     private static bool IsFatal(Exception exception) => exception is OutOfMemoryException or StackOverflowException or AccessViolationException;
 }

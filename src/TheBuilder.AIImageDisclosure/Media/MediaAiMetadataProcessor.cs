@@ -14,7 +14,7 @@ internal sealed class MediaAiMetadataProcessor(
     IMediaService mediaService,
     MediaUrlGeneratorCollection mediaUrlGenerators,
     ILogger<MediaAiMetadataProcessor> logger,
-    IImageWatermarkVerifier? watermarkVerifier = null) : IMediaAiMetadataProcessor
+    IImageWatermarkVerifier watermarkVerifier) : IMediaAiMetadataProcessor
 {
     public async Task<AiImageMetadata> InspectAsync(IMedia media, CancellationToken cancellationToken = default)
     {
@@ -37,32 +37,25 @@ internal sealed class MediaAiMetadataProcessor(
     private async Task InspectWatermarkAsync(IMedia media, AiImageMetadata result, CancellationToken cancellationToken)
     {
         ClearWatermark(media);
-        if (result.Reason != AiImageDetectionReason.NoContentCredentials || watermarkVerifier is null
+        if (result.Reason != AiImageDetectionReason.NoContentCredentials
             || !media.HasProperty(Constants.AiWatermarkPropertyAlias)) return;
         var fileValue = media.GetValue<string>(Constants.SourcePropertyAlias);
         try
         {
             if (!media.TryGetMediaPath(Constants.SourcePropertyAlias, mediaUrlGenerators, out var path)
                 || string.IsNullOrWhiteSpace(path)) return;
-            using var source = mediaService.GetMediaFileContentStream(path);
-            var watermark = await watermarkVerifier.VerifyAsync(source, MimeTypes.GetMimeType(path), cancellationToken);
+            var watermark = await watermarkVerifier.VerifyAsync(
+                () => mediaService.GetMediaFileContentStream(path), MimeTypes.GetMimeType(path), cancellationToken);
             if (media.GetValue<string>(Constants.SourcePropertyAlias) != fileValue
                 || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias))) return;
-            media.SetValue(Constants.AiWatermarkPropertyAlias, watermark.Status switch
-            {
-                ImageWatermarkStatus.Detected => Constants.OpenAiWatermarkDetected,
-                ImageWatermarkStatus.NotDetected => "No OpenAI watermark detected",
-                ImageWatermarkStatus.Unavailable => "OpenAI watermark check unavailable",
-                ImageWatermarkStatus.Unsupported => "Image unsupported by OpenAI watermark check",
-                _ => string.Empty,
-            });
+            media.SetValue(Constants.AiWatermarkPropertyAlias, watermark.ToStoredValue());
         }
         catch (Exception exception) when (!IsFatal(exception))
         {
             // Remote verification is optional; never turn its failure into a failed media save.
             if (media.GetValue<string>(Constants.SourcePropertyAlias) != fileValue
                 || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias))) return;
-            media.SetValue(Constants.AiWatermarkPropertyAlias, "OpenAI watermark check unavailable");
+            media.SetValue(Constants.AiWatermarkPropertyAlias, new ImageWatermarkResult(ImageWatermarkStatus.Unavailable).ToStoredValue());
             logger.LogWarning("Watermark check could not complete for image media {MediaKey}", media.Key);
         }
     }

@@ -149,7 +149,7 @@ public sealed class OpenAiWatermarkVerifierTests
         var verifier = CreateVerifier(handler);
         await using var image = new MemoryStream([1, 2, 3]);
 
-        var result = await verifier.SendAsync(image, "image/png", Connection(), TestContext.Current.CancellationToken);
+        var result = await verifier.SendAsync(() => image, "image/png", Connection(), TestContext.Current.CancellationToken);
 
         Assert.Equal(ImageWatermarkStatus.Unavailable, result.Status);
         Assert.DoesNotContain(body, result.Reason, StringComparison.Ordinal);
@@ -170,7 +170,7 @@ public sealed class OpenAiWatermarkVerifierTests
         var verifier = CreateVerifier(handler);
         await using var image = new MemoryStream([1, 2, 3]);
 
-        var result = await verifier.SendAsync(image, "image/png", Connection(), TestContext.Current.CancellationToken);
+        var result = await verifier.SendAsync(() => image, "image/png", Connection(), TestContext.Current.CancellationToken);
 
         Assert.Equal(ImageWatermarkStatus.Detected, result.Status);
         Assert.Equal("https://api.openai.com/v1/content_provenance_checks", captured!.RequestUri!.AbsoluteUri);
@@ -187,8 +187,8 @@ public sealed class OpenAiWatermarkVerifierTests
         await using var unsupported = new MemoryStream([1]);
         await using var oversized = new RepeatedByteStream(OpenAiWatermarkVerifier.MaximumImageBytes + 1);
 
-        var unsupportedResult = await verifier.SendAsync(unsupported, "image/gif", Connection(), TestContext.Current.CancellationToken);
-        var oversizedResult = await verifier.SendAsync(oversized, "image/png", Connection(), TestContext.Current.CancellationToken);
+        var unsupportedResult = await verifier.SendAsync(() => unsupported, "image/gif", Connection(), TestContext.Current.CancellationToken);
+        var oversizedResult = await verifier.SendAsync(() => oversized, "image/png", Connection(), TestContext.Current.CancellationToken);
 
         Assert.Equal(ImageWatermarkStatus.Unsupported, unsupportedResult.Status);
         Assert.Equal(ImageWatermarkStatus.Unsupported, oversizedResult.Status);
@@ -206,12 +206,37 @@ public sealed class OpenAiWatermarkVerifierTests
         await using var firstImage = new MemoryStream([1, 2, 3]);
         await using var testImage = new MemoryStream([1, 2, 3]);
 
-        var first = await verifier.SendAsync(firstImage, "image/png", Connection(), TestContext.Current.CancellationToken);
-        var second = await verifier.VerifyConnectionAsync(Guid.NewGuid(), testImage, "image/png", TestContext.Current.CancellationToken);
+        var connection = Connection();
+        var first = await verifier.SendAsync(() => firstImage, "image/png", connection, TestContext.Current.CancellationToken);
+        var second = await verifier.VerifyConnectionAsync(connection.Id, () => testImage, "image/png", TestContext.Current.CancellationToken);
 
         Assert.Equal(ImageWatermarkStatus.Unavailable, first.Status);
         Assert.Equal(ImageWatermarkStatus.Unavailable, second.Status);
         Assert.Equal(1, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task DisabledAndUnavailableConnectionsNeverOpenTheImage()
+    {
+        var verifier = CreateVerifier(new StubHandler(_ => throw new InvalidOperationException("No HTTP expected")));
+        Stream OpenImage() => throw new InvalidOperationException("Storage must not be opened");
+        var disabled = await verifier.VerifyAsync(OpenImage, "image/png", TestContext.Current.CancellationToken);
+        var unavailable = await verifier.VerifyConnectionAsync(Guid.NewGuid(), OpenImage, "image/png", TestContext.Current.CancellationToken);
+        Assert.Equal(ImageWatermarkStatus.Disabled, disabled.Status);
+        Assert.Equal(ImageWatermarkStatus.Unavailable, unavailable.Status);
+    }
+
+    [Fact]
+    public async Task FailedConnectionDoesNotSuppressAnotherConnectionOrOpenBlockedImages()
+    {
+        var handler = new StubHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        var verifier = CreateVerifier(handler);
+        var first = Connection();
+        await verifier.SendAsync(() => new MemoryStream([1]), "image/png", first, TestContext.Current.CancellationToken);
+        await verifier.SendAsync(() => throw new InvalidOperationException("Blocked image must not open"),
+            "image/png", first, TestContext.Current.CancellationToken);
+        await verifier.SendAsync(() => new MemoryStream([1]), "image/png", Connection(), TestContext.Current.CancellationToken);
+        Assert.Equal(2, handler.RequestCount);
     }
 
     [Fact]
@@ -224,7 +249,7 @@ public sealed class OpenAiWatermarkVerifierTests
         var verifier = CreateVerifier(handler, TimeSpan.FromMilliseconds(50));
         await using var image = new MemoryStream([1, 2, 3]);
 
-        var result = await verifier.SendAsync(image, "image/png", Connection(), TestContext.Current.CancellationToken);
+        var result = await verifier.SendAsync(() => image, "image/png", Connection(), TestContext.Current.CancellationToken);
 
         Assert.Equal(ImageWatermarkStatus.Unavailable, result.Status);
         Assert.Contains("timed out", result.Reason, StringComparison.OrdinalIgnoreCase);

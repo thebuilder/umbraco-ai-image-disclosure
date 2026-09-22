@@ -21,6 +21,7 @@ public sealed class AiImageDisclosureComposer : IComposer
         builder.Services.TryAddSingleton<IImageWatermarkVerifier, DisabledImageWatermarkVerifier>();
         builder.Services.AddSingleton<IImageAiMetadataReader, C2paImageAiMetadataReader>();
         builder.Services.AddSingleton<IMediaAiMetadataProcessor, MediaAiMetadataProcessor>();
+        builder.Services.AddOptions<MediaAiRescanOptions>();
         builder.Services.AddSingleton<MediaAiRescanService>();
         builder.Services.AddControllers().AddApplicationPart(typeof(Controllers.AiImageDisclosureController).Assembly);
         builder.AddNotificationAsyncHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();

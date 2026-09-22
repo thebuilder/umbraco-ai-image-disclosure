@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TheBuilder.AIImageDisclosure.Detection;
 using TheBuilder.AIImageDisclosure.Media;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
@@ -18,7 +19,7 @@ public sealed class MediaAiMetadataProcessorTests
             Substitute.For<IImageAiMetadataReader>(),
             Substitute.For<IMediaService>(),
             new MediaUrlGeneratorCollection(() => []),
-            Substitute.For<ILogger<MediaAiMetadataProcessor>>());
+            Substitute.For<ILogger<MediaAiMetadataProcessor>>(), new DisabledImageWatermarkVerifier());
 
         var result = await processor.InspectAsync(media, TestContext.Current.CancellationToken);
 

@@ -29,6 +29,8 @@ Restart Umbraco after installing. Create an active OpenAI connection in Umbraco.
 4. Review the notice about sending eligible images to OpenAI.
 5. Enable **OpenAI watermark fallback** and choose **Save**.
 
+Turning the fallback off keeps the selected connection. To clear it, turn the fallback off, select the empty connection option, and save.
+
 The integration stores only the enabled setting and connection ID. It resolves the key on the server through Umbraco.AI, including supported configuration references and sensitive-field rules. Editing or rotating the connection applies to subsequent checks. The settings response contains connection names and IDs, never keys. See [Umbraco.AI connections](https://docs.umbraco.com/ai-in-umbraco/17.latest/concepts/connections).
 
 ## Which images are checked?
@@ -61,6 +63,6 @@ A positive watermark does not distinguish fully generated images from AI edits, 
 
 Enabling verification sends the original eligible image to OpenAI's `content_provenance_checks` endpoint. Review the provider's applicable data terms before enabling it; this endpoint is not eligible for Zero Data Retention. C2PA inspection remains local and never fetches remote manifests.
 
-Verification has a 10-second request timeout and a bounded response size. Failures leave the classification undetermined and do not block a media save. Rate limits temporarily pause requests. Administrator scans process one media entity per request when this integration is installed, including while disabled, to bound request time and keep scan page numbers consistent.
+Verification has a 10-second request timeout and a bounded response size. Failures leave the classification undetermined and do not block a media save. Rate limits temporarily pause requests for the affected connection; testing another connection does not pause the selected one. A later failure cannot shorten an existing retry delay. Disabled or unavailable verification does not reopen the image for a remote check. Administrator scans process one media entity per request when this integration is installed, including while disabled, to bound request time and keep scan page numbers consistent.
 
 An API key alone does not guarantee access to the provenance endpoint. If **Test verification** reports unavailable, check that the connection is active, resolves a key, targets the direct OpenAI API, and has endpoint access. No real Media library image is needed to test the connection.

@@ -42,9 +42,8 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
                     .ResolveAsync(connectionId, cancellationToken) is null)
                 return BadRequest("The selected connection must be active, use the OpenAI provider, and target api.openai.com directly.");
         }
-        var store = services.GetRequiredService<OpenAiProvenanceSettingsStore>();
-        var selectedConnectionId = request.ConnectionId ?? store.Get().ConnectionId;
-        store.Save(new OpenAiProvenanceSettings(request.Enabled, selectedConnectionId));
+        services.GetRequiredService<OpenAiProvenanceSettingsStore>()
+            .Save(new OpenAiProvenanceSettings(request.Enabled, request.ConnectionId));
         return await GetSettings(cancellationToken);
     }
 
@@ -55,9 +54,8 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
         if (!IsAdministrator()) return Forbid();
         if (request.ConnectionId == Guid.Empty) return BadRequest("Select an OpenAI connection to test.");
         var bytes = ReadTestImage();
-        await using var sample = new MemoryStream(bytes, writable: false);
         var result = await services.GetRequiredService<OpenAiWatermarkVerifier>()
-            .VerifyConnectionAsync(request.ConnectionId, sample, "image/png", cancellationToken);
+            .VerifyConnectionAsync(request.ConnectionId, () => new MemoryStream(bytes, writable: false), "image/png", cancellationToken);
         return Ok(new OpenAiTestResponse(result.Status.ToString().ToLowerInvariant(), GetTestMessage(result.Status)));
     }
 
