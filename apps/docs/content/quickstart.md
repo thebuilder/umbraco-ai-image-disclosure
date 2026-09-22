@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Install AI Image Disclosure and classify your first Umbraco image.
+description: Install AI Image Disclosure and check an Umbraco image for C2PA evidence of AI use.
 seo:
   image: /og/quickstart.png
 ---
@@ -31,7 +31,9 @@ Restart the application. On first startup, the package creates the **AI image di
 
 ## Optional OpenAI watermark checks
 
-To check images without C2PA metadata, follow [OpenAI watermark fallback](/openai-watermarks). This requires the optional integration package and an administrator to enable external verification. The core package remains local by default.
+The core package works without OpenAI and checks C2PA credentials locally. You can add the [optional OpenAI watermark check](/openai-watermarks) for images without C2PA metadata. Install the separate integration package, then enable it as an administrator.
+
+Neither check guarantees that every AI-generated image will be identified. A missing credential or negative watermark result leaves the origin unknown. The package does not guess from the image's appearance.
 
 ## Test an image
 
@@ -51,7 +53,7 @@ aiDisclosureSource: C2PA
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
-AI-generated and AI-modified images also receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `TheBuilder:AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
+Images classified as `generated` or `modified` receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `TheBuilder:AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
 
 ![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
 

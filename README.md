@@ -4,7 +4,7 @@
 
 <h1 align="center">AI Image Disclosure for Umbraco</h1>
 
-<p align="center">Classify AI-generated and AI-modified images from signed C2PA Content Credentials.</p>
+<p align="center">Check Umbraco images for recorded evidence of AI use.</p>
 
 <p align="center">
   <a href="https://www.nuget.org/packages/TheBuilder.AIImageDisclosure"><img src="https://img.shields.io/nuget/vpre/TheBuilder.AIImageDisclosure?style=flat-square" alt="NuGet version"></a>
@@ -13,7 +13,11 @@
 
 ![AI disclosure properties on an Umbraco image](apps/docs/content/screenshots/media-details.png)
 
-AI Image Disclosure reads valid C2PA Content Credentials when a file is uploaded to, or replaced on, Umbraco's default `Image` media type. It stores a small, stable classification that editors and frontends can rely on, while preserving manual control when provenance is absent or incomplete. Existing media is not scanned automatically.
+AI Image Disclosure reads C2PA Content Credentials when you upload or replace a file on Umbraco's default `Image` media type. It checks the signed claims for evidence of AI generation or editing. Editors can review or override the result. Existing media is not scanned automatically.
+
+You can add an optional OpenAI watermark check for images without C2PA metadata. It requires a separate package and starts disabled.
+
+Neither check guarantees that every AI-generated image will be identified. Missing credentials or a negative watermark result leave the image's origin unknown. The package does not guess from how an image looks.
 
 ## What it adds
 
@@ -59,11 +63,11 @@ Backoffice signs are enabled by default. Umbraco's current Media Grid cards do n
 }
 ```
 
-## Optional OpenAI watermark fallback
+## Optional OpenAI watermark check
 
-Install `TheBuilder.AIImageDisclosure.OpenAI` alongside the matching Umbraco.AI and Umbraco.AI.OpenAI packages. The integration requires CMS 17.5 or later on 17.x, or CMS 18.x, and starts disabled. Administrators configure it under **Settings → AI image disclosure**, selecting an existing active OpenAI connection. Its key stays in Umbraco.AI.
+The core package works without OpenAI. To add the check, install `TheBuilder.AIImageDisclosure.OpenAI` alongside the matching Umbraco.AI and Umbraco.AI.OpenAI packages. The integration requires CMS 17.5 or later on 17.x, or CMS 18.x, and starts disabled. Administrators configure it in the **AI image disclosure** tab under **Settings**. Select an existing active OpenAI connection. Its key stays in Umbraco.AI.
 
-Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. A positive result stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign; it does not guess `generated` versus `modified`. See the [setup and privacy notes](apps/docs/content/openai-watermarks.md).
+Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. When OpenAI reports a watermark, the package stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign. This does not distinguish generation from editing. A negative result does not prove the image is human-made. See the [setup and privacy notes](apps/docs/content/openai-watermarks.md).
 
 ## Classification policy
 
@@ -83,7 +87,7 @@ A missing disclosure never means that an image is human-made.
 
 The detector also reads validated `c2pa.metadata` declarations using namespaced `Iptc4xmpExt:DigitalSourceType`, plus the legacy `stds.iptc` and `stds.iptc.photometadata` assertion labels. A placed AI component is `modified`; a removed component does not count, and `inputTo` ingredients are ignored.
 
-Detection is bounded: images over 64 MiB, extracted manifest JSON over 4 MiB, and manifest stores over 1,024 manifests are left undetermined for manual classification. Detection failures never block a media save.
+The package leaves images over 64 MiB, manifest JSON over 4 MiB, and stores with more than 1,024 manifests undetermined. Editors can classify these images manually. Detection failures never block a media save.
 
 Core C2PA detection reads embedded Content Credentials locally and never fetches remote manifests. The optional OpenAI fallback sends eligible images to OpenAI only after an administrator enables it.
 
@@ -101,13 +105,9 @@ Render the public label from `aiDisclosure`. Treat an empty value as not determi
 
 ## Detection boundaries
 
-C2PA is the primary signal because it can carry signed provenance and a standardized digital source type. Potential complementary signals include:
+The package checks signed C2PA claims. A valid signature does not guarantee that every claim is true. Credentials can also be absent or removed.
 
-- C2PA 2.4 `c2pa.ai-disclosure` assertions for model identification, content profiles, human oversight, and related metadata.
-- Optional [OpenAI SynthID verification](apps/docs/content/openai-watermarks.md) for images without C2PA metadata. A positive result records separate evidence because it does not distinguish generation from editing.
-- XMP or EXIF software tags as a weak hint only. They are unsigned and easy to edit.
-
-Pixel-based AI detector models should not set the disclosure automatically. Their false-positive and false-negative behavior makes them more suitable for an editor warning or review queue.
+The optional OpenAI check looks for supported watermarks. It cannot identify AI output from every tool. The package does not use visual AI classifiers, filenames, or unsigned software tags to guess an image's origin.
 
 ## Platform support
 

@@ -5,7 +5,7 @@ seo:
   image: /og/classification.png
 ---
 
-Only manifests whose validation state is `Valid` or `Trusted` contribute evidence. The detector follows the active manifest and parent ingredients.
+The package uses C2PA claims only when the manifest validation state is `Valid` or `Trusted`. The detector follows the active manifest and parent ingredients.
 
 | C2PA evidence | Stored value |
 | --- | --- |
@@ -30,6 +30,8 @@ The parser also recognizes `compositedWithTrainedAlgorithmicMedia`, a spelling f
 
 ## Why the package does not guess
 
-Pixel-based AI detectors can produce false positives and false negatives. Unsigned XMP or EXIF tags are easy to edit. Neither signal should silently set a compliance-facing property.
+The package does not use a visual AI classifier or unsigned XMP and EXIF tags to decide whether an image is AI-generated. It reads signed claims and, if you install and enable the OpenAI integration, checks for a supported watermark.
 
-The [optional OpenAI fallback](/openai-watermarks) checks OpenAI SynthID watermarks only when no C2PA metadata is present. It records separate `aiWatermark` evidence and never guesses `generated` versus `modified` from a watermark alone.
+Neither check guarantees that every AI-generated image will be identified. A valid signature does not guarantee that every claim is true. Missing credentials and negative watermark results leave the origin unknown.
+
+The [optional OpenAI watermark check](/openai-watermarks) checks OpenAI SynthID watermarks only when no C2PA metadata is present. It records separate `aiWatermark` evidence and never guesses `generated` versus `modified` from a watermark alone.

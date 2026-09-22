@@ -4,7 +4,7 @@ export const aiImageDisclosurePackage = defineUmbracoPackage({
   id: "thebuilder.aiimagedisclosure",
   name: "AI Image Disclosure",
   summary:
-    "Classify new and replaced Umbraco Image files from valid signed C2PA Content Credentials.",
+    "Check Umbraco images for signed C2PA claims of AI use. An OpenAI watermark check is optional.",
   links: {
     docs: "https://ai-image-disclosure.thebuilder.dk",
     nuget: "https://www.nuget.org/packages/TheBuilder.AIImageDisclosure",

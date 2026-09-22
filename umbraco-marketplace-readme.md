@@ -2,7 +2,11 @@
 
 # AI Image Disclosure
 
-AI Image Disclosure reads valid C2PA Content Credentials when a file is uploaded to, or replaced on, Umbraco's default `Image` media type. It stores `generated`, `modified`, or no classification for editor review and exposes the same values through the Media Delivery API. Missing credentials remain unknown; the package does not guess from image pixels.
+AI Image Disclosure checks signed C2PA Content Credentials for claims of AI generation or editing when you upload or replace an Umbraco Image file. Editors can review or override the result.
+
+You can add an optional OpenAI watermark check for images without C2PA metadata. It requires a separate package and starts disabled.
+
+Neither check guarantees that every AI-generated image will be identified. Missing credentials or a negative watermark result leave the origin unknown. The package does not guess from how an image looks.
 
 The stored values align with the European Commission's optional labels for fully AI-generated and partially AI-modified content. [View the official EU icons and guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content).
 

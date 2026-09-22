@@ -5,19 +5,21 @@ seo:
   image: /og/editor-workflow.png
 ---
 
-## Detected automatically
+## Read the evidence
 
 Uploading or replacing `umbracoFile` on Umbraco's default `Image` media type runs C2PA detection during the save. Positive evidence stores `generated` or `modified`, sets the source to `C2PA`, and records the AI action's software agent when the credential provides one.
 
 **AI generator** is read-only. It records evidence from the validated C2PA action and is not an editorial attribution field.
 
-**AI disclosure reason** is also read-only. It explains an automatic non-positive result, such as **No content credentials**, **Invalid content credentials**, **Image exceeds scan size limit**, **Content credentials exceed scan limits**, **No AI declaration**, or **Image could not be read**. Positive AI results leave this property empty.
+**AI disclosure reason** is also read-only. It explains why a check found no usable AI evidence. Possible values include **No content credentials**, **Invalid content credentials**, **Image exceeds scan size limit**, **Content credentials exceed scan limits**, **No AI declaration**, or **Image could not be read**. Positive AI results leave this property empty.
 
 Saving a name, crop, or another media property does not rerun detection. Existing media is not scanned after installation.
 
 ## Optional watermark evidence
 
-**AI watermark** is a separate read-only result from the [optional OpenAI fallback](/openai-watermarks). **OpenAI SynthID detected** confirms a supported OpenAI watermark and adds an **AI detected** sign. It does not set `generated` or `modified`, because the watermark cannot distinguish them. No watermark detected is still inconclusive.
+**AI watermark** is a separate read-only result from the [optional OpenAI watermark check](/openai-watermarks). `OpenAI SynthID detected` means the API reported a supported watermark. The media tree shows an **AI detected** sign. It does not set `generated` or `modified`, because the watermark cannot distinguish them.
+
+The check requires a separate package and starts disabled. Neither the C2PA check nor the OpenAI check can identify every AI-generated image. Missing evidence leaves the origin unknown. The package does not guess from the image's appearance.
 
 Images with any C2PA credentials, and images kept in manual mode, skip the remote check. Replacing an image clears stale watermark evidence before any new check.
 
