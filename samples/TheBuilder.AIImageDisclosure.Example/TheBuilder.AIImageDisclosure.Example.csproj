@@ -11,6 +11,12 @@
     <PackageReference Include="Umbraco.Cms.DevelopmentMode.Backoffice" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IncludeOpenAiSample)' == 'true'">
+    <ProjectReference Include="../../src/TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj" />
+    <PackageReference Include="Umbraco.AI" VersionOverride="18.3.0" />
+    <PackageReference Include="Umbraco.AI.OpenAI" VersionOverride="18.2.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- Opt-in to app-local ICU to ensure consistent globalization APIs across different platforms -->
     <PackageReference Include="Microsoft.ICU.ICU4C.Runtime" />

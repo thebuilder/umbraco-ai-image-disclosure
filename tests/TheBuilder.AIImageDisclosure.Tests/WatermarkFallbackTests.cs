@@ -86,6 +86,20 @@ public sealed class WatermarkFallbackTests
         Assert.Equal(string.Empty, values[Constants.AiWatermarkPropertyAlias]);
     }
 
+    [Fact]
+    public async Task DoesNotApplyFailedCheckToAReplacementFile()
+    {
+        var (processor, media, verifier, values) = Create(AiImageMetadata.NoContentCredentials);
+        verifier.VerifyAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns<Task<ImageWatermarkResult>>(_ =>
+            {
+                values[Constants.SourcePropertyAlias] = "/media/replacement.png";
+                throw new HttpRequestException();
+            });
+        await processor.InspectAsync(media, TestContext.Current.CancellationToken);
+        Assert.Equal(string.Empty, values[Constants.AiWatermarkPropertyAlias]);
+    }
+
     private static (MediaAiMetadataProcessor Processor, IMedia Media, IImageWatermarkVerifier Verifier, Dictionary<string, string> Values)
         Create(AiImageMetadata result)
     {

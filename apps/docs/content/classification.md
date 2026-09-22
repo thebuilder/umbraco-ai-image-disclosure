@@ -32,4 +32,4 @@ The parser also recognizes `compositedWithTrainedAlgorithmicMedia`, a spelling f
 
 Pixel-based AI detectors can produce false positives and false negatives. Unsigned XMP or EXIF tags are easy to edit. Neither signal should silently set a compliance-facing property.
 
-Vendor watermarks such as SynthID may become useful complementary evidence when providers expose dependable verification services. They are not currently used by the package.
+The [optional OpenAI fallback](/openai-watermarks) checks OpenAI SynthID watermarks only when no C2PA metadata is present. It records separate `aiWatermark` evidence and never guesses `generated` versus `modified` from a watermark alone.

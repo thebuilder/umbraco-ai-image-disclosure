@@ -42,7 +42,12 @@ export default class OpenAiDisclosureSettings extends UmbLitElement {
       this.#connectionId = data.connectionId ?? '';
       this.#connections = data.connections;
       this.#available = data.available;
-      this.#status = data.status;
+      this.#status = {
+        ready: 'Watermark fallback is enabled.',
+        disabled: 'Watermark fallback is off.',
+        unavailable: 'Configure Umbraco AI with the OpenAI provider to use watermark verification.',
+        invalid: 'The selected connection is unavailable. Check its credentials and endpoint in Umbraco AI.',
+      }[data.status] ?? 'Settings loaded.';
     } catch {
       this.#error = 'Settings could not be loaded. Reload this page to try again.';
     } finally {
@@ -121,6 +126,8 @@ export default class OpenAiDisclosureSettings extends UmbLitElement {
             ?disabled=${this.#busy || !this.#available}
             @change=${event => { this.#connectionId = event.target.value; this.requestUpdate(); }}></uui-select>
           <p>Manage credentials in Umbraco AI. The key stays on the server.</p>
+          ${this.#available && !this.#busy && this.#connections.length === 0
+            ? html`<p>Create an active OpenAI connection in the AI section, then reload this page.</p>` : ''}
         </div>
         <p>Enabling this sends eligible images to OpenAI. The verification endpoint is not eligible for Zero Data Retention.</p>
         <p>A detected watermark is evidence of AI use; it does not distinguish a fully generated image from an AI edit. A negative result leaves the origin undetermined.</p>

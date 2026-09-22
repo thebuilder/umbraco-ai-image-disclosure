@@ -14,6 +14,7 @@ The stored values align with the European Commission's optional labels for fully
 - Records the software agent attached to the relevant AI action, when available.
 - Lets editors override a classification and resume automatic detection later.
 - Exposes all stored values through Umbraco's media Delivery API.
+- Supports optional OpenAI watermark checks for images without C2PA metadata, using an existing Umbraco.AI connection.
 
 ## Install
 

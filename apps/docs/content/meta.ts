@@ -8,6 +8,7 @@ export default defineMeta({
     "editor-workflow",
     "delivery-api",
     "classification",
+    "openai-watermarks",
     "operations",
     "c2pa-eu-ai-act",
     "license",

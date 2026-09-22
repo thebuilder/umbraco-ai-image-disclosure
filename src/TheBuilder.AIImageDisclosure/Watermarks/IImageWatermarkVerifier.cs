@@ -3,6 +3,9 @@ namespace TheBuilder.AIImageDisclosure.Watermarks;
 /// <summary>Optional verification of watermarks when an image has no Content Credentials.</summary>
 public interface IImageWatermarkVerifier
 {
+    /// <summary>Stable per-request rescan limit. Remote verifiers should use one to bound request duration.</summary>
+    int MaximumRescanBatchSize => 50;
+
     /// <summary>Checks an original image without changing or taking ownership of its stream.</summary>
     Task<ImageWatermarkResult> VerifyAsync(Stream image, string mediaType, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
@@ -7,14 +8,16 @@ namespace TheBuilder.AIImageDisclosure.Media;
 internal sealed class MediaAiRescanService(
     IEntityService entityService,
     IMediaService mediaService,
-    ILogger<MediaAiRescanService> logger)
+    ILogger<MediaAiRescanService> logger,
+    IImageWatermarkVerifier? watermarkVerifier = null)
 {
     internal const int MaximumBatchSize = 50;
 
     internal RescanResult Scan(int pageIndex, int limit, int userId, CancellationToken cancellationToken = default)
     {
         if (pageIndex < 0) throw new ArgumentOutOfRangeException(nameof(pageIndex));
-        limit = Math.Clamp(limit, 1, MaximumBatchSize);
+        var batchLimit = Math.Clamp(watermarkVerifier?.MaximumRescanBatchSize ?? MaximumBatchSize, 1, MaximumBatchSize);
+        limit = Math.Clamp(limit, 1, batchLimit);
         var entities = entityService.GetPagedDescendants(
             -1, UmbracoObjectTypes.Media, pageIndex, limit, out var total, null, Ordering.By("Id")).ToArray();
         var scanned = 0;

@@ -27,7 +27,11 @@ Installation stops rather than overwriting an existing data type or media proper
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds four properties to the default Image media type.
+Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds five properties to the default Image media type.
+
+## Optional OpenAI watermark checks
+
+To check images without C2PA metadata, follow [OpenAI watermark fallback](/openai-watermarks). This requires the optional integration package and an administrator to enable external verification. The core package remains local by default.
 
 ## Test an image
 
@@ -63,4 +67,4 @@ Choose **Resume automatic detection** in **AI disclosure source**, then save. Th
 
 ## Scan existing media
 
-Administrators can open the **AI disclosure scan** tab in the Media section and choose **Start scan**. Each request handles at most 50 media entities; non-Image media is ignored. The dashboard shows scanned, manually preserved, and failed-save counts. **Stop after current batch** leaves the next page ready to resume, while a request error can be retried from the same page. The cursor is reset if the browser page is reloaded.
+Administrators can open the **AI disclosure scan** tab in the Media section and choose **Start scan**. Each request handles at most 50 media entities; non-Image media is ignored. The dashboard shows scanned, manually preserved, and failed-save counts. **Stop after current batch** leaves the next page ready to resume, while a request error can be retried from the same page. The cursor is reset if the browser page is reloaded. With the optional OpenAI integration installed, each request handles one media entity to keep verification time bounded.

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using TheBuilder.AIImageDisclosure.Detection;
 using TheBuilder.AIImageDisclosure.Media;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -88,6 +89,31 @@ public sealed class MediaAiRescanServiceTests
         var result = new MediaAiRescanService(entities, mediaService, NullLogger<MediaAiRescanService>.Instance).Scan(0, 50, 7, TestContext.Current.CancellationToken);
         Assert.Equal(1, result.Failed);
         Assert.Equal(0, result.Scanned);
+    }
+
+    [Fact]
+    public void RemoteVerifierBoundsEveryRequestToOneImageWithoutSkippingPages()
+    {
+        var entities = Substitute.For<IEntityService>();
+        var media = Substitute.For<IMediaService>();
+        var verifier = Substitute.For<IImageWatermarkVerifier>();
+        verifier.MaximumRescanBatchSize.Returns(1);
+        entities.GetPagedDescendants(-1, UmbracoObjectTypes.Media, Arg.Any<long>(), 1,
+            out Arg.Any<long>(), null, Arg.Any<Ordering>()).Returns(call =>
+            {
+                call[4] = 3L;
+                return new[] { Entity((int)call.ArgAt<long>(2) + 1) };
+            });
+        var service = new MediaAiRescanService(entities, media, NullLogger<MediaAiRescanService>.Instance, verifier);
+        var first = service.Scan(0, 50, 7, TestContext.Current.CancellationToken);
+        var second = service.Scan(first.NextPageIndex, 50, 7, TestContext.Current.CancellationToken);
+        var last = service.Scan(second.NextPageIndex, 50, 7, TestContext.Current.CancellationToken);
+        Assert.False(first.Done);
+        Assert.False(second.Done);
+        Assert.True(last.Done);
+        media.Received(1).GetById(1);
+        media.Received(1).GetById(2);
+        media.Received(1).GetById(3);
     }
 
     private static IMedia Media(string source, out Dictionary<string, string> values, string alias = "Image")

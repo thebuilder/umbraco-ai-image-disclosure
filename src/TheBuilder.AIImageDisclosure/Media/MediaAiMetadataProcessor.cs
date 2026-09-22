@@ -39,11 +39,11 @@ internal sealed class MediaAiMetadataProcessor(
         ClearWatermark(media);
         if (result.Reason != AiImageDetectionReason.NoContentCredentials || watermarkVerifier is null
             || !media.HasProperty(Constants.AiWatermarkPropertyAlias)) return;
+        var fileValue = media.GetValue<string>(Constants.SourcePropertyAlias);
         try
         {
             if (!media.TryGetMediaPath(Constants.SourcePropertyAlias, mediaUrlGenerators, out var path)
                 || string.IsNullOrWhiteSpace(path)) return;
-            var fileValue = media.GetValue<string>(Constants.SourcePropertyAlias);
             using var source = mediaService.GetMediaFileContentStream(path);
             var watermark = await watermarkVerifier.VerifyAsync(source, MimeTypes.GetMimeType(path), cancellationToken);
             if (media.GetValue<string>(Constants.SourcePropertyAlias) != fileValue
@@ -60,6 +60,8 @@ internal sealed class MediaAiMetadataProcessor(
         catch (Exception exception) when (!IsFatal(exception))
         {
             // Remote verification is optional; never turn its failure into a failed media save.
+            if (media.GetValue<string>(Constants.SourcePropertyAlias) != fileValue
+                || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias))) return;
             media.SetValue(Constants.AiWatermarkPropertyAlias, "OpenAI watermark check unavailable");
             logger.LogWarning("Watermark check could not complete for image media {MediaKey}", media.Key);
         }
