@@ -8,19 +8,19 @@ namespace TheBuilder.AIImageDisclosure.Media;
 
 internal sealed class AiImageDisclosureMediaSavingHandler(
     IMediaAiMetadataProcessor processor,
-    ILogger<AiImageDisclosureMediaSavingHandler> logger) : INotificationHandler<MediaSavingNotification>
+    ILogger<AiImageDisclosureMediaSavingHandler> logger) : INotificationAsyncHandler<MediaSavingNotification>
 {
-    public void Handle(MediaSavingNotification notification)
+    public async Task HandleAsync(MediaSavingNotification notification, CancellationToken cancellationToken)
     {
         foreach (var media in notification.SavedEntities.Where(IsDisclosureImage))
         {
             if (ShouldResumeAutomaticDetection(media))
             {
-                LogInvalidMetadata(media, processor.ResumeAutomaticDetection(media));
+                LogInvalidMetadata(media, await processor.ResumeAutomaticDetectionAsync(media, cancellationToken));
             }
             else if (media.IsPropertyDirty(Constants.SourcePropertyAlias))
             {
-                LogInvalidMetadata(media, processor.Inspect(media));
+                LogInvalidMetadata(media, await processor.InspectAsync(media, cancellationToken));
             }
             else if (HasManualMetadataChange(media))
             {
@@ -58,8 +58,6 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
 
     private static bool ShouldResumeAutomaticDetection(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias)
-        && string.Equals(
-            media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias),
-            Constants.ResumeAutomaticDisclosureSourceValue,
-            StringComparison.Ordinal);
+        && media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias) is
+            Constants.ResumeAutomaticDisclosureSourceValue or "[\"Resume automatic detection\"]";
 }

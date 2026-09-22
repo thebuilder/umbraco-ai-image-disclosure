@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using TheBuilder.AIImageDisclosure.Detection;
 using TheBuilder.AIImageDisclosure.Media;
 using TheBuilder.AIImageDisclosure.Migrations;
@@ -16,11 +18,12 @@ public sealed class AiImageDisclosureComposer : IComposer
     /// <inheritdoc />
     public void Compose(IUmbracoBuilder builder)
     {
+        builder.Services.TryAddSingleton<IImageWatermarkVerifier, DisabledImageWatermarkVerifier>();
         builder.Services.AddSingleton<IImageAiMetadataReader, C2paImageAiMetadataReader>();
         builder.Services.AddSingleton<IMediaAiMetadataProcessor, MediaAiMetadataProcessor>();
         builder.Services.AddSingleton<MediaAiRescanService>();
         builder.Services.AddControllers().AddApplicationPart(typeof(Controllers.AiImageDisclosureController).Assembly);
-        builder.AddNotificationHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();
+        builder.AddNotificationAsyncHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();
         builder.FlagProviders().Append<AiDisclosureFlagProvider>();
         builder.PackageMigrationPlans().Add(typeof(AiImageDisclosurePackageMigrationPlan));
     }

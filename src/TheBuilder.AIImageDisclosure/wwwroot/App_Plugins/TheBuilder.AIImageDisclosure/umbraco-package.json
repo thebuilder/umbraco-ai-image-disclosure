@@ -51,6 +51,41 @@
           "alias": "Umb.Condition.CurrentUser.IsAdmin"
         }
       ]
+    },
+    {
+      "type": "entitySign",
+      "alias": "TheBuilder.AIImageDisclosure.EntitySign.Watermark",
+      "name": "AI watermark detected",
+      "js": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-entity-sign.js",
+      "forEntityTypes": [
+        "media"
+      ],
+      "forEntityFlags": [
+        "TheBuilder.AIImageDisclosure.Watermark"
+      ],
+      "meta": {
+        "label": "AI detected"
+      }
+    },
+    {
+      "type": "dashboard",
+      "alias": "TheBuilder.AIImageDisclosure.OpenAiSettings",
+      "name": "AI image disclosure settings",
+      "element": "/App_Plugins/TheBuilder.AIImageDisclosure/openai-settings-dashboard.js",
+      "weight": 100,
+      "meta": {
+        "label": "AI image disclosure",
+        "pathname": "ai-image-disclosure"
+      },
+      "conditions": [
+        {
+          "alias": "Umb.Condition.SectionAlias",
+          "match": "Umb.Section.Settings"
+        },
+        {
+          "alias": "Umb.Condition.CurrentUser.IsAdmin"
+        }
+      ]
     }
   ]
 }

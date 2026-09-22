@@ -61,6 +61,23 @@ public sealed class AiDisclosureFlagProviderTests
         mediaService.DidNotReceive().GetByIds(Arg.Any<IEnumerable<Guid>>());
     }
 
+    [Theory]
+    [InlineData("", true)]
+    [InlineData("Manual", false)]
+    [InlineData("[\"Manual\"]", false)]
+    public async Task WatermarkFlagDoesNotOverrideAnExplicitManualUndeterminedChoice(string source, bool expected)
+    {
+        var media = CreateImage(Guid.NewGuid(), string.Empty);
+        media.GetValue<string>(Constants.AiWatermarkPropertyAlias).Returns(Constants.OpenAiWatermarkDetected);
+        media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias).Returns(source);
+        var service = Substitute.For<IMediaService>();
+        service.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([media]);
+        var item = new MediaTreeItemResponseModel { Id = media.Key };
+        await new AiDisclosureFlagProvider(service, new ConfigurationBuilder().Build()).PopulateFlagsAsync([item]);
+        Assert.Equal(expected, item.Flags.Any(flag => flag.Alias == Constants.WatermarkFlagAlias));
+        Assert.DoesNotContain(item.Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
+    }
+
     private static IMedia CreateImage(Guid key, string disclosure)
     {
         var media = Substitute.For<IMedia>();

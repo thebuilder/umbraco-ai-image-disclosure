@@ -47,6 +47,11 @@ internal sealed class AiDisclosureFlagProvider(
                 case ModifiedDropdownValue:
                     item.AddFlag(Constants.ModifiedFlagAlias);
                     break;
+                default:
+                    if (media.GetValue<string>(Constants.AiWatermarkPropertyAlias) == Constants.OpenAiWatermarkDetected
+                        && media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias) is not (Constants.ManualDisclosureSourceValue or "[\"Manual\"]"))
+                        item.AddFlag(Constants.WatermarkFlagAlias);
+                    break;
             }
         }
 

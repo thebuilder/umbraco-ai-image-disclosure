@@ -28,8 +28,7 @@ internal sealed class MediaAiRescanService(
                 var media = mediaService.GetById(entity.Id);
                 if (media is null || media.Trashed
                     || !media.ContentType.Alias.Equals(Constants.DefaultImageMediaTypeAlias, StringComparison.OrdinalIgnoreCase)) continue;
-                if (string.Equals(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias),
-                    Constants.ManualDisclosureSourceValue, StringComparison.Ordinal))
+                if (MediaAiMetadataProcessor.IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias)))
                 {
                     skippedManual++;
                     continue;

@@ -11,22 +11,22 @@ namespace TheBuilder.AIImageDisclosure.Tests;
 public sealed class MediaSavingHandlerTests
 {
     [Fact]
-    public void InspectsImageWhenFileChanges()
+    public async Task InspectsImageWhenFileChanges()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: true, fileDirty: true);
-        processor.Inspect(media).Returns(AiImageMetadata.NotDetected);
+        processor.InspectAsync(media, TestContext.Current.CancellationToken).Returns(AiImageMetadata.NotDetected);
         var handler = new AiImageDisclosureMediaSavingHandler(
             processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
 
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
 
-        processor.Received(1).Inspect(media);
+        await processor.Received(1).InspectAsync(media, TestContext.Current.CancellationToken);
     }
 
     [Fact]
-    public void PreservesManualChoiceWhenOnlyMetadataChanges()
+    public async Task PreservesManualChoiceWhenOnlyMetadataChanges()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: true, fileDirty: false);
@@ -34,16 +34,16 @@ public sealed class MediaSavingHandlerTests
             processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
 
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
 
-        processor.DidNotReceive().Inspect(Arg.Any<IMedia>());
+        await processor.DidNotReceive().InspectAsync(Arg.Any<IMedia>(), TestContext.Current.CancellationToken);
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
             Constants.ManualDisclosureSourceValue);
     }
 
     [Fact]
-    public void IgnoresNonImageMedia()
+    public async Task IgnoresNonImageMedia()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: false, fileDirty: true);
@@ -51,13 +51,13 @@ public sealed class MediaSavingHandlerTests
             processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
 
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
 
-        processor.DidNotReceive().Inspect(Arg.Any<IMedia>());
+        await processor.DidNotReceive().InspectAsync(Arg.Any<IMedia>(), TestContext.Current.CancellationToken);
     }
 
     [Fact]
-    public void ResumeAutomaticDetectionReprocessesCurrentFile()
+    public async Task ResumeAutomaticDetectionReprocessesCurrentFile()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: true, fileDirty: false);
@@ -65,19 +65,19 @@ public sealed class MediaSavingHandlerTests
         media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias).Returns(true);
         media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias)
             .Returns(Constants.ResumeAutomaticDisclosureSourceValue);
-        processor.ResumeAutomaticDetection(media).Returns(AiImageMetadata.Generated("gpt-image"));
+        processor.ResumeAutomaticDetectionAsync(media, TestContext.Current.CancellationToken).Returns(AiImageMetadata.Generated("gpt-image"));
         var handler = new AiImageDisclosureMediaSavingHandler(
             processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
 
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
 
-        processor.Received(1).ResumeAutomaticDetection(media);
-        processor.DidNotReceive().Inspect(Arg.Any<IMedia>());
+        await processor.Received(1).ResumeAutomaticDetectionAsync(media, TestContext.Current.CancellationToken);
+        await processor.DidNotReceive().InspectAsync(Arg.Any<IMedia>(), TestContext.Current.CancellationToken);
     }
 
     [Fact]
-    public void ClearingDisclosureAlsoClearsStaleGenerator()
+    public async Task ClearingDisclosureAlsoClearsStaleGenerator()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: true, fileDirty: false);
@@ -86,7 +86,7 @@ public sealed class MediaSavingHandlerTests
             processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
 
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
 
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.Received(1).SetValue(
@@ -95,7 +95,7 @@ public sealed class MediaSavingHandlerTests
     }
 
     [Fact]
-    public void GeneratorChangeDoesNotCreateManualOverride()
+    public async Task GeneratorChangeDoesNotCreateManualOverride()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: true, fileDirty: false);
@@ -105,7 +105,7 @@ public sealed class MediaSavingHandlerTests
             processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
 
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
 
         media.DidNotReceive().SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
@@ -113,7 +113,7 @@ public sealed class MediaSavingHandlerTests
     }
 
     [Fact]
-    public void ResubmittingC2paSourceDoesNotOverrideAnEditorialChange()
+    public async Task ResubmittingC2paSourceDoesNotOverrideAnEditorialChange()
     {
         var processor = Substitute.For<IMediaAiMetadataProcessor>();
         var media = CreateMedia(isImage: true, fileDirty: false);
@@ -121,8 +121,8 @@ public sealed class MediaSavingHandlerTests
         media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias).Returns("C2PA");
         var handler = new AiImageDisclosureMediaSavingHandler(processor,
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
-        handler.Handle(new MediaSavingNotification([media], new EventMessages()));
-        processor.DidNotReceive().ResumeAutomaticDetection(media);
+        await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
+        await processor.DidNotReceive().ResumeAutomaticDetectionAsync(media, TestContext.Current.CancellationToken);
         media.Received().SetValue(Constants.AiDisclosureSourcePropertyAlias, "Manual");
     }
 

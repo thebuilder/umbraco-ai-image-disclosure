@@ -52,13 +52,13 @@ public sealed class MediaAiRescanServiceTests
         mediaService.GetById(2).Returns(manual);
         mediaService.GetById(3).Returns(folder);
         mediaService.GetById(4).Returns(trashed);
-        processor.ResumeAutomaticDetection(automatic).Returns(_ => {
+        processor.ResumeAutomaticDetectionAsync(automatic, Arg.Any<CancellationToken>()).Returns(_ => {
             MediaAiMetadataProcessor.ApplyAutomatic(automatic, AiImageMetadata.Modified("Test model"));
             return AiImageMetadata.Modified("Test model");
         });
         var handler = new AiImageDisclosureMediaSavingHandler(processor, NullLogger<AiImageDisclosureMediaSavingHandler>.Instance);
         mediaService.Save(automatic, 7).Returns(_ => {
-            handler.Handle(new MediaSavingNotification([automatic], new EventMessages()));
+            handler.HandleAsync(new MediaSavingNotification([automatic], new EventMessages()), CancellationToken.None).GetAwaiter().GetResult();
             return OperationResult.Attempt.Succeed(new EventMessages());
         });
         var service = new MediaAiRescanService(entities, mediaService, NullLogger<MediaAiRescanService>.Instance);
@@ -69,8 +69,8 @@ public sealed class MediaAiRescanServiceTests
         Assert.Equal("C2PA", automaticValues[Constants.AiDisclosureSourcePropertyAlias]);
         Assert.Equal("modified", automaticValues[Constants.AiDisclosurePropertyAlias]);
         Assert.Equal("Manual", manualValues[Constants.AiDisclosureSourcePropertyAlias]);
-        processor.Received(1).ResumeAutomaticDetection(automatic);
-        processor.DidNotReceive().ResumeAutomaticDetection(manual);
+        processor.Received(1).ResumeAutomaticDetectionAsync(automatic, Arg.Any<CancellationToken>());
+        processor.DidNotReceive().ResumeAutomaticDetectionAsync(manual, Arg.Any<CancellationToken>());
         mediaService.DidNotReceive().Save(manual, Arg.Any<int>());
     }
 

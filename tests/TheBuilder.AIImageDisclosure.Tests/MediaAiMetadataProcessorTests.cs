@@ -11,7 +11,7 @@ namespace TheBuilder.AIImageDisclosure.Tests;
 public sealed class MediaAiMetadataProcessorTests
 {
     [Fact]
-    public void ClearsAutomaticMetadataWhenMediaPathIsUnavailable()
+    public async Task ClearsAutomaticMetadataWhenMediaPathIsUnavailable()
     {
         var media = Substitute.For<IMedia>();
         var processor = new MediaAiMetadataProcessor(
@@ -20,7 +20,7 @@ public sealed class MediaAiMetadataProcessorTests
             new MediaUrlGeneratorCollection(() => []),
             Substitute.For<ILogger<MediaAiMetadataProcessor>>());
 
-        var result = processor.Inspect(media);
+        var result = await processor.InspectAsync(media, TestContext.Current.CancellationToken);
 
         Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
         media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
