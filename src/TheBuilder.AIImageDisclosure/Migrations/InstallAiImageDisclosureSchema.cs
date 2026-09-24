@@ -57,32 +57,30 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
             "Label (string)");
         var aiDisclosureSourceDataType = await _dataTypes.GetDisclosureSourceAsync();
 
-        var imageGroup = imageMediaType.PropertyGroups.FirstOrDefault(group =>
-            group.PropertyTypes?.Any(property => property.Alias == Constants.SourcePropertyAlias) is true);
-        var changed = AddPropertyIfMissing(
+        var changed = AiDisclosureSchema.AddPropertyIfMissing(
             imageMediaType,
-            imageGroup,
+            _shortStringHelper,
             aiDisclosureDataType,
             Constants.AiDisclosurePropertyAlias,
             "AI disclosure",
             "Fully AI-generated or partially AI-modified, detected from valid C2PA metadata. Editors can override this value.");
-        changed |= AddPropertyIfMissing(
+        changed |= AiDisclosureSchema.AddPropertyIfMissing(
             imageMediaType,
-            imageGroup,
+            _shortStringHelper,
             aiGeneratorDataType,
             Constants.AiGeneratorPropertyAlias,
             "AI generator",
             Constants.AiGeneratorPropertyDescription);
-        changed |= AddPropertyIfMissing(
+        changed |= AiDisclosureSchema.AddPropertyIfMissing(
             imageMediaType,
-            imageGroup,
+            _shortStringHelper,
             aiDisclosureSourceDataType,
             Constants.AiDisclosureSourcePropertyAlias,
             "AI disclosure source",
             "C2PA when detected automatically, Manual after an editor override, or choose Resume automatic detection to reprocess the current file.");
-        changed |= AddPropertyIfMissing(
+        changed |= AiDisclosureSchema.AddPropertyIfMissing(
             imageMediaType,
-            imageGroup,
+            _shortStringHelper,
             aiGeneratorDataType,
             Constants.AiDisclosureReasonPropertyAlias,
             "AI disclosure reason",
@@ -92,32 +90,4 @@ internal sealed class InstallAiImageDisclosureSchema : AsyncPackageMigrationBase
             await _mediaTypeService.UpdateAsync(imageMediaType, MigrationUserKey);
     }
 
-    private bool AddPropertyIfMissing(
-        IMediaType imageMediaType,
-        PropertyGroup? imageGroup,
-        IDataType dataType,
-        string alias,
-        string name,
-        string description)
-    {
-        var existingProperty = imageMediaType.PropertyTypes.FirstOrDefault(property => property.Alias == alias);
-        AiImageDisclosureSchemaGuard.EnsurePropertyUsesDataType(existingProperty, dataType.Key, alias);
-        if (existingProperty is not null) return false;
-
-        var property = new PropertyType(_shortStringHelper, dataType, alias)
-        {
-            Name = name,
-            Description = description,
-            Mandatory = false,
-            SortOrder = imageGroup?.PropertyTypes?.Select(item => item.SortOrder).DefaultIfEmpty(-1).Max() + 1
-                ?? imageMediaType.PropertyTypes.Count(),
-        };
-
-        if (imageGroup is null)
-            imageMediaType.AddPropertyType(property);
-        else
-            imageMediaType.AddPropertyType(property, imageGroup.Alias, imageGroup.Name);
-
-        return true;
-    }
 }

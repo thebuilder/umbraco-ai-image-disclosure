@@ -1,25 +1,16 @@
 namespace TheBuilder.AIImageDisclosure.OpenAI;
 
-/// <summary>Resolves OpenAI credentials from the configured credential source.</summary>
-public interface IOpenAiConnectionResolver
+/// <summary>Provides optional selectable OpenAI connections.</summary>
+public interface IOpenAiConnectionSource
 {
-    /// <summary>Gets whether standard configuration supplies an API key.</summary>
-    bool IsConfigurationManaged { get; }
-
-    /// <summary>Gets whether a credential source is available.</summary>
+    /// <summary>Gets whether the source is available.</summary>
     bool IsAvailable { get; }
-
-    /// <summary>Gets whether standard configuration contains a nonempty API key.</summary>
-    bool HasConfiguredApiKey { get; }
-
-    /// <summary>Gets whether configuration explicitly enables automatic verification.</summary>
-    bool IsEnabled { get; }
 
     /// <summary>Gets sanitized selectable connections.</summary>
     Task<IReadOnlyList<OpenAiConnectionOption>> GetConnectionsAsync(CancellationToken cancellationToken);
 
-    /// <summary>Resolves credentials for automatic or explicitly selected verification.</summary>
-    Task<ResolvedOpenAiConnection?> ResolveAsync(Guid? connectionId, CancellationToken cancellationToken);
+    /// <summary>Resolves one selected connection.</summary>
+    Task<ResolvedOpenAiConnection?> ResolveAsync(Guid connectionId, CancellationToken cancellationToken);
 }
 
 /// <summary>A sanitized OpenAI connection selector entry.</summary>

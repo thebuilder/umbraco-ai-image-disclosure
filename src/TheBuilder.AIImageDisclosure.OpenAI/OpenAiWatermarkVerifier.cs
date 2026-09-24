@@ -7,9 +7,8 @@ using TheBuilder.AIImageDisclosure.Watermarks;
 namespace TheBuilder.AIImageDisclosure.OpenAI;
 
 internal sealed class OpenAiWatermarkVerifier(
-    IOpenAiConnectionResolver connectionResolver,
+    OpenAiVerificationPolicy policy,
     IHttpClientFactory httpClientFactory,
-    OpenAiProvenanceSettingsStore settingsStore,
     ILogger<OpenAiWatermarkVerifier> logger,
     TimeSpan requestTimeout = default) : IImageWatermarkVerifier
 {
@@ -26,16 +25,10 @@ internal sealed class OpenAiWatermarkVerifier(
         string mediaType,
         CancellationToken cancellationToken = default)
     {
-        if (connectionResolver.IsConfigurationManaged)
-        {
-            if (!connectionResolver.IsEnabled)
-                return new ImageWatermarkResult(ImageWatermarkStatus.Disabled, Provider);
-            return await VerifyConnectionAsync(null, openImage, mediaType, cancellationToken);
-        }
-        var settings = settingsStore.Get();
-        if (!settings.Enabled || settings.ConnectionId is not { } connectionId)
-            return new ImageWatermarkResult(ImageWatermarkStatus.Disabled);
-        return await VerifyConnectionAsync(connectionId, openImage, mediaType, cancellationToken);
+        var effective = await policy.GetAsync(cancellationToken);
+        if (!effective.Enabled) return new ImageWatermarkResult(ImageWatermarkStatus.Disabled, Provider);
+        if (effective.Connection is null) return Unavailable("The selected OpenAI connection is unavailable or unsupported.");
+        return await SendAsync(openImage, mediaType, effective.Connection, cancellationToken);
     }
 
     internal async Task<ImageWatermarkResult> VerifyConnectionAsync(
@@ -44,10 +37,7 @@ internal sealed class OpenAiWatermarkVerifier(
         string mediaType,
         CancellationToken cancellationToken = default)
     {
-        var sourceId = connectionResolver.IsConfigurationManaged ? Guid.Empty : connectionId;
-        if (sourceId is { } id && cooldowns.IsCoolingDown(id))
-            return Unavailable("The OpenAI provenance check is temporarily unavailable.");
-        var connection = await connectionResolver.ResolveAsync(connectionId, cancellationToken);
+        var connection = await policy.ResolveExplicitAsync(connectionId, cancellationToken);
         if (connection is null) return Unavailable("The selected OpenAI connection is unavailable or unsupported.");
         return await SendAsync(openImage, mediaType, connection, cancellationToken);
     }

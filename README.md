@@ -108,7 +108,7 @@ The package leaves images over 64 MiB, manifest JSON over 4 MiB, and stores with
 
 Core C2PA detection reads embedded Content Credentials locally and never fetches remote manifests. The optional OpenAI fallback sends eligible images to OpenAI only after an administrator enables it.
 
-Administrators can open the **AI disclosure scan** tab in the Media section to scan existing Image media in batches of up to 50. The dashboard reports scanned, manually preserved, and failed saves, and can stop after the current batch or resume after an error. The cursor is not durable after a page reload. Installing the optional OpenAI integration reduces requests to one media entity each to bound remote verification time.
+Administrators can open the **AI disclosure scan** tab in the Media section to scan existing Image media in batches of up to 50. The dashboard reports scanned, manually preserved, and failed saves, and can stop after the current batch or resume after an error. The scan tracks media IDs up to a limit captured at the start, so deletions do not shift progress and new uploads are left for the next scan. Reloading the page resets the cursor. Installing the optional OpenAI integration reduces requests to one media entity each to bound remote verification time.
 
 ## Delivery API
 

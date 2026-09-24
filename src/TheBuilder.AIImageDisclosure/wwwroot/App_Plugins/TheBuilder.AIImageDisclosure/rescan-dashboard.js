@@ -12,7 +12,7 @@ export default class AiDisclosureRescanDashboard extends UmbLitElement {
     .error { color: var(--uui-color-danger-standalone); }
   `;
 
-  #page = 0;
+  #cursor = null;
   #scanned = 0;
   #skipped = 0;
   #failed = 0;
@@ -29,7 +29,7 @@ export default class AiDisclosureRescanDashboard extends UmbLitElement {
   #start = async () => {
     if (this.#running) return;
     if (this.#phase === 'complete') {
-      this.#page = 0;
+      this.#cursor = null;
       this.#scanned = this.#skipped = this.#failed = 0;
     }
     this.#phase = 'running';
@@ -41,13 +41,17 @@ export default class AiDisclosureRescanDashboard extends UmbLitElement {
           security: [{ scheme: 'bearer', type: 'http' }],
           url: '/umbraco/backoffice/api/ai-image-disclosure/rescan',
           headers: { 'Content-Type': 'application/json' },
-          body: { pageIndex: this.#page, limit: 50 },
+          body: { cursor: this.#cursor, limit: 50 },
         });
         if (error || !data || !response.ok) throw new Error('The scan request failed. Resume to retry this batch.');
-        if (!Number.isInteger(data.nextPageIndex) || data.nextPageIndex <= this.#page) {
+        const next = data.nextCursor;
+        if (!next || !Number.isInteger(next.lastId) || !Number.isInteger(next.maximumId)
+          || next.lastId < 0 || next.maximumId < next.lastId
+          || (this.#cursor && next.maximumId !== this.#cursor.maximumId)
+          || (!data.done && next.lastId <= (this.#cursor?.lastId ?? 0))) {
           throw new Error('The scan did not advance. Resume to retry this batch.');
         }
-        this.#page = data.nextPageIndex;
+        this.#cursor = next;
         this.#scanned += data.scanned;
         this.#skipped += data.skippedManual;
         this.#failed += data.failed;
@@ -71,7 +75,7 @@ export default class AiDisclosureRescanDashboard extends UmbLitElement {
   render() {
     const status = {
       ready: 'Ready to scan.',
-      running: `Scanning batch ${this.#page + 1}…`,
+      running: 'Scanning images…',
       stopping: 'Stopping after the current batch…',
       paused: 'Scan paused. You can resume from the next batch.',
       complete: 'Scan complete.',

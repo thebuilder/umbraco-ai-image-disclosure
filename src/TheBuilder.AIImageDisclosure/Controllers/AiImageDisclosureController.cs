@@ -20,18 +20,20 @@ public sealed class AiImageDisclosureController(IServiceProvider services) : Umb
         var user = security.BackOfficeSecurity?.CurrentUser;
         if (user is null || (!user.IsAdmin() && !user.IsSuper()))
             return Forbid();
-        if (request.PageIndex < 0 || request.Limit is < 1 or > MediaAiRescanService.MaximumBatchSize)
-            return BadRequest("PageIndex must be non-negative and Limit must be between 1 and 50.");
+        if (request.Cursor is { } cursor && (cursor.LastId < 0 || cursor.MaximumId < cursor.LastId))
+            return BadRequest("The scan cursor is invalid.");
+        if (request.Limit is < 1 or > MediaAiRescanService.MaximumBatchSize)
+            return BadRequest("Limit must be between 1 and 50.");
         return Ok(services.GetRequiredService<MediaAiRescanService>().Scan(
-            request.PageIndex, request.Limit, user.Id, HttpContext.RequestAborted));
+            request.Cursor, request.Limit, user.Id, HttpContext.RequestAborted));
     }
 }
 
-/// <summary>Describes the page to scan.</summary>
+/// <summary>Describes the next batch to scan.</summary>
 public sealed class RescanRequest
 {
-    /// <summary>Gets or sets the zero-based page index.</summary>
-    public int PageIndex { get; init; }
+    /// <summary>Gets or sets the cursor returned by the previous batch, or null to start a scan.</summary>
+    public RescanCursor? Cursor { get; init; }
     /// <summary>Gets or sets the requested page size.</summary>
     public int Limit { get; init; } = 50;
 }

@@ -62,9 +62,17 @@ public sealed class OpenAiProvenanceSettingsControllerTests
             .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
             .AddSingleton(securityAccessor)
             .AddSingleton<OpenAiProvenanceSettingsStore>()
-            .AddSingleton<OpenAiConnectionResolver>()
-            .AddSingleton<IOpenAiConnectionResolver>(provider => provider.GetRequiredService<OpenAiConnectionResolver>())
+            .AddSingleton(new OpenAiVerificationPolicy(new ConfigurationBuilder().Build(),
+                new OpenAiProvenanceSettingsStore(new ServiceCollection().AddSingleton(keyValueService).BuildServiceProvider()
+                    .GetRequiredService<IServiceScopeFactory>()), new EmptySource()))
             .BuildServiceProvider();
         return new OpenAiProvenanceController(services);
+    }
+
+    private sealed class EmptySource : IOpenAiConnectionSource
+    {
+        public bool IsAvailable => false;
+        public Task<IReadOnlyList<OpenAiConnectionOption>> GetConnectionsAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<OpenAiConnectionOption>>([]);
+        public Task<ResolvedOpenAiConnection?> ResolveAsync(Guid connectionId, CancellationToken cancellationToken) => Task.FromResult<ResolvedOpenAiConnection?>(null);
     }
 }

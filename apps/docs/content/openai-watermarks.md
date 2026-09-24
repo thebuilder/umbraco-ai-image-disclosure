@@ -105,6 +105,6 @@ Verification has a 10-second request timeout and limits the response size. Failu
 
 Rate limits temporarily pause requests for the affected connection. Testing another connection does not pause the selected one. A later failure cannot shorten an existing retry delay.
 
-Administrator scans process one media item per request when this integration is installed, even while disabled. This limits request time and keeps scan page numbers consistent.
+Administrator scans process one media item per request when this integration is installed, even while disabled. This limits request time. Scans track media IDs independently of batch size.
 
 An API key alone does not guarantee access to the provenance endpoint. If **Test verification** reports unavailable, check that a key is configured and has endpoint access. If you use Umbraco.AI, also check that the connection is active and targets the direct OpenAI API. No real Media library image is needed to test the connection.

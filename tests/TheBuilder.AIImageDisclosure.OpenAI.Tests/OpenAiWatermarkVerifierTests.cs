@@ -356,8 +356,9 @@ public sealed class OpenAiWatermarkVerifierTests
             .BuildServiceProvider();
         var factory = Substitute.For<IHttpClientFactory>();
         factory.CreateClient(Arg.Any<string>()).Returns(new HttpClient(handler, disposeHandler: false));
-        return new OpenAiWatermarkVerifier(new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>(), new ConfigurationBuilder().Build()), factory,
-            new OpenAiProvenanceSettingsStore(services.GetRequiredService<IServiceScopeFactory>()),
+        var store = new OpenAiProvenanceSettingsStore(services.GetRequiredService<IServiceScopeFactory>());
+        var policy = new OpenAiVerificationPolicy(new ConfigurationBuilder().Build(), store, new EmptySource());
+        return new OpenAiWatermarkVerifier(policy, factory,
             Substitute.For<ILogger<OpenAiWatermarkVerifier>>(), requestTimeout);
     }
 
@@ -392,7 +393,7 @@ public sealed class OpenAiWatermarkVerifierTests
             .AddSingleton(modelResolver)
             .AddSingleton(providerCollection)
             .BuildServiceProvider();
-        return (new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>(), new ConfigurationBuilder().Build()), modelResolver);
+        return (new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>()), modelResolver);
     }
 
     private static uint PngCrc32(byte[] type, byte[] data)
@@ -458,5 +459,12 @@ public sealed class OpenAiWatermarkVerifierTests
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
+    private sealed class EmptySource : IOpenAiConnectionSource
+    {
+        public bool IsAvailable => false;
+        public Task<IReadOnlyList<OpenAiConnectionOption>> GetConnectionsAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<OpenAiConnectionOption>>([]);
+        public Task<ResolvedOpenAiConnection?> ResolveAsync(Guid connectionId, CancellationToken cancellationToken) => Task.FromResult<ResolvedOpenAiConnection?>(null);
     }
 }

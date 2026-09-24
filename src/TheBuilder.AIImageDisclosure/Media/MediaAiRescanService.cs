@@ -1,25 +1,36 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
+using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
 
 namespace TheBuilder.AIImageDisclosure.Media;
 
 internal sealed class MediaAiRescanService(
     IEntityService entityService,
+    ICoreScopeProvider scopeProvider,
     IMediaService mediaService,
     ILogger<MediaAiRescanService> logger,
     IOptions<MediaAiRescanOptions> options)
 {
     internal const int MaximumBatchSize = 50;
 
-    internal RescanResult Scan(int pageIndex, int limit, int userId, CancellationToken cancellationToken = default)
+    internal RescanResult Scan(RescanCursor? cursor, int limit, int userId, CancellationToken cancellationToken = default)
     {
-        if (pageIndex < 0) throw new ArgumentOutOfRangeException(nameof(pageIndex));
+        cancellationToken.ThrowIfCancellationRequested();
+        if (cursor is not null && (cursor.LastId < 0 || cursor.MaximumId < cursor.LastId))
+            throw new ArgumentOutOfRangeException(nameof(cursor));
+        cursor ??= new RescanCursor(0, entityService.GetPagedDescendants(
+            -1, UmbracoObjectTypes.Media, 0, 1, out _, null, Ordering.By("Id", Direction.Descending))
+            .FirstOrDefault()?.Id ?? 0);
         var batchLimit = Math.Clamp(options.Value.MaximumBatchSize, 1, MaximumBatchSize);
         limit = Math.Clamp(limit, 1, batchLimit);
+        var query = scopeProvider.CreateQuery<IUmbracoEntity>()
+            .Where(entity => entity.Id > cursor.LastId && entity.Id <= cursor.MaximumId);
         var entities = entityService.GetPagedDescendants(
-            -1, UmbracoObjectTypes.Media, pageIndex, limit, out var total, null, Ordering.By("Id")).ToArray();
+            -1, UmbracoObjectTypes.Media, 0, limit, out _, query, Ordering.By("Id")).ToArray();
         var scanned = 0;
         var skippedManual = 0;
         var failed = 0;
@@ -53,9 +64,10 @@ internal sealed class MediaAiRescanService(
                 logger.LogWarning(exception, "AI disclosure scan failed for media {MediaId}", entity.Id);
             }
         }
-        return new RescanResult(pageIndex + 1, scanned, skippedManual, failed, total,
-            entities.Length == 0 || ((long)pageIndex + 1) * limit >= total);
+        var nextCursor = cursor with { LastId = entities.LastOrDefault()?.Id ?? cursor.LastId };
+        return new RescanResult(nextCursor, scanned, skippedManual, failed,
+            entities.Length < limit || nextCursor.LastId >= cursor.MaximumId);
     }
 }
 
-internal sealed record RescanResult(int NextPageIndex, int Scanned, int SkippedManual, int Failed, long TotalItems, bool Done);
+internal sealed record RescanResult(RescanCursor NextCursor, int Scanned, int SkippedManual, int Failed, bool Done);

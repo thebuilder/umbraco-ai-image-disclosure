@@ -15,7 +15,8 @@ public sealed class OpenAiProvenanceComposer : IComposer
     public void Compose(IUmbracoBuilder builder)
     {
         builder.Services.AddSingleton<OpenAiProvenanceSettingsStore>();
-        builder.Services.TryAddSingleton<IOpenAiConnectionResolver, OpenAiConfigurationResolver>();
+        builder.Services.TryAddSingleton<IOpenAiConnectionSource, EmptyOpenAiConnectionSource>();
+        builder.Services.AddSingleton<OpenAiVerificationPolicy>();
         builder.Services.AddSingleton<OpenAiWatermarkVerifier>();
         builder.Services.AddSingleton(OpenAiWatermarkVerifier.Provider);
         builder.Services.Configure<MediaAiRescanOptions>(options => options.MaximumBatchSize = 1);

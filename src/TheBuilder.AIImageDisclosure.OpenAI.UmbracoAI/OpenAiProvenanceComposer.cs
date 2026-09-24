@@ -11,6 +11,6 @@ public sealed class OpenAiProvenanceComposer : IComposer
     /// <inheritdoc />
     public void Compose(IUmbracoBuilder builder)
     {
-        builder.Services.Replace(ServiceDescriptor.Singleton<IOpenAiConnectionResolver, OpenAiConnectionResolver>());
+        builder.Services.Replace(ServiceDescriptor.Singleton<IOpenAiConnectionSource, OpenAiConnectionResolver>());
     }
 }

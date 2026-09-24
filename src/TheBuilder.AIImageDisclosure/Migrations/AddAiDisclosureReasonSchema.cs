@@ -1,4 +1,3 @@
-using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
@@ -22,29 +21,9 @@ internal sealed class AddAiDisclosureReasonSchema(
         var dataType = await new AiImageDisclosureDataTypeProvider(
             dataTypeService, propertyEditors, configurationSerializer).GetRequiredAsync(
                 Umbraco.Cms.Core.Constants.DataTypes.Guids.LabelStringGuid, "Label (string)");
-        var existing = imageMediaType.PropertyTypes.FirstOrDefault(property =>
-            property.Alias == Constants.AiDisclosureReasonPropertyAlias);
-        if (existing is not null)
-        {
-            AiImageDisclosureSchemaGuard.EnsurePropertyUsesDataType(
-                existing, dataType.Key, Constants.AiDisclosureReasonPropertyAlias);
-            return;
-        }
-
-        var group = imageMediaType.PropertyGroups.FirstOrDefault(item =>
-            item.PropertyTypes?.Any(property => property.Alias == Constants.SourcePropertyAlias) is true);
-        var property = new PropertyType(shortStringHelper, dataType, Constants.AiDisclosureReasonPropertyAlias)
-        {
-            Name = "AI disclosure reason",
-            Description = Constants.AiDisclosureReasonPropertyDescription,
-            Mandatory = false,
-            SortOrder = group?.PropertyTypes?.Select(item => item.SortOrder).DefaultIfEmpty(-1).Max() + 1
-                ?? imageMediaType.PropertyTypes.Count(),
-        };
-        if (group is null)
-            imageMediaType.AddPropertyType(property);
-        else
-            imageMediaType.AddPropertyType(property, group.Alias, group.Name);
+        if (!AiDisclosureSchema.AddPropertyIfMissing(
+                imageMediaType, shortStringHelper, dataType, Constants.AiDisclosureReasonPropertyAlias,
+                "AI disclosure reason", Constants.AiDisclosureReasonPropertyDescription)) return;
         var result = await mediaTypeService.UpdateAsync(
             imageMediaType, Umbraco.Cms.Core.Constants.Security.SuperUserKey);
         if (!result.Success)

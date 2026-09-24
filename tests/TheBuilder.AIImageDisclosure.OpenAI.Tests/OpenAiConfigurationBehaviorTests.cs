@@ -20,8 +20,8 @@ public sealed class OpenAiConfigurationBehaviorTests
     [Fact]
     public async Task ConfiguredKeyAloneDisablesAutomaticChecksDespiteSavedEnabledSettings()
     {
-        var resolver = ConfiguredResolver(enabled: null, key: "secret-key");
-        var verifier = CreateVerifier(resolver, new StubHandler(_ => throw new InvalidOperationException("must not call")),
+        var policy = ConfiguredPolicy(enabled: null, key: "secret-key");
+        var verifier = CreateVerifier(policy, new StubHandler(_ => throw new InvalidOperationException("must not call")),
             new OpenAiProvenanceSettings(true, Guid.NewGuid()));
 
         var result = await verifier.VerifyAsync(() => new MemoryStream([1, 2, 3]), "image/png", TestContext.Current.CancellationToken);
@@ -32,12 +32,12 @@ public sealed class OpenAiConfigurationBehaviorTests
     [Fact]
     public async Task ExplicitConfiguredTestWorksWhenAutomaticChecksAreDisabled()
     {
-        var resolver = ConfiguredResolver(enabled: false, key: "secret-key");
+        var policy = ConfiguredPolicy(enabled: false, key: "secret-key");
         var handler = new StubHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent("{\"results\":[{\"type\":\"synthid\",\"outcome\":\"detected\"}]}", Encoding.UTF8, "application/json"),
         });
-        var verifier = CreateVerifier(resolver, handler, OpenAiProvenanceSettings.Disabled);
+        var verifier = CreateVerifier(policy, handler, OpenAiProvenanceSettings.Disabled);
 
         var result = await verifier.VerifyConnectionAsync(null, () => new MemoryStream([1, 2, 3]), "image/png", TestContext.Current.CancellationToken);
 
@@ -49,8 +49,8 @@ public sealed class OpenAiConfigurationBehaviorTests
     [Fact]
     public async Task EmptyConfiguredKeyDoesNotFallBackToSavedConnection()
     {
-        var resolver = ConfiguredResolver(enabled: true, key: "");
-        var verifier = CreateVerifier(resolver, new StubHandler(_ => throw new InvalidOperationException("must not call")),
+        var policy = ConfiguredPolicy(enabled: true, key: "");
+        var verifier = CreateVerifier(policy, new StubHandler(_ => throw new InvalidOperationException("must not call")),
             new OpenAiProvenanceSettings(true, Guid.NewGuid()));
 
         var result = await verifier.VerifyAsync(() => new MemoryStream([1]), "image/png", TestContext.Current.CancellationToken);
@@ -66,19 +66,21 @@ public sealed class OpenAiConfigurationBehaviorTests
             ["TheBuilder:AIImageDisclosure:OpenAI:Enabled"] = "true",
             ["TheBuilder:AIImageDisclosure:OpenAI:ApiKey"] = "configured-secret",
         }).Build();
-        using var services = new ServiceCollection().AddSingleton<IConfiguration>(configuration).BuildServiceProvider();
-        var resolver = new UmbracoAiResolver(services.GetRequiredService<IServiceScopeFactory>(), configuration);
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var source = new UmbracoAiResolver(services.GetRequiredService<IServiceScopeFactory>());
+        var policy = new OpenAiVerificationPolicy(configuration, Store(), source);
 
-        Assert.True(resolver.IsConfigurationManaged);
-        Assert.True(resolver.IsEnabled);
-        Assert.Equal("configured-secret", (await resolver.ResolveAsync(null, TestContext.Current.CancellationToken))!.ApiKey);
+        var effective = await policy.GetAsync(TestContext.Current.CancellationToken);
+        Assert.True(effective.ManagedByConfiguration);
+        Assert.True(effective.Enabled);
+        Assert.Equal("configured-secret", effective.Connection!.ApiKey);
     }
 
     [Fact]
     public async Task ManagedSaveRejectsEnabledAndConnectionOverrides()
     {
-        var resolver = ConfiguredResolver(enabled: true, key: "secret-key");
-        var controller = CreateController(resolver, new OpenAiProvenanceSettings(true, null));
+        var policy = ConfiguredPolicy(enabled: true, key: "secret-key");
+        var controller = CreateController(policy, new OpenAiProvenanceSettings(true, null));
 
         var result = await controller.SaveSettings(new OpenAiSettingsRequest(false, null), TestContext.Current.CancellationToken);
 
@@ -97,8 +99,8 @@ public sealed class OpenAiConfigurationBehaviorTests
     public async Task SettingsResponseReportsConfigurationWithoutReturningSecret()
     {
         const string secret = "secret-key";
-        var resolver = ConfiguredResolver(enabled: true, key: secret);
-        var controller = CreateController(resolver, OpenAiProvenanceSettings.Disabled);
+        var policy = ConfiguredPolicy(enabled: true, key: secret);
+        var controller = CreateController(policy, OpenAiProvenanceSettings.Disabled);
 
         var result = await controller.GetSettings(TestContext.Current.CancellationToken);
         var payload = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result).Value;
@@ -113,32 +115,30 @@ public sealed class OpenAiConfigurationBehaviorTests
         Assert.Null(response.ConnectionId);
     }
 
-    private static IOpenAiConnectionResolver ConfiguredResolver(bool? enabled, string? key)
+    private static OpenAiVerificationPolicy ConfiguredPolicy(bool? enabled, string? key)
     {
         var values = new Dictionary<string, string?>();
         if (enabled is { } enabledValue)
             values["TheBuilder:AIImageDisclosure:OpenAI:Enabled"] = enabledValue.ToString();
         if (key is not null)
             values["TheBuilder:AIImageDisclosure:OpenAI:ApiKey"] = key;
-        return new OpenAiConfigurationResolver(new ConfigurationBuilder().AddInMemoryCollection(values).Build());
+        return new OpenAiVerificationPolicy(new ConfigurationBuilder().AddInMemoryCollection(values).Build(), Store(), new OpenAiConnectionSourceForTest());
     }
 
     private static OpenAiWatermarkVerifier CreateVerifier(
-        IOpenAiConnectionResolver resolver,
+        OpenAiVerificationPolicy policy,
         StubHandler handler,
         OpenAiProvenanceSettings settings)
     {
         var keyValue = Substitute.For<IKeyValueService>();
         keyValue.GetValue(Arg.Any<string>()).Returns(JsonSerializer.Serialize(settings));
-        var storeServices = new ServiceCollection().AddSingleton(keyValue).BuildServiceProvider();
         var clients = Substitute.For<IHttpClientFactory>();
         clients.CreateClient(Arg.Any<string>()).Returns(new HttpClient(handler, disposeHandler: false));
-        return new OpenAiWatermarkVerifier(resolver, clients,
-            new OpenAiProvenanceSettingsStore(storeServices.GetRequiredService<IServiceScopeFactory>()),
+        return new OpenAiWatermarkVerifier(policy, clients,
             Substitute.For<ILogger<OpenAiWatermarkVerifier>>());
     }
 
-    private static OpenAiProvenanceController CreateController(IOpenAiConnectionResolver resolver, OpenAiProvenanceSettings settings)
+    private static OpenAiProvenanceController CreateController(OpenAiVerificationPolicy policy, OpenAiProvenanceSettings settings)
     {
         var keyValue = Substitute.For<IKeyValueService>();
         keyValue.GetValue(Arg.Any<string>()).Returns(JsonSerializer.Serialize(settings));
@@ -158,14 +158,29 @@ public sealed class OpenAiConfigurationBehaviorTests
         var provider = new ServiceCollection()
             .AddSingleton<IKeyValueService>(keyValue)
             .AddSingleton<OpenAiProvenanceSettingsStore>()
-            .AddSingleton(resolver)
+            .AddSingleton(policy)
             .AddSingleton(httpFactory)
             .AddSingleton<OpenAiWatermarkVerifier>(services => new OpenAiWatermarkVerifier(
-                resolver, services.GetRequiredService<IHttpClientFactory>(), services.GetRequiredService<OpenAiProvenanceSettingsStore>(),
+                policy, services.GetRequiredService<IHttpClientFactory>(),
                 Substitute.For<ILogger<OpenAiWatermarkVerifier>>()))
             .AddSingleton<IBackOfficeSecurityAccessor>(accessor)
             .BuildServiceProvider();
         return new OpenAiProvenanceController(provider);
+    }
+
+    private static OpenAiProvenanceSettingsStore Store()
+    {
+        var keyValue = Substitute.For<IKeyValueService>();
+        keyValue.GetValue(Arg.Any<string>()).Returns("{}");
+        return new OpenAiProvenanceSettingsStore(new ServiceCollection().AddSingleton(keyValue).BuildServiceProvider()
+            .GetRequiredService<IServiceScopeFactory>());
+    }
+
+    private sealed class OpenAiConnectionSourceForTest : IOpenAiConnectionSource
+    {
+        public bool IsAvailable => false;
+        public Task<IReadOnlyList<OpenAiConnectionOption>> GetConnectionsAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<OpenAiConnectionOption>>([]);
+        public Task<ResolvedOpenAiConnection?> ResolveAsync(Guid connectionId, CancellationToken cancellationToken) => Task.FromResult<ResolvedOpenAiConnection?>(null);
     }
 
     private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> response) : HttpMessageHandler
