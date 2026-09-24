@@ -24,10 +24,10 @@ Umbraco's Media Delivery API is disabled by default, even when the Content Deliv
 
 See the [official Media Delivery API documentation](https://docs.umbraco.com/umbraco-cms/reference/content-delivery-api/media-delivery-api) for public-access and API-key options.
 
-Request the three scalar properties with the media item:
+Request the five scalar properties with the media item:
 
 ```http
-GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource]
+GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure,aiGenerator,aiDisclosureSource,aiDisclosureReason,aiWatermark]
 ```
 
 A relevant response fragment contains values like:
@@ -37,7 +37,9 @@ A relevant response fragment contains values like:
   "properties": {
     "aiDisclosure": "generated",
     "aiGenerator": "gpt-image",
-    "aiDisclosureSource": "C2PA"
+    "aiDisclosureSource": "C2PA",
+    "aiDisclosureReason": "",
+    "aiWatermark": ""
   }
 }
 ```
@@ -55,7 +57,8 @@ const label =
       : undefined;
 ```
 
-- Render from `aiDisclosure`, never from `aiGenerator` or `aiDisclosureSource`.
+- Render the fully generated / partially modified distinction from `aiDisclosure`, never from `aiGenerator` or `aiDisclosureSource`.
+- For the optional fallback, `aiWatermark === "OpenAI SynthID detected"` supports a generic **AI detected** label when the source is not `Manual`. It does not establish fully generated versus partially modified content. Keep manual editorial decisions authoritative.
 - Treat an empty or missing value as not determined, not proof that the image is non-AI.
 - Decide through editorial policy whether undetermined images need manual review.
 - Give a visible icon accompanying text or an accessible name.

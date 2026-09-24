@@ -12,10 +12,11 @@ Detection is intentionally bounded. The following inputs remain undetermined and
 - Images larger than 64 MiB
 - Extracted manifest JSON larger than 4 MiB
 - Manifest stores with more than 1,024 manifests
+- Content Credentials that exceed the reader's internal resource limits
 
-Detection runs synchronously while a new image file or replacement is saved, so C2PA parsing can add processing time to that request. Existing media is not scanned or queued in the background, and saving unrelated fields does not trigger detection.
+Detection is awaited while a new image file or replacement is saved, so C2PA parsing and optional watermark verification can add processing time to that request. Existing media is not scanned automatically or queued in the background, and saving unrelated fields does not trigger detection. Administrators can start the bounded Media dashboard scan manually; it processes at most 50 media entities per request, preserves manual values, and reports failed saves.
 
-AI Image Disclosure reads embedded Content Credentials only. Remote manifest fetching is disabled, the network host allow-list is empty, and the reader uses a deny-all HTTP resolver. Processing an uploaded image does not make outbound network requests.
+AI Image Disclosure reads embedded Content Credentials only. Remote manifest fetching is disabled, the network host allow-list is empty, and the reader uses a deny-all HTTP resolver. Core C2PA detection does not make outbound network requests. The [optional OpenAI watermark check](/openai-watermarks), when enabled, uploads images without C2PA metadata for verification. Its requests have a 10-second timeout and bounded responses; endpoint failures leave the save available. Installing that integration reduces scan batches to one media entity per request, including while disabled. Scans use a media ID cursor and an upper ID captured at the start. Deleting earlier items does not skip later images, and new uploads are left for the next scan.
 
 Unreadable or invalid data never blocks a media save. A replacement without usable positive AI evidence clears previous automatic values; existing manual values are preserved.
 

@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Install AI Image Disclosure and classify your first Umbraco image.
+description: Install AI Image Disclosure and check an Umbraco image for C2PA evidence of AI use.
 seo:
   image: /og/quickstart.png
 ---
@@ -14,8 +14,8 @@ seo:
 
 > **Package scope**
 >
-> - Processes new uploads and file replacements only.
-> - Does not backfill existing media.
+> - Processes new uploads and file replacements automatically.
+> - Existing media is scanned only when an administrator starts the Media section's **AI disclosure scan** dashboard.
 > - Uses Umbraco's native signs without replacing its Media collection views.
 > - Does not add disclosure labels to public pages.
 
@@ -27,7 +27,13 @@ Installation stops rather than overwriting an existing data type or media proper
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds three properties to the default Image media type.
+Restart the application. On first startup, the package creates the **AI image disclosure** and **AI image disclosure source** data types and adds five properties to the default Image media type.
+
+## Optional OpenAI watermark checks
+
+The core package works without OpenAI and checks C2PA credentials locally. You can add the [optional OpenAI watermark check](/openai-watermarks) for images without C2PA metadata. Install the separate integration package, then configure the key and enable the check through app settings. Umbraco.AI is not required.
+
+Neither check guarantees that every AI-generated image will be identified. A missing credential or negative watermark result leaves the origin unknown. The package does not guess from the image's appearance.
 
 ## Test an image
 
@@ -47,7 +53,7 @@ aiDisclosureSource: C2PA
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
-AI-generated and AI-modified images also receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `TheBuilder:AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
+Images classified as `generated` or `modified` receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `TheBuilder:AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
 
 ![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
 
@@ -60,3 +66,7 @@ Clearing **AI disclosure** also clears **AI generator** and records a manual, un
 ## Resume automatic detection
 
 Choose **Resume automatic detection** in **AI disclosure source**, then save. The package immediately reprocesses the current file and replaces the manual values with the detected result, or clears them when the file contains no usable AI evidence. Replacing the image file is not required.
+
+## Scan existing media
+
+Administrators can open the **AI disclosure scan** tab in the Media section and choose **Start scan**. Each request handles at most 50 media entities; non-Image media is ignored. The dashboard shows scanned, manually preserved, and failed-save counts. **Stop after current batch** preserves progress, while a request error can be retried from the same cursor. The scan tracks media IDs, so deleting an earlier item does not skip later images. New uploads are left for the next scan. The cursor is reset if the browser page is reloaded. With the optional OpenAI integration installed, each request handles one media entity to keep verification time bounded.

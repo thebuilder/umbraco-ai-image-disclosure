@@ -12,13 +12,14 @@ internal static class C2paManifestParser
         "http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia";
     private const string CompositedWithTrainedAlgorithmicMedia =
         "http://cv.iptc.org/newscodes/digitalsourcetype/compositedWithTrainedAlgorithmicMedia";
+    private const string MetadataAssertion = "c2pa.metadata";
 
     public static AiImageMetadata Parse(string json)
     {
         try
         {
-            if (json is null || json.Length > MaximumManifestJsonCharacters)
-                return AiImageMetadata.InvalidMetadata;
+            if (json is null) return AiImageMetadata.InvalidMetadata;
+            if (json.Length > MaximumManifestJsonCharacters) return AiImageMetadata.ManifestLimitExceeded;
 
             using var document = JsonDocument.Parse(json);
             var root = document.RootElement;
@@ -28,12 +29,18 @@ internal static class C2paManifestParser
                 || activeManifestElement.GetString() is not { Length: > 0 } activeManifest
                 || !root.TryGetProperty("manifests", out var manifests)
                 || manifests.ValueKind != JsonValueKind.Object
-                || HasTooManyManifests(manifests))
+                || !manifests.TryGetProperty(activeManifest, out _))
             {
                 return AiImageMetadata.InvalidMetadata;
             }
 
+            if (HasTooManyManifests(manifests)) return AiImageMetadata.ManifestLimitExceeded;
+
             return FindDisclosure(manifests, activeManifest) ?? AiImageMetadata.NotDetected;
+        }
+        catch (C2paScanLimitException)
+        {
+            return AiImageMetadata.ManifestLimitExceeded;
         }
         catch (Exception exception) when (exception is JsonException or InvalidOperationException)
         {
@@ -60,44 +67,24 @@ internal static class C2paManifestParser
         JsonElement manifests,
         string activeManifest)
     {
-        var pending = new Stack<string>();
-        var visited = new HashSet<string>(StringComparer.Ordinal);
         var directIngredientFallbacks = new List<DisclosureCandidate>();
         DisclosureCandidate? best = null;
-        pending.Push(activeManifest);
-
-        while (pending.TryPop(out var manifestLabel))
+        foreach (var evidence in C2paManifestGraph.Walk(manifests, activeManifest))
         {
-            if (!visited.Add(manifestLabel) || !manifests.TryGetProperty(manifestLabel, out var manifest))
+            if (evidence.IsIngredient)
             {
+                if (GetSourceType(evidence.Value) is not { } sourceType) continue;
+                var candidate = CreateCandidate(sourceType, null);
+                if (evidence.IsComponent)
+                    best = PreferStronger(best, AsComponent(candidate));
+                else
+                    directIngredientFallbacks.Add(candidate);
                 continue;
             }
 
-            best = PreferStronger(best, FindDisclosureAction(manifest));
-
-            if (!manifest.TryGetProperty("ingredients", out var ingredients)
-                || ingredients.ValueKind != JsonValueKind.Array)
-            {
-                continue;
-            }
-
-            foreach (var ingredient in ingredients.EnumerateArray())
-            {
-                if (!ingredient.TryGetProperty("relationship", out var relationship)
-                    || relationship.GetString() != "parentOf")
-                {
-                    continue;
-                }
-
-                if (ingredient.TryGetProperty("active_manifest", out var parentLabel)
-                    && parentLabel.GetString() is { Length: > 0 } parent)
-                {
-                    pending.Push(parent);
-                }
-
-                if (GetSourceType(ingredient) is { } sourceType)
-                    directIngredientFallbacks.Add(CreateCandidate(sourceType, null));
-            }
+            var detected = PreferStronger(
+                FindDisclosureAction(evidence.Value), FindDisclosureMetadata(evidence.Value));
+            best = PreferStronger(best, evidence.IsComponent ? AsComponent(detected) : detected);
         }
 
         if (best is null)
@@ -122,7 +109,7 @@ internal static class C2paManifestParser
         {
             if (!assertion.TryGetProperty("label", out var label)
                 || label.GetString() is not { } labelValue
-                || !labelValue.StartsWith("c2pa.actions", StringComparison.Ordinal)
+                || !C2paManifestGraph.IsActionsAssertion(labelValue)
                 || !assertion.TryGetProperty("data", out var data)
                 || !data.TryGetProperty("actions", out var actions))
             {
@@ -166,17 +153,55 @@ internal static class C2paManifestParser
         return best;
     }
 
-    private static AiSourceType? GetSourceType(JsonElement element)
+    private static DisclosureCandidate? FindDisclosureMetadata(JsonElement manifest)
     {
-        if (!element.TryGetProperty("digitalSourceType", out var sourceType)) return null;
-
-        return sourceType.GetString() switch
+        if (!manifest.TryGetProperty("assertions", out var assertions)
+            || assertions.ValueKind != JsonValueKind.Array) return null;
+        DisclosureCandidate? best = null;
+        foreach (var assertion in assertions.EnumerateArray())
         {
-            TrainedAlgorithmicMedia => AiSourceType.Generated,
-            CompositeWithTrainedAlgorithmicMedia or CompositedWithTrainedAlgorithmicMedia => AiSourceType.Modified,
-            _ => null,
-        };
+            if (!assertion.TryGetProperty("label", out var label)
+                || label.GetString() is not (MetadataAssertion or "stds.iptc" or "stds.iptc.photometadata")
+                || !assertion.TryGetProperty("data", out var data)) continue;
+            if (GetMetadataSourceType(data) is { } sourceType)
+                best = PreferStronger(best, CreateCandidate(sourceType, null));
+        }
+        return best;
     }
+
+    private static DisclosureCandidate? AsComponent(DisclosureCandidate? candidate) =>
+        candidate is null ? null : new DisclosureCandidate(
+            DisclosureStrength.Composite, AiImageMetadata.Modified(candidate.Metadata.Generator));
+
+    private static AiSourceType? GetSourceType(JsonElement element) =>
+        element.TryGetProperty("digitalSourceType", out var sourceType) ? ParseSourceType(sourceType) : null;
+
+    private static AiSourceType? GetMetadataSourceType(JsonElement data)
+    {
+        const string iptcNamespace = "http://iptc.org/std/Iptc4xmpExt/2008-02-29/";
+        foreach (var property in data.EnumerateObject())
+        {
+            var separator = property.Name.IndexOf(':');
+            if (separator < 0 || property.Name[(separator + 1)..] != "DigitalSourceType") continue;
+            var prefix = property.Name[..separator];
+            if (data.TryGetProperty("@context", out var context)
+                && context.ValueKind == JsonValueKind.Object
+                && context.TryGetProperty(prefix, out var binding))
+            {
+                if (binding.ValueKind != JsonValueKind.String || binding.GetString() != iptcNamespace) continue;
+            }
+            else if (prefix != "Iptc4xmpExt") continue;
+            if (ParseSourceType(property.Value) is { } sourceType) return sourceType;
+        }
+        return null;
+    }
+
+    private static AiSourceType? ParseSourceType(JsonElement value) => value.GetString() switch
+    {
+        TrainedAlgorithmicMedia => AiSourceType.Generated,
+        CompositeWithTrainedAlgorithmicMedia or CompositedWithTrainedAlgorithmicMedia => AiSourceType.Modified,
+        _ => null,
+    };
 
     private static DisclosureCandidate CreateCandidate(AiSourceType sourceType, string? generator) =>
         sourceType == AiSourceType.Generated

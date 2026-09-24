@@ -1,10 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
     <PackageId>TheBuilder.AIImageDisclosure</PackageId>
     <Product>AI Image Disclosure</Product>
     <Title>AI Image Disclosure for Umbraco</Title>
@@ -19,6 +18,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
   </PropertyGroup>
 
   <ItemGroup>

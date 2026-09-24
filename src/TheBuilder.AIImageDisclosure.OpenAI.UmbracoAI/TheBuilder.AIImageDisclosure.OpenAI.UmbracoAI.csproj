@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Daniel Schmidt</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/thebuilder/umbraco-ai-image-disclosure</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/thebuilder/umbraco-ai-image-disclosure.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Optional Umbraco.AI connection adapter for AI Image Disclosure OpenAI provenance.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UmbracoAiCoreVersion Condition="'$(UmbracoAiCoreVersion)' == ''">[17.3.0,19.0.0)</UmbracoAiCoreVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj" />
+    <PackageReference Include="Umbraco.AI.Core" VersionOverride="$(UmbracoAiCoreVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

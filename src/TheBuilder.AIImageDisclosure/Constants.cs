@@ -2,6 +2,11 @@ namespace TheBuilder.AIImageDisclosure;
 
 internal static class Constants
 {
+    internal const string AiWatermarkPropertyAlias = "aiWatermark";
+    internal const string OpenAiWatermarkDetected = "OpenAI SynthID detected";
+    internal const string WatermarkFlagAlias = "TheBuilder.AIImageDisclosure.Watermark";
+    internal const string AiWatermarkPropertyDescription = "Read-only watermark evidence. A detected watermark does not distinguish full AI generation from partial editing.";
+
     public const string PackageName = "TheBuilder.AIImageDisclosure";
     public const string ShowBackofficeBadgesSetting = "TheBuilder:AIImageDisclosure:ShowBackofficeBadges";
     public const string GeneratedFlagAlias = PackageName + ".Generated";
@@ -11,6 +16,7 @@ internal static class Constants
     public const string AiDisclosurePropertyAlias = "aiDisclosure";
     public const string AiGeneratorPropertyAlias = "aiGenerator";
     public const string AiDisclosureSourcePropertyAlias = "aiDisclosureSource";
+    public const string AiDisclosureReasonPropertyAlias = "aiDisclosureReason";
     public const string AiDisclosureDataTypeName = "AI image disclosure";
     public const string AiDisclosureSourceDataTypeName = "AI image disclosure source";
     public const string AiGeneratorPropertyDescription =
@@ -22,4 +28,6 @@ internal static class Constants
     public const string C2paDisclosureSourceValue = "C2PA";
     public const string ManualDisclosureSourceValue = "Manual";
     public const string ResumeAutomaticDisclosureSourceValue = "Resume automatic detection";
+    public const string AiDisclosureReasonPropertyDescription =
+        "Read-only reason for the latest automatic detection result, when no AI disclosure was found.";
 }

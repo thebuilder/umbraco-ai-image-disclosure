@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Configuration;
+using TheBuilder.AIImageDisclosure.Media;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using Umbraco.Cms.Api.Management.Services.Flags;
 using Umbraco.Cms.Api.Management.ViewModels;
 using Umbraco.Cms.Api.Management.ViewModels.Tree;
@@ -9,8 +11,13 @@ namespace TheBuilder.AIImageDisclosure.Backoffice;
 
 internal sealed class AiDisclosureFlagProvider(
     IMediaService mediaService,
-    IConfiguration configuration) : IFlagProvider
+    IConfiguration configuration,
+    IEnumerable<ImageWatermarkProvider> watermarkProviders) : IFlagProvider
 {
+    // Keep recognizing existing evidence even after its integration package is removed.
+    private readonly HashSet<string> detectedWatermarks = watermarkProviders.Select(provider => provider.DetectedValue)
+        .Append(Constants.OpenAiWatermarkDetected).Append("AI watermark detected").ToHashSet(StringComparer.Ordinal);
+
     private const string GeneratedDropdownValue = "[\"generated\"]";
     private const string ModifiedDropdownValue = "[\"modified\"]";
 
@@ -46,6 +53,11 @@ internal sealed class AiDisclosureFlagProvider(
                 case Constants.ModifiedDisclosureValue:
                 case ModifiedDropdownValue:
                     item.AddFlag(Constants.ModifiedFlagAlias);
+                    break;
+                default:
+                    if (detectedWatermarks.Contains(media.GetValue<string>(Constants.AiWatermarkPropertyAlias) ?? string.Empty)
+                        && !MediaAiMetadataProcessor.IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias)))
+                        item.AddFlag(Constants.WatermarkFlagAlias);
                     break;
             }
         }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TheBuilder.AIImageDisclosure.Detection;
 using TheBuilder.AIImageDisclosure.Media;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
@@ -11,21 +12,22 @@ namespace TheBuilder.AIImageDisclosure.Tests;
 public sealed class MediaAiMetadataProcessorTests
 {
     [Fact]
-    public void ClearsAutomaticMetadataWhenMediaPathIsUnavailable()
+    public async Task ClearsAutomaticMetadataWhenMediaPathIsUnavailable()
     {
         var media = Substitute.For<IMedia>();
         var processor = new MediaAiMetadataProcessor(
             Substitute.For<IImageAiMetadataReader>(),
             Substitute.For<IMediaService>(),
             new MediaUrlGeneratorCollection(() => []),
-            Substitute.For<ILogger<MediaAiMetadataProcessor>>());
+            Substitute.For<ILogger<MediaAiMetadataProcessor>>(), new DisabledImageWatermarkVerifier());
 
-        var result = processor.Inspect(media);
+        var result = await processor.InspectAsync(media, TestContext.Current.CancellationToken);
 
         Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
         media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, "Image could not be read");
     }
 
     [Fact]
@@ -38,6 +40,7 @@ public sealed class MediaAiMetadataProcessorTests
         media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "gpt-image");
         media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+        media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, string.Empty);
     }
 
     [Fact]
@@ -62,6 +65,7 @@ public sealed class MediaAiMetadataProcessorTests
         media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, "No AI declaration");
     }
 
     [Fact]
@@ -74,6 +78,7 @@ public sealed class MediaAiMetadataProcessorTests
         media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, "Invalid content credentials");
     }
 
     [Fact]

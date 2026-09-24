@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using TheBuilder.AIImageDisclosure.Watermarks;
 using TheBuilder.AIImageDisclosure.Detection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.PropertyEditors;
@@ -12,20 +13,57 @@ internal sealed class MediaAiMetadataProcessor(
     IImageAiMetadataReader metadataReader,
     IMediaService mediaService,
     MediaUrlGeneratorCollection mediaUrlGenerators,
-    ILogger<MediaAiMetadataProcessor> logger) : IMediaAiMetadataProcessor
+    ILogger<MediaAiMetadataProcessor> logger,
+    IImageWatermarkVerifier watermarkVerifier) : IMediaAiMetadataProcessor
 {
-    public AiImageMetadata Inspect(IMedia media)
+    public async Task<AiImageMetadata> InspectAsync(IMedia media, CancellationToken cancellationToken = default)
     {
+        var manual = HasManualMetadata(media);
         var result = Read(media);
         Apply(media, result);
+        if (manual) ClearWatermark(media);
+        else await InspectWatermarkAsync(media, result, cancellationToken);
         return result;
     }
 
-    public AiImageMetadata ResumeAutomaticDetection(IMedia media)
+    public async Task<AiImageMetadata> ResumeAutomaticDetectionAsync(IMedia media, CancellationToken cancellationToken = default)
     {
         var result = Read(media);
         ApplyAutomatic(media, result);
+        await InspectWatermarkAsync(media, result, cancellationToken);
         return result;
+    }
+
+    private async Task InspectWatermarkAsync(IMedia media, AiImageMetadata result, CancellationToken cancellationToken)
+    {
+        ClearWatermark(media);
+        if (result.Reason != AiImageDetectionReason.NoContentCredentials
+            || !media.HasProperty(Constants.AiWatermarkPropertyAlias)) return;
+        var fileValue = media.GetValue<string>(Constants.SourcePropertyAlias);
+        try
+        {
+            if (!media.TryGetMediaPath(Constants.SourcePropertyAlias, mediaUrlGenerators, out var path)
+                || string.IsNullOrWhiteSpace(path)) return;
+            var watermark = await watermarkVerifier.VerifyAsync(
+                () => mediaService.GetMediaFileContentStream(path), MimeTypes.GetMimeType(path), cancellationToken);
+            if (media.GetValue<string>(Constants.SourcePropertyAlias) != fileValue
+                || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias))) return;
+            media.SetValue(Constants.AiWatermarkPropertyAlias, watermark.ToStoredValue());
+        }
+        catch (Exception exception) when (!IsFatal(exception))
+        {
+            // Remote verification is optional; never turn its failure into a failed media save.
+            if (media.GetValue<string>(Constants.SourcePropertyAlias) != fileValue
+                || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias))) return;
+            media.SetValue(Constants.AiWatermarkPropertyAlias, new ImageWatermarkResult(ImageWatermarkStatus.Unavailable).ToStoredValue());
+            logger.LogWarning("Watermark check could not complete for image media {MediaKey}", media.Key);
+        }
+    }
+
+    private static void ClearWatermark(IMedia media)
+    {
+        if (media.HasProperty(Constants.AiWatermarkPropertyAlias))
+            media.SetValue(Constants.AiWatermarkPropertyAlias, string.Empty);
     }
 
     private AiImageMetadata Read(IMedia media)
@@ -36,7 +74,7 @@ internal sealed class MediaAiMetadataProcessor(
             if (!media.TryGetMediaPath(Constants.SourcePropertyAlias, mediaUrlGenerators, out mediaPath)
                 || string.IsNullOrWhiteSpace(mediaPath))
             {
-                return AiImageMetadata.InvalidMetadata;
+                return AiImageMetadata.Unreadable;
             }
 
             using var source = mediaService.GetMediaFileContentStream(mediaPath);
@@ -45,7 +83,7 @@ internal sealed class MediaAiMetadataProcessor(
         catch (Exception exception) when (!IsFatal(exception))
         {
             logger.LogWarning(exception, "Could not inspect image media {MediaKey} at {MediaPath}", media.Key, mediaPath);
-            return AiImageMetadata.InvalidMetadata;
+            return AiImageMetadata.Unreadable;
         }
     }
 
@@ -68,15 +106,18 @@ internal sealed class MediaAiMetadataProcessor(
                 media.SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
                 media.SetValue(Constants.AiGeneratorPropertyAlias, result.Generator ?? string.Empty);
                 media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+                SetReason(media, result);
                 break;
             case AiImageDetectionStatus.Modified:
                 media.SetValue(Constants.AiDisclosurePropertyAlias, Constants.ModifiedDisclosureValue);
                 media.SetValue(Constants.AiGeneratorPropertyAlias, result.Generator ?? string.Empty);
                 media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+                SetReason(media, result);
                 break;
             case AiImageDetectionStatus.NotDetected:
             case AiImageDetectionStatus.InvalidMetadata:
                 ClearAutomaticMetadata(media);
+                SetReason(media, result);
                 break;
             default:
                 throw new InvalidOperationException($"Unsupported AI image detection status {result.Status}.");
@@ -85,10 +126,10 @@ internal sealed class MediaAiMetadataProcessor(
 
     private static bool HasManualMetadata(IMedia media) =>
         HasDirtyMetadata(media)
-        || string.Equals(
-            media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias),
-            Constants.ManualDisclosureSourceValue,
-            StringComparison.Ordinal);
+        || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias));
+
+    internal static bool IsManualSource(string? value) =>
+        value is Constants.ManualDisclosureSourceValue or "[\"Manual\"]";
 
     private static bool HasDirtyMetadata(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias);
@@ -99,6 +140,9 @@ internal sealed class MediaAiMetadataProcessor(
         media.SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
     }
+
+    private static void SetReason(IMedia media, AiImageMetadata result) =>
+        media.SetValue(Constants.AiDisclosureReasonPropertyAlias, result.Reason.ToStoredValue());
 
     private static bool IsFatal(Exception exception) =>
         exception is OutOfMemoryException or StackOverflowException or AccessViolationException;

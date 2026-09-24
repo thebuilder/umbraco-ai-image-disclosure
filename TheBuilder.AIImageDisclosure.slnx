@@ -3,9 +3,12 @@
     <Project Path="samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj" />
+    <Project Path="src/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI.csproj" />
     <Project Path="src/TheBuilder.AIImageDisclosure/TheBuilder.AIImageDisclosure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/TheBuilder.AIImageDisclosure.OpenAI.Tests/TheBuilder.AIImageDisclosure.OpenAI.Tests.csproj" />
     <Project Path="tests/TheBuilder.AIImageDisclosure.Tests/TheBuilder.AIImageDisclosure.Tests.csproj" />
   </Folder>
 </Solution>

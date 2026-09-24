@@ -1,17 +1,21 @@
 ---
 title: AI image disclosure in Umbraco
-description: Detect AI-generated and AI-modified images from C2PA Content Credentials and support EU AI Act disclosure workflows in Umbraco.
+description: Check Umbraco images for C2PA evidence of AI use, with an optional OpenAI watermark check.
 seo:
   image: /og/overview.png
 ---
 
-AI Image Disclosure classifies Umbraco's default `Image` media type from signed C2PA Content Credentials. Detection runs when a file is uploaded or replaced; existing media is not scanned automatically. The result gives editors and frontends a small, predictable contract without exposing the complete manifest.
+AI Image Disclosure checks signed C2PA Content Credentials for claims of AI generation or editing. It runs when you upload or replace a file on Umbraco's default `Image` media type. Editors can review and change the result.
+
+An optional OpenAI integration checks for supported watermarks when C2PA metadata is absent. It requires a separate package and starts disabled.
+
+Neither check guarantees that every AI-generated image will be identified. No evidence means the origin remains unknown. The package does not guess from how an image looks.
 
 ## What is C2PA?
 
 The Coalition for Content Provenance and Authenticity, or C2PA, publishes an open standard for cryptographically verifiable media provenance. A C2PA **Content Credential** can record where an asset came from, how it was changed, which tools were involved, and whether AI played a role.
 
-AI Image Disclosure verifies the signed credential before using its claims. It does not treat the presence of metadata as proof on its own. Read the [official C2PA explainer](https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html) or see [C2PA and the EU AI Act](/c2pa-eu-ai-act) for the complete distinction.
+AI Image Disclosure verifies the signed credential before using its claims. It does not treat the presence of metadata as proof on its own. Read the [official C2PA explainer](https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html) or see [C2PA and the EU AI Act](/c2pa-eu-ai-act) for more about signed claims.
 
 ## Stored properties
 
@@ -20,17 +24,21 @@ AI Image Disclosure verifies the signed credential before using its claims. It d
 | `aiDisclosure` | `generated`, `modified`, or empty | The public classification |
 | `aiGenerator` | Read-only text or empty | The software agent attached to the AI-relevant action |
 | `aiDisclosureSource` | `C2PA`, `Manual`, or empty | How the current value was set; also offers a resume-automatic action in the backoffice |
+| `aiDisclosureReason` | Read-only text or empty | Why the last automatic check found no usable AI evidence |
+| `aiWatermark` | Read-only text or empty | Separate evidence from optional OpenAI watermark verification |
 
 The empty value means **not determined**. It does not mean the image is human-made.
 
 ## Backoffice experience
 
-Editors can review and change the disclosure when metadata is absent or the classification needs correction. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the public label variants and their intended use.
+Editors can review and change the disclosure when metadata is absent or the classification needs correction. Administrators also get an **AI disclosure scan** tab in Media for bounded batches of existing Image media. It reports progress, preserves manual values, and can stop after the current batch. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the public label variants and their intended use.
 
 The package does not replace or decorate Umbraco's Media Grid, table view, media pickers, or other thumbnail presentations. This keeps the extension compatible with Umbraco's native collection UI and with packages that provide their own collection views.
 
+Configure the [optional OpenAI watermark check](/openai-watermarks) through standard .NET app settings. Umbraco.AI is not required. A separate adapter can reuse an existing Umbraco.AI connection. The **AI image disclosure** tab under **Settings** shows the current configuration and provides a test button. Only images without C2PA metadata are eligible.
+
 ## What detection can establish
 
-Detection answers a narrow question: does a valid C2PA provenance chain contain positive evidence that this image was generated or modified using AI?
+A C2PA result records what the signed claims say about AI use. A valid signature does not guarantee that every claim is true. An OpenAI result records whether its API reported a supported watermark.
 
-It does not infer provenance from pixels, filenames, or unsigned metadata. See [Classification](/classification) for the exact rules and [Operations](/operations) for limits and platform support.
+Neither result guarantees a complete history of the image. The package does not use visual AI classifiers, filenames, or unsigned software tags to fill gaps in that history. See [Classification](/classification) for the exact rules and [Operations](/operations) for limits and platform support.

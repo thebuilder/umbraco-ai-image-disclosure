@@ -5,7 +5,7 @@ namespace TheBuilder.AIImageDisclosure.Media;
 
 internal interface IMediaAiMetadataProcessor
 {
-    AiImageMetadata Inspect(IMedia media);
+    Task<AiImageMetadata> InspectAsync(IMedia media, CancellationToken cancellationToken = default);
 
-    AiImageMetadata ResumeAutomaticDetection(IMedia media);
+    Task<AiImageMetadata> ResumeAutomaticDetectionAsync(IMedia media, CancellationToken cancellationToken = default);
 }

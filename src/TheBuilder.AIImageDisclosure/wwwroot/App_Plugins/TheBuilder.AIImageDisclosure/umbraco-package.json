@@ -7,8 +7,12 @@
       "alias": "TheBuilder.AIImageDisclosure.EntitySign.Generated",
       "name": "AI-generated media sign",
       "js": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-entity-sign.js",
-      "forEntityTypes": ["media"],
-      "forEntityFlags": ["TheBuilder.AIImageDisclosure.Generated"],
+      "forEntityTypes": [
+        "media"
+      ],
+      "forEntityFlags": [
+        "TheBuilder.AIImageDisclosure.Generated"
+      ],
       "meta": {
         "label": "AI generated"
       }
@@ -18,11 +22,70 @@
       "alias": "TheBuilder.AIImageDisclosure.EntitySign.Modified",
       "name": "AI-modified media sign",
       "js": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-entity-sign.js",
-      "forEntityTypes": ["media"],
-      "forEntityFlags": ["TheBuilder.AIImageDisclosure.Modified"],
+      "forEntityTypes": [
+        "media"
+      ],
+      "forEntityFlags": [
+        "TheBuilder.AIImageDisclosure.Modified"
+      ],
       "meta": {
         "label": "AI modified"
       }
+    },
+    {
+      "type": "dashboard",
+      "alias": "TheBuilder.AIImageDisclosure.RescanDashboard",
+      "name": "AI disclosure scan",
+      "element": "/App_Plugins/TheBuilder.AIImageDisclosure/rescan-dashboard.js",
+      "weight": 100,
+      "meta": {
+        "label": "AI disclosure scan",
+        "pathname": "ai-disclosure-scan"
+      },
+      "conditions": [
+        {
+          "alias": "Umb.Condition.SectionAlias",
+          "match": "Umb.Section.Media"
+        },
+        {
+          "alias": "Umb.Condition.CurrentUser.IsAdmin"
+        }
+      ]
+    },
+    {
+      "type": "entitySign",
+      "alias": "TheBuilder.AIImageDisclosure.EntitySign.Watermark",
+      "name": "AI watermark detected",
+      "js": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-entity-sign.js",
+      "forEntityTypes": [
+        "media"
+      ],
+      "forEntityFlags": [
+        "TheBuilder.AIImageDisclosure.Watermark"
+      ],
+      "meta": {
+        "label": "AI detected"
+      }
+    },
+    {
+      "type": "dashboard",
+      "alias": "TheBuilder.AIImageDisclosure.OpenAiSettings",
+      "name": "AI image disclosure settings",
+      "element": "/App_Plugins/TheBuilder.AIImageDisclosure/openai-settings-dashboard.js",
+      "weight": 100,
+      "meta": {
+        "label": "AI image disclosure",
+        "pathname": "ai-image-disclosure"
+      },
+      "conditions": [
+        {
+          "alias": "Umb.Condition.SectionAlias",
+          "match": "Umb.Section.Settings"
+        },
+        {
+          "alias": "Umb.Condition.CurrentUser.IsAdmin"
+        }
+      ]
     }
   ]
 }
