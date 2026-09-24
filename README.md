@@ -65,7 +65,24 @@ Backoffice signs are enabled by default. Umbraco's current Media Grid cards do n
 
 ## Optional OpenAI watermark check
 
-The core package works without OpenAI. To add the check, install `TheBuilder.AIImageDisclosure.OpenAI` alongside the matching Umbraco.AI and Umbraco.AI.OpenAI packages. The integration requires CMS 17.5 or later on 17.x, or CMS 18.x, and starts disabled. Administrators configure it in the **AI image disclosure** tab under **Settings**. Select an existing active OpenAI connection. Its key stays in Umbraco.AI.
+The core package works without OpenAI. To add the check, install `TheBuilder.AIImageDisclosure.OpenAI`. It supports standard .NET configuration without requiring Umbraco.AI:
+
+```json
+{
+  "TheBuilder": {
+    "AIImageDisclosure": {
+      "OpenAI": {
+        "Enabled": false,
+        "ApiKey": ""
+      }
+    }
+  }
+}
+```
+
+Supply the key through .NET user secrets or `TheBuilder__AIImageDisclosure__OpenAI__ApiKey` in your hosting environment. Set `Enabled` to `true` to allow image uploads. A key alone does not enable the check. The Settings panel shows configuration status and provides a test using a bundled sample image, without exposing the key.
+
+To reuse an existing Umbraco.AI connection, install the separate `TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI` adapter and matching Umbraco.AI provider packages. The adapter requires CMS 17.5 or later on 17.x, or CMS 18.x. The direct-key package supports CMS 17.1 through 18.x. Explicit OpenAI configuration settings take precedence over saved connection settings.
 
 Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. When OpenAI reports a watermark, the package stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign. This does not distinguish generation from editing. A negative result does not prove the image is human-made. See the [setup and privacy notes](apps/docs/content/openai-watermarks.md).
 

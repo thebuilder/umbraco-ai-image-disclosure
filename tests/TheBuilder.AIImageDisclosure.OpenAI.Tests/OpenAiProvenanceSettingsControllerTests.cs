@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using TheBuilder.AIImageDisclosure.OpenAI;
@@ -58,9 +59,11 @@ public sealed class OpenAiProvenanceSettingsControllerTests
 
         var services = new ServiceCollection()
             .AddSingleton<IKeyValueService>(keyValueService)
+            .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
             .AddSingleton(securityAccessor)
             .AddSingleton<OpenAiProvenanceSettingsStore>()
             .AddSingleton<OpenAiConnectionResolver>()
+            .AddSingleton<IOpenAiConnectionResolver>(provider => provider.GetRequiredService<OpenAiConnectionResolver>())
             .BuildServiceProvider();
         return new OpenAiProvenanceController(services);
     }

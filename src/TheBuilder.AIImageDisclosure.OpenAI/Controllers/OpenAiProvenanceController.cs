@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using TheBuilder.AIImageDisclosure.OpenAI;
-using Umbraco.AI.Core.Providers;
 using Umbraco.Cms.Core.Security;
 using Umbraco.Cms.Web.Common.Controllers;
 using Umbraco.Extensions;
@@ -20,13 +18,17 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
         if (!IsAdministrator()) return Forbid();
         var available = IsAvailable();
         var settings = services.GetRequiredService<OpenAiProvenanceSettingsStore>().Get();
-        var connectionResolver = services.GetRequiredService<OpenAiConnectionResolver>();
+        var connectionResolver = services.GetRequiredService<IOpenAiConnectionResolver>();
         var connections = await connectionResolver.GetConnectionsAsync(cancellationToken);
-        var selectedConnectionIsUsable = settings.ConnectionId is { } selectedId
+        var managedByConfiguration = connectionResolver.IsConfigurationManaged;
+        var effectiveEnabled = managedByConfiguration ? connectionResolver.IsEnabled : settings.Enabled;
+        var effectiveConnectionId = managedByConfiguration ? null : settings.ConnectionId;
+        var selectedConnectionIsUsable = effectiveConnectionId is { } selectedId
             && await connectionResolver.ResolveAsync(selectedId, cancellationToken) is not null;
-        var status = !available ? "unavailable" : !settings.Enabled ? "disabled"
-            : selectedConnectionIsUsable ? "ready" : "invalid";
-        return Ok(new OpenAiSettingsResponse(settings.Enabled, settings.ConnectionId, connections, available, status));
+        var status = !available ? "unavailable" : !effectiveEnabled ? "disabled"
+            : managedByConfiguration ? "ready" : selectedConnectionIsUsable ? "ready" : "invalid";
+        return Ok(new OpenAiSettingsResponse(effectiveEnabled, effectiveConnectionId, connections, available, status,
+            managedByConfiguration, connectionResolver.HasConfiguredApiKey));
     }
 
     /// <summary>Stores whether the fallback is enabled and which connection it uses.</summary>
@@ -34,11 +36,20 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
     public async Task<IActionResult> SaveSettings([FromBody] OpenAiSettingsRequest request, CancellationToken cancellationToken)
     {
         if (!IsAdministrator()) return Forbid();
+        var connectionResolver = services.GetRequiredService<IOpenAiConnectionResolver>();
+        if (connectionResolver.IsConfigurationManaged)
+        {
+            if (request.Enabled != connectionResolver.IsEnabled)
+                return BadRequest("The enabled setting is controlled by standard configuration.");
+            if (request.ConnectionId is not null)
+                return BadRequest("The connection selection is controlled by standard configuration.");
+            return await GetSettings(cancellationToken);
+        }
         if (request.Enabled)
         {
             if (request.ConnectionId is not { } connectionId)
                 return BadRequest("Select an active OpenAI connection before enabling the fallback.");
-            if (await services.GetRequiredService<OpenAiConnectionResolver>()
+            if (await connectionResolver
                     .ResolveAsync(connectionId, cancellationToken) is null)
                 return BadRequest("The selected connection must be active, use the OpenAI provider, and target api.openai.com directly.");
         }
@@ -52,6 +63,11 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
     public async Task<IActionResult> TestConnection([FromBody] OpenAiTestRequest request, CancellationToken cancellationToken)
     {
         if (!IsAdministrator()) return Forbid();
+        var resolver = services.GetRequiredService<IOpenAiConnectionResolver>();
+        if (resolver.IsConfigurationManaged && request.ConnectionId is not null)
+            return BadRequest("The credential source is controlled by standard configuration.");
+        if (request.ConnectionId is null && !resolver.IsConfigurationManaged)
+            return BadRequest("Select an OpenAI connection to test.");
         if (request.ConnectionId == Guid.Empty) return BadRequest("Select an OpenAI connection to test.");
         var bytes = ReadTestImage();
         var result = await services.GetRequiredService<OpenAiWatermarkVerifier>()
@@ -66,7 +82,7 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
         return user is not null && (user.IsAdmin() || user.IsSuper());
     }
 
-    private bool IsAvailable() => services.GetService<OpenAiConnectionResolver>()?.IsAvailable is true;
+    private bool IsAvailable() => services.GetService<IOpenAiConnectionResolver>()?.IsAvailable is true;
 
     private static string GetTestMessage(TheBuilder.AIImageDisclosure.Watermarks.ImageWatermarkStatus status) => status switch
     {
@@ -90,13 +106,13 @@ public sealed class OpenAiProvenanceController(IServiceProvider services) : Umbr
 }
 
 /// <summary>Sanitized OpenAI fallback settings view.</summary>
-public sealed record OpenAiSettingsResponse(bool Enabled, Guid? ConnectionId, IReadOnlyList<OpenAiConnectionOption> Connections, bool Available, string Status);
+public sealed record OpenAiSettingsResponse(bool Enabled, Guid? ConnectionId, IReadOnlyList<OpenAiConnectionOption> Connections, bool Available, string Status, bool ManagedByConfiguration, bool ApiKeyConfigured);
 
 /// <summary>OpenAI fallback settings write model.</summary>
 public sealed record OpenAiSettingsRequest(bool Enabled, Guid? ConnectionId);
 
 /// <summary>Connection selection for the endpoint check.</summary>
-public sealed record OpenAiTestRequest(Guid ConnectionId);
+public sealed record OpenAiTestRequest(Guid? ConnectionId);
 
 /// <summary>Sanitized provenance test response.</summary>
 public sealed record OpenAiTestResponse(string Status, string Message);

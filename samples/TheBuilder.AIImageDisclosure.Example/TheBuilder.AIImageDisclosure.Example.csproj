@@ -13,6 +13,10 @@
 
   <ItemGroup Condition="'$(IncludeOpenAiSample)' == 'true'">
     <ProjectReference Include="../../src/TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeUmbracoAiSample)' == 'true'">
+    <ProjectReference Include="../../src/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI.csproj" />
     <PackageReference Include="Umbraco.AI" VersionOverride="18.3.0" />
     <PackageReference Include="Umbraco.AI.OpenAI" VersionOverride="18.2.0" />
   </ItemGroup>

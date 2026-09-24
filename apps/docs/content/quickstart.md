@@ -31,7 +31,7 @@ Restart the application. On first startup, the package creates the **AI image di
 
 ## Optional OpenAI watermark checks
 
-The core package works without OpenAI and checks C2PA credentials locally. You can add the [optional OpenAI watermark check](/openai-watermarks) for images without C2PA metadata. Install the separate integration package, then enable it as an administrator.
+The core package works without OpenAI and checks C2PA credentials locally. You can add the [optional OpenAI watermark check](/openai-watermarks) for images without C2PA metadata. Install the separate integration package, then configure the key and enable the check through app settings. Umbraco.AI is not required.
 
 Neither check guarantees that every AI-generated image will be identified. A missing credential or negative watermark result leaves the origin unknown. The package does not guess from the image's appearance.
 

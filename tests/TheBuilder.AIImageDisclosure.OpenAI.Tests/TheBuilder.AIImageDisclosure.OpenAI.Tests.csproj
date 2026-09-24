@@ -17,5 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj" />
+    <ProjectReference Include="../../src/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI.csproj" />
   </ItemGroup>
 </Project>

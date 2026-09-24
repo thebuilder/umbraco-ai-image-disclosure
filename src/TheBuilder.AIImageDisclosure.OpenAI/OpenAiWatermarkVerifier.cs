@@ -7,7 +7,7 @@ using TheBuilder.AIImageDisclosure.Watermarks;
 namespace TheBuilder.AIImageDisclosure.OpenAI;
 
 internal sealed class OpenAiWatermarkVerifier(
-    OpenAiConnectionResolver connectionResolver,
+    IOpenAiConnectionResolver connectionResolver,
     IHttpClientFactory httpClientFactory,
     OpenAiProvenanceSettingsStore settingsStore,
     ILogger<OpenAiWatermarkVerifier> logger,
@@ -26,6 +26,12 @@ internal sealed class OpenAiWatermarkVerifier(
         string mediaType,
         CancellationToken cancellationToken = default)
     {
+        if (connectionResolver.IsConfigurationManaged)
+        {
+            if (!connectionResolver.IsEnabled)
+                return new ImageWatermarkResult(ImageWatermarkStatus.Disabled, Provider);
+            return await VerifyConnectionAsync(null, openImage, mediaType, cancellationToken);
+        }
         var settings = settingsStore.Get();
         if (!settings.Enabled || settings.ConnectionId is not { } connectionId)
             return new ImageWatermarkResult(ImageWatermarkStatus.Disabled);
@@ -33,12 +39,14 @@ internal sealed class OpenAiWatermarkVerifier(
     }
 
     internal async Task<ImageWatermarkResult> VerifyConnectionAsync(
-        Guid connectionId,
+        Guid? connectionId,
         Func<Stream> openImage,
         string mediaType,
         CancellationToken cancellationToken = default)
     {
-        if (cooldowns.IsCoolingDown(connectionId)) return Unavailable("The OpenAI provenance check is temporarily unavailable.");
+        var sourceId = connectionResolver.IsConfigurationManaged ? Guid.Empty : connectionId;
+        if (sourceId is { } id && cooldowns.IsCoolingDown(id))
+            return Unavailable("The OpenAI provenance check is temporarily unavailable.");
         var connection = await connectionResolver.ResolveAsync(connectionId, cancellationToken);
         if (connection is null) return Unavailable("The selected OpenAI connection is unavailable or unsupported.");
         return await SendAsync(openImage, mediaType, connection, cancellationToken);

@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Umbraco.AI.Core.EditableModels;
 using NSubstitute;
@@ -355,7 +356,7 @@ public sealed class OpenAiWatermarkVerifierTests
             .BuildServiceProvider();
         var factory = Substitute.For<IHttpClientFactory>();
         factory.CreateClient(Arg.Any<string>()).Returns(new HttpClient(handler, disposeHandler: false));
-        return new OpenAiWatermarkVerifier(new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>()), factory,
+        return new OpenAiWatermarkVerifier(new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>(), new ConfigurationBuilder().Build()), factory,
             new OpenAiProvenanceSettingsStore(services.GetRequiredService<IServiceScopeFactory>()),
             Substitute.For<ILogger<OpenAiWatermarkVerifier>>(), requestTimeout);
     }
@@ -391,7 +392,7 @@ public sealed class OpenAiWatermarkVerifierTests
             .AddSingleton(modelResolver)
             .AddSingleton(providerCollection)
             .BuildServiceProvider();
-        return (new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>()), modelResolver);
+        return (new OpenAiConnectionResolver(services.GetRequiredService<IServiceScopeFactory>(), new ConfigurationBuilder().Build()), modelResolver);
     }
 
     private static uint PngCrc32(byte[] type, byte[] data)

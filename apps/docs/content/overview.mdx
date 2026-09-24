@@ -35,7 +35,7 @@ Editors can review and change the disclosure when metadata is absent or the clas
 
 The package does not replace or decorate Umbraco's Media Grid, table view, media pickers, or other thumbnail presentations. This keeps the extension compatible with Umbraco's native collection UI and with packages that provide their own collection views.
 
-Administrators can enable the [optional OpenAI watermark check](/openai-watermarks) in the **AI image disclosure** tab under **Settings**. It uses an existing Umbraco.AI OpenAI connection. Only images without C2PA metadata are eligible.
+Configure the [optional OpenAI watermark check](/openai-watermarks) through standard .NET app settings. Umbraco.AI is not required. A separate adapter can reuse an existing Umbraco.AI connection. The **AI image disclosure** tab under **Settings** shows the current configuration and provides a test button. Only images without C2PA metadata are eligible.
 
 ## What detection can establish
 

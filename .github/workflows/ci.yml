@@ -83,12 +83,16 @@ jobs:
           dotnet-version: 10.0.x
       - name: Build sample
         run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release
-      - name: Build sample with OpenAI integration
-        run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release -p:IncludeOpenAiSample=true -p:UmbracoAiCoreVersion=18.3.0
+      - name: Build sample with configured OpenAI key support
+        run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release -p:IncludeOpenAiSample=true
+      - name: Build sample with Umbraco AI adapter
+        run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release -p:IncludeUmbracoAiSample=true -p:UmbracoAiCoreVersion=18.3.0
       - name: Pack
         run: dotnet pack src/TheBuilder.AIImageDisclosure/TheBuilder.AIImageDisclosure.csproj --configuration Release --output artifacts
       - name: Pack optional OpenAI integration
         run: dotnet pack src/TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj --configuration Release --output artifacts
+      - name: Pack optional Umbraco AI adapter
+        run: dotnet pack src/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI.csproj --configuration Release --output artifacts
       - name: Validate archives
         run: for package in artifacts/*.nupkg; do unzip -t "$package"; done
       - name: Restore package in an Umbraco 17.1 consumer
@@ -98,8 +102,18 @@ jobs:
           dotnet add /tmp/package-consumer/PackageConsumer.csproj package Umbraco.Cms.Web.Common --version 17.1.0
           dotnet add /tmp/package-consumer/PackageConsumer.csproj package TheBuilder.AIImageDisclosure --version 0.1.0
           dotnet restore /tmp/package-consumer/PackageConsumer.csproj
-      - name: Restore optional package in an Umbraco 17.5 consumer
+      - name: Restore direct-key package without Umbraco AI on CMS 17.1
+        run: |
+          dotnet add /tmp/package-consumer/PackageConsumer.csproj package TheBuilder.AIImageDisclosure.OpenAI --version 0.1.0
+          dotnet restore /tmp/package-consumer/PackageConsumer.csproj
+          python3 - <<'PYTHON'
+          import json
+          with open('/tmp/package-consumer/obj/project.assets.json') as assets:
+              packages = json.load(assets)['libraries']
+          assert not any(name.startswith('Umbraco.AI') for name in packages), 'Direct-key package must not require Umbraco.AI'
+          PYTHON
+      - name: Restore optional Umbraco AI adapter in a CMS 17.5 consumer
         run: |
           dotnet add /tmp/package-consumer/PackageConsumer.csproj package Umbraco.Cms.Web.Common --version 17.5.0
-          dotnet add /tmp/package-consumer/PackageConsumer.csproj package TheBuilder.AIImageDisclosure.OpenAI --version 0.1.0
+          dotnet add /tmp/package-consumer/PackageConsumer.csproj package TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI --version 0.1.0
           dotnet restore /tmp/package-consumer/PackageConsumer.csproj

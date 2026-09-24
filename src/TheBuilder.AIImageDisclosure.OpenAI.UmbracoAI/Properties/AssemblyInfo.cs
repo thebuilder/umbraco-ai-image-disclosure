@@ -2,5 +2,3 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("TheBuilder.AIImageDisclosure.OpenAI.Tests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
-
-[assembly: InternalsVisibleTo("TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI")]
