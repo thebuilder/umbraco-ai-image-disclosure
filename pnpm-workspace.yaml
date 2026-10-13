@@ -1,2 +1,5 @@
 packages:
   - apps/docs
+minimumReleaseAgeExclude:
+  # Our own packages are trusted, so new releases install right away.
+  - '@thebuilder/*'
