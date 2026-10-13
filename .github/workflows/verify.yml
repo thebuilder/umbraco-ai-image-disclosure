@@ -1,0 +1,237 @@
+name: Verify packages
+
+on:
+  workflow_call:
+    inputs:
+      package-version:
+        description: Version applied to the NuGet packages and Umbraco manifest.
+        type: string
+        default: 0.0.0-ci
+      release-tag:
+        description: GitHub Release tag linked from NuGet release notes.
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build documentation
+        run: pnpm docs:build
+
+  dotnet:
+    name: .NET (Umbraco ${{ matrix.umbraco-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        umbraco-version:
+          - 17.1.0
+          - 17.*
+          - 18.*
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test package
+        run: >-
+          dotnet test tests/TheBuilder.AIImageDisclosure.Tests/TheBuilder.AIImageDisclosure.Tests.csproj
+          --configuration Release
+          '-p:UmbracoVersion=${{ matrix.umbraco-version }}'
+
+  openai:
+    name: OpenAI integration (Umbraco ${{ matrix.umbraco-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - umbraco-version: 17.5.0
+            ai-version: 17.3.0
+          - umbraco-version: 18.1.1
+            ai-version: 18.3.0
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test optional integration
+        run: >-
+          dotnet test tests/TheBuilder.AIImageDisclosure.OpenAI.Tests/TheBuilder.AIImageDisclosure.OpenAI.Tests.csproj
+          --configuration Release
+          '-p:UmbracoVersion=${{ matrix.umbraco-version }}'
+          '-p:UmbracoAiCoreVersion=${{ matrix.ai-version }}'
+
+  sample:
+    name: Sample host
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build sample host
+        run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release
+
+      - name: Build sample with configured OpenAI key support
+        run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release -p:IncludeOpenAiSample=true
+
+      - name: Build sample with Umbraco AI adapter
+        run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release -p:IncludeUmbracoAiSample=true -p:UmbracoAiCoreVersion=18.3.0
+
+  package:
+    name: Package
+    needs:
+      - docs
+      - dotnet
+      - openai
+      - sample
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Stamp Umbraco package manifest version
+        shell: bash
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+        run: |
+          manifest=src/TheBuilder.AIImageDisclosure/wwwroot/App_Plugins/TheBuilder.AIImageDisclosure/umbraco-package.json
+          jq --arg version "$PACKAGE_VERSION" '.version = $version' "$manifest" > "$RUNNER_TEMP/umbraco-package.json"
+          mv "$RUNNER_TEMP/umbraco-package.json" "$manifest"
+
+      - name: Pack NuGet packages
+        shell: bash
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+          RELEASE_TAG: ${{ inputs.release-tag }}
+        run: |
+          projects=(
+            src/TheBuilder.AIImageDisclosure/TheBuilder.AIImageDisclosure.csproj
+            src/TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj
+            src/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI/TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI.csproj
+          )
+
+          arguments=(
+            --configuration Release
+            --output artifacts
+            "-p:Version=$PACKAGE_VERSION"
+            -p:ContinuousIntegrationBuild=true
+          )
+
+          if [[ -n "$RELEASE_TAG" ]]; then
+            arguments+=("-p:PackageReleaseNotes=https://github.com/thebuilder/umbraco-ai-image-disclosure/releases/tag/$RELEASE_TAG")
+          fi
+
+          for project in "${projects[@]}"; do
+            dotnet pack "$project" "${arguments[@]}"
+          done
+
+      - name: Validate NuGet archives
+        shell: bash
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+          RELEASE_TAG: ${{ inputs.release-tag }}
+        run: |
+          for id in TheBuilder.AIImageDisclosure TheBuilder.AIImageDisclosure.OpenAI TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI; do
+            package="artifacts/$id.$PACKAGE_VERSION.nupkg"
+            test -f "$package"
+            unzip -t "$package"
+            entries="$(unzip -Z1 "$package")"
+            nuspec="$(unzip -p "$package" "$id.nuspec")"
+
+            grep -Fqx 'README.md' <<< "$entries"
+            grep -Fqx 'LICENSE' <<< "$entries"
+            grep -Fq "<version>$PACKAGE_VERSION</version>" <<< "$nuspec"
+
+            if [[ -n "$RELEASE_TAG" ]]; then
+              grep -Fq "<releaseNotes>https://github.com/thebuilder/umbraco-ai-image-disclosure/releases/tag/$RELEASE_TAG</releaseNotes>" <<< "$nuspec"
+            fi
+          done
+
+          package="artifacts/TheBuilder.AIImageDisclosure.$PACKAGE_VERSION.nupkg"
+          entries="$(unzip -Z1 "$package")"
+          plugin=staticwebassets/App_Plugins/TheBuilder.AIImageDisclosure
+          manifest_version="$(unzip -p "$package" "$plugin/umbraco-package.json" | jq -r '.version')"
+
+          grep -Fqx 'icon.png' <<< "$entries"
+          grep -Fqx 'THIRD-PARTY-NOTICES.md' <<< "$entries"
+          grep -Fqx "$plugin/umbraco-package.json" <<< "$entries"
+          grep -Fqx "$plugin/ai-disclosure-entity-sign.js" <<< "$entries"
+          grep -Fqx "$plugin/openai-settings-dashboard.js" <<< "$entries"
+          grep -Fqx "$plugin/rescan-dashboard.js" <<< "$entries"
+          test "$manifest_version" = "$PACKAGE_VERSION"
+
+      - name: Restore package in an Umbraco 17.1 consumer
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+        run: |
+          dotnet new classlib --name PackageConsumer --output "$RUNNER_TEMP/package-consumer" --framework net10.0
+          dotnet nuget add source "$GITHUB_WORKSPACE/artifacts" --name ai-image-disclosure-artifacts
+          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package Umbraco.Cms.Web.Common --version 17.1.0
+          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package TheBuilder.AIImageDisclosure --version "$PACKAGE_VERSION"
+          dotnet restore "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj"
+
+      - name: Restore direct-key package without Umbraco AI on CMS 17.1
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+        run: |
+          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package TheBuilder.AIImageDisclosure.OpenAI --version "$PACKAGE_VERSION"
+          dotnet restore "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj"
+          python3 - "$RUNNER_TEMP/package-consumer/obj/project.assets.json" <<'PYTHON'
+          import json, sys
+          with open(sys.argv[1]) as assets:
+              packages = json.load(assets)['libraries']
+          assert not any(name.startswith('Umbraco.AI') for name in packages), 'Direct-key package must not require Umbraco.AI'
+          PYTHON
+
+      - name: Restore optional Umbraco AI adapter in a CMS 17.5 consumer
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+        run: |
+          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package Umbraco.Cms.Web.Common --version 17.5.0
+          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI --version "$PACKAGE_VERSION"
+          dotnet restore "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TheBuilder.AIImageDisclosure-packages
+          path: artifacts/*.nupkg
+          if-no-files-found: error
