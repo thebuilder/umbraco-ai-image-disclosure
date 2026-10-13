@@ -21,7 +21,6 @@ export default defineConfig({
     tabs: [{ label: "Docs", path: "/", href: "/overview" }],
   },
   deployment: {
-    output: "static",
     site: "https://ai-image-disclosure.thebuilder.dk",
   },
   seo: {
@@ -33,7 +32,7 @@ export default defineConfig({
       display: "inter-tight",
     },
   },
-  ai: {
+  agents: {
     llmsTxt: true,
   },
 });
