@@ -145,6 +145,8 @@ pnpm docs:dev
 
 The integration suite contains a generated OpenAI PNG with embedded Content Credentials and a supplied Google manifest chain.
 
+NuGet publishing is documented in [docs/releasing.md](https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/docs/releasing.md).
+
 ## License
 
 MIT. See [LICENSE](LICENSE) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
