@@ -21,12 +21,10 @@ Add this section to `appsettings.json`:
 
 ```json
 {
-  "TheBuilder": {
-    "AIImageDisclosure": {
-      "OpenAI": {
-        "Enabled": false,
-        "ApiKey": ""
-      }
+  "AIImageDisclosure": {
+    "OpenAI": {
+      "Enabled": false,
+      "ApiKey": ""
     }
   }
 }
@@ -35,11 +33,11 @@ Add this section to `appsettings.json`:
 Supply the key through your hosting environment or .NET user secrets instead of committing it to source control. The environment variable names are:
 
 ```text
-TheBuilder__AIImageDisclosure__OpenAI__ApiKey
-TheBuilder__AIImageDisclosure__OpenAI__Enabled
+AIImageDisclosure__OpenAI__ApiKey
+AIImageDisclosure__OpenAI__Enabled
 ```
 
-For local development, the user-secret key is `TheBuilder:AIImageDisclosure:OpenAI:ApiKey`. You can also set `OrganizationId` in the same configuration section if your OpenAI account requires it.
+For local development, the user-secret key is `AIImageDisclosure:OpenAI:ApiKey`. You can also set `OrganizationId` in the same configuration section if your OpenAI account requires it.
 
 Set `Enabled` to `true` to allow eligible Media library images to be sent to OpenAI. Supplying a key alone does not enable automatic checks.
 

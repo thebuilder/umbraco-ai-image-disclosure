@@ -53,7 +53,7 @@ aiDisclosureSource: C2PA
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
-Images classified as `generated` or `modified` receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `TheBuilder:AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
+Images classified as `generated` or `modified` receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
 
 ![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
 

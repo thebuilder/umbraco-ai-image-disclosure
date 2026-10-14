@@ -7,7 +7,7 @@ internal sealed class OpenAiVerificationPolicy(
     OpenAiProvenanceSettingsStore settingsStore,
     IOpenAiConnectionSource connectionSource)
 {
-    internal const string Prefix = "TheBuilder:AIImageDisclosure:OpenAI";
+    internal const string Prefix = "AIImageDisclosure:OpenAI";
 
     public bool IsConfigurationManaged => HasConfigurationKey("Enabled") || HasConfigurationKey("ApiKey");
     public bool HasConfiguredApiKey => !string.IsNullOrWhiteSpace(configuration[$"{Prefix}:ApiKey"]);

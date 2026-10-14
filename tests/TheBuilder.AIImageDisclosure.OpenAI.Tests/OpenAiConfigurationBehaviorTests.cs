@@ -63,8 +63,8 @@ public sealed class OpenAiConfigurationBehaviorTests
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["TheBuilder:AIImageDisclosure:OpenAI:Enabled"] = "true",
-            ["TheBuilder:AIImageDisclosure:OpenAI:ApiKey"] = "configured-secret",
+            ["AIImageDisclosure:OpenAI:Enabled"] = "true",
+            ["AIImageDisclosure:OpenAI:ApiKey"] = "configured-secret",
         }).Build();
         using var services = new ServiceCollection().BuildServiceProvider();
         var source = new UmbracoAiResolver(services.GetRequiredService<IServiceScopeFactory>());
@@ -119,9 +119,9 @@ public sealed class OpenAiConfigurationBehaviorTests
     {
         var values = new Dictionary<string, string?>();
         if (enabled is { } enabledValue)
-            values["TheBuilder:AIImageDisclosure:OpenAI:Enabled"] = enabledValue.ToString();
+            values["AIImageDisclosure:OpenAI:Enabled"] = enabledValue.ToString();
         if (key is not null)
-            values["TheBuilder:AIImageDisclosure:OpenAI:ApiKey"] = key;
+            values["AIImageDisclosure:OpenAI:ApiKey"] = key;
         return new OpenAiVerificationPolicy(new ConfigurationBuilder().AddInMemoryCollection(values).Build(), Store(), new OpenAiConnectionSourceForTest());
     }
 

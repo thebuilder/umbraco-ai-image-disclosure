@@ -132,7 +132,7 @@ export default class OpenAiDisclosureSettings extends UmbLitElement {
         ${this.#managedByConfiguration ? html`
         <div class="field">
           <p>${this.#apiKeyConfigured ? 'API key configured.' : 'No API key configured.'} The key stays on the server.</p>
-          <p>Managed through app settings. Change <code>TheBuilder:AIImageDisclosure:OpenAI:Enabled</code> on the server to turn automatic checks on or off.</p>
+          <p>Managed through app settings. Change <code>AIImageDisclosure:OpenAI:Enabled</code> on the server to turn automatic checks on or off.</p>
         </div>` : html`
         <div class="field">
           <label class="field-label" id="connection-label" for="connection">OpenAI connection</label>
@@ -145,7 +145,7 @@ export default class OpenAiDisclosureSettings extends UmbLitElement {
         </div>`}
         <p>Enabling this sends eligible images to OpenAI. The verification endpoint is not eligible for Zero Data Retention.</p>
         <p>A detected watermark is evidence of AI use; it does not distinguish a fully generated image from an AI edit. A negative result leaves the origin undetermined.</p>
-        ${!this.#available && !this.#busy && !this.#managedByConfiguration ? html`<p>Install <code>TheBuilder.AIImageDisclosure.OpenAI</code> and set <code>TheBuilder:AIImageDisclosure:OpenAI:ApiKey</code> in app settings. To reuse an Umbraco.AI connection, also install <code>TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI</code>.</p>` : ''}
+        ${!this.#available && !this.#busy && !this.#managedByConfiguration ? html`<p>Install <code>TheBuilder.AIImageDisclosure.OpenAI</code> and set <code>AIImageDisclosure:OpenAI:ApiKey</code> in app settings. To reuse an Umbraco.AI connection, also install <code>TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI</code>.</p>` : ''}
         <div class="actions">
           <uui-button look="primary" type="submit" label="Save" ?disabled=${this.#busy || !this.#available || this.#managedByConfiguration}>Save</uui-button>
           <uui-button look="secondary" type="button" label="Test verification" ?disabled=${this.#busy || !this.#available || (this.#managedByConfiguration ? !this.#apiKeyConfigured : !this.#connectionId)} @click=${this.#test}>Test verification</uui-button>
