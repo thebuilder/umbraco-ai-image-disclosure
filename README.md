@@ -8,10 +8,10 @@
 
 <p align="center">
   <a href="https://www.nuget.org/packages/TheBuilder.AIImageDisclosure"><img src="https://img.shields.io/nuget/vpre/TheBuilder.AIImageDisclosure?style=flat-square" alt="NuGet version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure?style=flat-square" alt="MIT license"></a>
+  <a href="https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure?style=flat-square" alt="MIT license"></a>
 </p>
 
-![AI disclosure properties on an Umbraco image](apps/docs/content/screenshots/media-details.png)
+![AI disclosure properties on an Umbraco image](https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/content/screenshots/media-details.png)
 
 AI Image Disclosure reads C2PA Content Credentials when you upload or replace a file on Umbraco's default `Image` media type. It checks the signed claims for evidence of AI generation or editing. Editors can review or override the result. Existing media is not scanned automatically.
 
@@ -55,10 +55,8 @@ Backoffice signs are enabled by default. Umbraco's current Media Grid cards do n
 
 ```json
 {
-  "TheBuilder": {
-    "AIImageDisclosure": {
-      "ShowBackofficeBadges": false
-    }
+  "AIImageDisclosure": {
+    "ShowBackofficeBadges": false
   }
 }
 ```
@@ -69,22 +67,20 @@ The core package works without OpenAI. To add the check, install `TheBuilder.AII
 
 ```json
 {
-  "TheBuilder": {
-    "AIImageDisclosure": {
-      "OpenAI": {
-        "Enabled": false,
-        "ApiKey": ""
-      }
+  "AIImageDisclosure": {
+    "OpenAI": {
+      "Enabled": false,
+      "ApiKey": ""
     }
   }
 }
 ```
 
-Supply the key through .NET user secrets or `TheBuilder__AIImageDisclosure__OpenAI__ApiKey` in your hosting environment. Set `Enabled` to `true` to allow image uploads. A key alone does not enable the check. The Settings panel shows configuration status and provides a test using a bundled sample image, without exposing the key.
+Supply the key through .NET user secrets or `AIImageDisclosure__OpenAI__ApiKey` in your hosting environment. Set `Enabled` to `true` to allow image uploads. A key alone does not enable the check. The Settings panel shows configuration status and provides a test using a bundled sample image, without exposing the key.
 
 To reuse an existing Umbraco.AI connection, install the separate `TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI` adapter and matching Umbraco.AI provider packages. The adapter requires CMS 17.5 or later on 17.x, or CMS 18.x. The direct-key package supports CMS 17.1 through 18.x. Explicit OpenAI configuration settings take precedence over saved connection settings.
 
-Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. When OpenAI reports a watermark, the package stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign. This does not distinguish generation from editing. A negative result does not prove the image is human-made. See the [setup and privacy notes](apps/docs/content/openai-watermarks.md).
+Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. When OpenAI reports a watermark, the package stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign. This does not distinguish generation from editing. A negative result does not prove the image is human-made. See the [setup and privacy notes](https://ai-image-disclosure.thebuilder.dk/openai-watermarks).
 
 ## Classification policy
 
@@ -149,4 +145,4 @@ NuGet publishing is documented in [docs/releasing.md](https://github.com/thebuil
 
 ## License
 
-MIT. See [LICENSE](LICENSE) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+MIT. See [LICENSE](https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/LICENSE) and [THIRD-PARTY-NOTICES.md](https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/THIRD-PARTY-NOTICES.md).

@@ -8,7 +8,7 @@ internal static class Constants
     internal const string AiWatermarkPropertyDescription = "Read-only watermark evidence. A detected watermark does not distinguish full AI generation from partial editing.";
 
     public const string PackageName = "TheBuilder.AIImageDisclosure";
-    public const string ShowBackofficeBadgesSetting = "TheBuilder:AIImageDisclosure:ShowBackofficeBadges";
+    public const string ShowBackofficeBadgesSetting = "AIImageDisclosure:ShowBackofficeBadges";
     public const string GeneratedFlagAlias = PackageName + ".Generated";
     public const string ModifiedFlagAlias = PackageName + ".Modified";
     public const string DefaultImageMediaTypeAlias = "Image";
