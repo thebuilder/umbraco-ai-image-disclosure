@@ -3,7 +3,8 @@
 import PageLayout from "blume/components/layout/PageLayout.astro";
 import data from "blume:data";
 import { loadUmbracoPackages } from "@thebuilder/umbraco-docs";
-import { EcosystemSection, InstallCommand, LandingRoot } from "@thebuilder/umbraco-docs/astro";
+import { EcosystemSection, InstallCommand, LandingHero, LandingRoot } from "@thebuilder/umbraco-docs/astro";
+import HeroParticles from "@thebuilder/umbraco-docs/components/HeroParticles";
 
 import "./_home/home.css";
 
@@ -15,10 +16,9 @@ const ecosystemPackages = await loadUmbracoPackages();
 
 const { config } = data;
 const installCommand = "dotnet add package TheBuilder.AIImageDisclosure";
-const repoUrl = "https://github.com/thebuilder/umbraco-ai-image-disclosure";
-const nugetUrl = "https://www.nuget.org/packages/TheBuilder.AIImageDisclosure";
-const marketplaceUrl =
-  "https://marketplace.umbraco.com/package/thebuilder.aiimagedisclosure";
+const repoUrl = aiImageDisclosurePackage.links.github;
+const nugetUrl = aiImageDisclosurePackage.links.nuget;
+const marketplaceUrl = aiImageDisclosurePackage.links.marketplace;
 const deliveryResponse = `{
   "properties": {
     "aiDisclosure": "generated",
@@ -63,33 +63,27 @@ const features = [
   }}
 >
   <LandingRoot class="home">
-    <section class="hero">
-      <div class="hero__glow" aria-hidden="true"></div>
-      <div class="shell hero__inner">
-        <img class="hero__mark reveal" src="/logo-mark.svg" width="72" height="72" alt="AI Image Disclosure" style="--i: 0" decoding="async" />
-        <p class="eyebrow reveal" style="--i: 1">C2PA Content Credentials for Umbraco</p>
-        <h1 class="hero__title reveal" style="--i: 2">
-          Check images for <span>evidence of AI use.</span>
-        </h1>
-        <p class="hero__lede reveal" style="--i: 3">
-          Read signed C2PA claims about AI use in Umbraco images. Editors can review and change the result. Add the optional OpenAI check to look for supported watermarks when credentials are absent.
-        </p>
-        <div class="hero__actions reveal" style="--i: 4">
-          <a class="button button--primary" href="/quickstart">Get started</a>
-          <a class="button button--secondary" href={repoUrl} rel="noopener">View on GitHub</a>
-        </div>
-        <div class="install-shell reveal" style="--i: 5">
-          <InstallCommand command={installCommand} />
-        </div>
-        <p class="hero__compat reveal" style="--i: 6">Umbraco CMS 17.1 through 18.x · .NET 10</p>
-      </div>
+    <LandingHero
+      layout="split"
+      eyebrow="C2PA Content Credentials for Umbraco"
+      title="Check images for"
+      accent="evidence of AI use."
+      description="Read signed C2PA claims about AI use in Umbraco images. Editors can review and change the result. Add the optional OpenAI check to look for supported watermarks when credentials are absent."
+      compatibility="Umbraco CMS 17.1 through 18.x · .NET 10"
+    >
+      <HeroParticles slot="background" logo="/logo-mark.svg" />
+      <Fragment slot="actions">
+        <a class="button button--primary" href="/quickstart">Get started</a>
+        <a class="button button--secondary" href={repoUrl} rel="noopener">View on GitHub</a>
+      </Fragment>
+      <InstallCommand slot="install" command={installCommand} />
       <div class="shell">
         <figure class="screenshot reveal" style="--i: 6">
           <div class="screenshot__bar" aria-hidden="true"><span></span><span></span><span></span></div>
           <img src={backofficeShot.src} width={backofficeShot.width} height={backofficeShot.height} alt="AI disclosure properties on an image in the Umbraco Media library" loading="eager" decoding="async" />
         </figure>
       </div>
-    </section>
+    </LandingHero>
 
     <section class="shell trust reveal">
       <p>Neither check guarantees that every AI-generated image will be identified. Missing credentials or a negative watermark result leave the origin unknown. The package does not guess from how an image looks.</p>
