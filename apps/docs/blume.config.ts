@@ -1,3 +1,4 @@
+import { docsTheme } from "@thebuilder/umbraco-docs";
 import { defineConfig } from "blume";
 import { aiImageDisclosurePackage } from "./umbraco-package";
 
@@ -26,12 +27,8 @@ export default defineConfig({
   seo: {
     og: { enabled: false },
   },
-  theme: {
-    accent: "#7557e8",
-    fonts: {
-      display: "inter-tight",
-    },
-  },
+  // The docs family's shared accent and fonts, so every package site looks alike.
+  theme: { ...docsTheme },
   agents: {
     llmsTxt: true,
   },
