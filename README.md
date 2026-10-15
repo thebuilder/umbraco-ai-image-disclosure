@@ -1,15 +1,18 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/icon.png" width="128" height="128" alt="AI Image Disclosure logo">
+  <img src="https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/public/logo-mark.svg" width="112" height="112" alt="AI Image Disclosure logo" />
 </p>
 
 <h1 align="center">AI Image Disclosure for Umbraco</h1>
 
-<p align="center">Check Umbraco images for recorded evidence of AI use.</p>
-
 <p align="center">
-  <a href="https://www.nuget.org/packages/TheBuilder.AIImageDisclosure"><img src="https://img.shields.io/nuget/vpre/TheBuilder.AIImageDisclosure?style=flat-square" alt="NuGet version"></a>
-  <a href="https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure?style=flat-square" alt="MIT license"></a>
+  Check Umbraco images for signed C2PA evidence of AI use.<br />
+  Editors review the result, and your website decides how to label it.
 </p>
+
+[![NuGet version](https://img.shields.io/nuget/vpre/TheBuilder.AIImageDisclosure)](https://www.nuget.org/packages/TheBuilder.AIImageDisclosure)
+[![NuGet downloads](https://img.shields.io/nuget/dt/TheBuilder.AIImageDisclosure)](https://www.nuget.org/packages/TheBuilder.AIImageDisclosure)
+[![Umbraco Marketplace](https://img.shields.io/badge/Umbraco-Marketplace-3544b1)](https://marketplace.umbraco.com/package/thebuilder.aiimagedisclosure)
+[![License](https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure)](https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/LICENSE)
 
 ![AI disclosure properties on an Umbraco image](https://raw.githubusercontent.com/thebuilder/umbraco-ai-image-disclosure/refs/heads/main/apps/docs/content/screenshots/media-details.png)
 
