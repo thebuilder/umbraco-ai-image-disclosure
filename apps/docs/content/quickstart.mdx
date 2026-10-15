@@ -12,12 +12,12 @@ seo:
 - A supported native platform listed under [Operations](/operations)
 - Umbraco's default media type with the exact alias `Image`
 
-> **Package scope**
->
-> - Processes new uploads and file replacements automatically.
-> - Existing media is scanned only when an administrator starts the Media section's **AI disclosure scan** dashboard.
-> - Uses Umbraco's native signs without replacing its Media collection views.
-> - Does not add disclosure labels to public pages.
+:::note[Package scope]
+- Processes new uploads and file replacements automatically.
+- Existing media is scanned only when an administrator starts the Media section's **AI disclosure scan** dashboard.
+- Uses Umbraco's native signs without replacing its Media collection views.
+- Does not add disclosure labels to public pages.
+:::
 
 Installation stops rather than overwriting an existing data type or media property that uses one of the package's aliases with an incompatible definition.
 
@@ -37,19 +37,26 @@ Neither check guarantees that every AI-generated image will be identified. A mis
 
 ## Test an image
 
-1. Open the **Media** section.
-2. [Download the known-good C2PA test image](/test-assets/openai-generated-c2pa.png).
-3. Upload the image in the Media section. It must use Umbraco's default `Image` media type.
-4. Save the media item.
-5. Confirm that **AI disclosure**, **AI generator**, and **AI disclosure source** contain the expected values.
+<Steps>
+  <Step title="Download the test image">
+    [Download the known-good C2PA test image](/test-assets/openai-generated-c2pa.png).
+  </Step>
+  <Step title="Upload it">
+    Open the **Media** section and upload the image. It must use Umbraco's default `Image` media type.
+  </Step>
+  <Step title="Save the media item">
+    Detection runs during the save.
+  </Step>
+  <Step title="Check the values">
+    Confirm that **AI disclosure**, **AI generator**, and **AI disclosure source** contain the expected values:
 
-The expected values are:
-
-```text
-aiDisclosure: generated
-aiGenerator: gpt-image
-aiDisclosureSource: C2PA
-```
+    ```text
+    aiDisclosure: generated
+    aiGenerator: gpt-image
+    aiDisclosureSource: C2PA
+    ```
+  </Step>
+</Steps>
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
