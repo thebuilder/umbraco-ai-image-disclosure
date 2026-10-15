@@ -37,26 +37,19 @@ Neither check guarantees that every AI-generated image will be identified. A mis
 
 ## Test an image
 
-<Steps>
-  <Step title="Download the test image">
-    [Download the known-good C2PA test image](/test-assets/openai-generated-c2pa.png).
-  </Step>
-  <Step title="Upload it">
-    Open the **Media** section and upload the image. It must use Umbraco's default `Image` media type.
-  </Step>
-  <Step title="Save the media item">
-    Detection runs during the save.
-  </Step>
-  <Step title="Check the values">
-    Confirm that **AI disclosure**, **AI generator**, and **AI disclosure source** contain the expected values:
+1. Open the **Media** section.
+2. [Download the known-good C2PA test image](/test-assets/openai-generated-c2pa.png).
+3. Upload the image in the Media section. It must use Umbraco's default `Image` media type.
+4. Save the media item.
+5. Confirm that **AI disclosure**, **AI generator**, and **AI disclosure source** contain the expected values.
 
-    ```text
-    aiDisclosure: generated
-    aiGenerator: gpt-image
-    aiDisclosureSource: C2PA
-    ```
-  </Step>
-</Steps>
+The expected values are:
+
+```text
+aiDisclosure: generated
+aiGenerator: gpt-image
+aiDisclosureSource: C2PA
+```
 
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
