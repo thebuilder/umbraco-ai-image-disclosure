@@ -5,6 +5,7 @@ import data from "blume:data";
 import { loadUmbracoPackages } from "@thebuilder/umbraco-docs";
 import { EcosystemSection, InstallCommand, LandingHero, LandingRoot } from "@thebuilder/umbraco-docs/astro";
 import HeroParticles from "@thebuilder/umbraco-docs/components/HeroParticles";
+import CodeBlock from "blume/components/content/CodeBlock.astro";
 
 import "./_home/home.css";
 
@@ -150,10 +151,9 @@ const features = [
         <p>Request the media properties to display a label on your website. Watermark results are separate from the generated or modified classification.</p>
         <a class="button button--secondary" href="/delivery-api">Read the API guide</a>
       </div>
-      <figure class="code-preview reveal" style="--i: 1">
-        <figcaption>Example media properties <span>JSON</span></figcaption>
-        <pre tabindex="0"><code>{deliveryResponse}</code></pre>
-      </figure>
+      <div class="code-preview reveal" style="--i: 1">
+        <CodeBlock lang="json" title="Example media properties" code={deliveryResponse} />
+      </div>
     </section>
 
     <section class="shell closing reveal">

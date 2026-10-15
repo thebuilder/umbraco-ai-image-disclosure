@@ -7,7 +7,7 @@ seo:
 
 Umbraco's Media Delivery API is disabled by default, even when the Content Delivery API is enabled. Enable both the parent API and its media section in `appsettings.json`:
 
-```json
+```json appsettings.json
 {
   "Umbraco": {
     "CMS": {
@@ -32,7 +32,7 @@ GET /umbraco/delivery/api/v2/media/item/{mediaId}?fields=properties[aiDisclosure
 
 A relevant response fragment contains values like:
 
-```json
+```json Response
 {
   "properties": {
     "aiDisclosure": "generated",

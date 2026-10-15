@@ -17,9 +17,11 @@ Install the optional package. Umbraco.AI is not required:
 dotnet add package TheBuilder.AIImageDisclosure.OpenAI
 ```
 
-Add this section to `appsettings.json`:
+Add this section to `appsettings.json`, or set the same values as environment variables:
 
-```json
+<CodeGroup>
+
+```json appsettings.json
 {
   "AIImageDisclosure": {
     "OpenAI": {
@@ -30,12 +32,14 @@ Add this section to `appsettings.json`:
 }
 ```
 
-Supply the key through your hosting environment or .NET user secrets instead of committing it to source control. The environment variable names are:
-
-```text
+```text Environment variables
 AIImageDisclosure__OpenAI__ApiKey
 AIImageDisclosure__OpenAI__Enabled
 ```
+
+</CodeGroup>
+
+Supply the key through your hosting environment or .NET user secrets instead of committing it to source control.
 
 For local development, the user-secret key is `AIImageDisclosure:OpenAI:ApiKey`. You can also set `OrganizationId` in the same configuration section if your OpenAI account requires it.
 
@@ -59,11 +63,23 @@ If you used the earlier preview integration, add this adapter to keep using your
 
 Restart Umbraco after installing. Create an active OpenAI connection in Umbraco.AI, or use one you already have. The connection must target the direct OpenAI API. Azure OpenAI and custom compatible endpoints are not supported for this check.
 
-1. Open the **AI image disclosure** tab under **Settings** as an administrator.
-2. Select an existing OpenAI connection.
-3. Use **Test verification** to check the provenance endpoint with a bundled sample image. This can send the sample even while automatic checks are disabled. It never uses an image from your Media library.
-4. Review the notice about sending eligible images to OpenAI.
-5. Enable **OpenAI watermark fallback** and choose **Save**.
+<Steps>
+  <Step title="Open the settings tab">
+    Open the **AI image disclosure** tab under **Settings** as an administrator.
+  </Step>
+  <Step title="Select a connection">
+    Select an existing OpenAI connection.
+  </Step>
+  <Step title="Test verification">
+    Use **Test verification** to check the provenance endpoint with a bundled sample image. This can send the sample even while automatic checks are disabled. It never uses an image from your Media library.
+  </Step>
+  <Step title="Review the notice">
+    Review the notice about sending eligible images to OpenAI.
+  </Step>
+  <Step title="Enable the check">
+    Enable **OpenAI watermark fallback** and choose **Save**.
+  </Step>
+</Steps>
 
 Turning the check off keeps the selected connection. To clear it, turn the check off, select the empty connection option, and save.
 
@@ -97,7 +113,11 @@ The watermark result does not distinguish generation from editing. The package s
 
 ## Privacy and failures
 
-Enabling verification sends the original eligible image to OpenAI's `content_provenance_checks` endpoint. Review OpenAI's data terms before enabling it. This endpoint is not eligible for Zero Data Retention. C2PA inspection remains local and never fetches remote manifests.
+:::warning
+Enabling verification sends the original eligible image to OpenAI's `content_provenance_checks` endpoint. Review OpenAI's data terms before enabling it. This endpoint is not eligible for Zero Data Retention.
+:::
+
+C2PA inspection remains local and never fetches remote manifests.
 
 Verification has a 10-second request timeout and limits the response size. Failures leave the classification undetermined and do not block a media save. Disabled or unavailable verification does not reopen the image for a remote check.
 
