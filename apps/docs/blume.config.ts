@@ -1,5 +1,6 @@
 import { docsTheme } from "@thebuilder/umbraco-docs";
 import { defineConfig } from "blume";
+import { vercel } from "blume/analytics";
 import { aiImageDisclosurePackage } from "./umbraco-package";
 
 export default defineConfig({
@@ -27,6 +28,7 @@ export default defineConfig({
   seo: {
     og: { enabled: false },
   },
+  analytics: [vercel()],
   // The docs family's shared accent and fonts, so every package site looks alike.
   theme: { ...docsTheme },
   agents: {
