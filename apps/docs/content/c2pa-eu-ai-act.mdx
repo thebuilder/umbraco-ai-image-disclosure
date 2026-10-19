@@ -45,6 +45,18 @@ The European Commission provides freely usable icons for **Fully AI-Generated** 
 
 AI Image Disclosure connects the two layers:
 
+```mermaid
+flowchart TD
+    F[An image is uploaded] --> C{C2PA AI evidence?}
+    C -->|Fully generated| G[generated]
+    C -->|Partly modified| M[modified]
+    C -->|None| E[empty]
+    G --> R[An editor reviews or corrects it]
+    M --> R
+    E --> R
+    R --> L[The frontend reads it from the<br/>Delivery API and shows a label]
+```
+
 1. C2PA provides signed, machine-readable evidence when it is present and valid.
 2. Umbraco stores a simple `generated`, `modified`, or empty value.
 3. Editors can correct or add the disclosure when file-level evidence is unavailable.
