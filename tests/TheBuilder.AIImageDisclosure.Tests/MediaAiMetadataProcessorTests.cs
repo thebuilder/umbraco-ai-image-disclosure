@@ -24,9 +24,9 @@ public sealed class MediaAiMetadataProcessorTests
         var result = await processor.InspectAsync(media, TestContext.Current.CancellationToken);
 
         Assert.Equal(AiImageDetectionStatus.InvalidMetadata, result.Status);
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, null);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
-        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, null);
         media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, "Image could not be read");
     }
 
@@ -37,9 +37,9 @@ public sealed class MediaAiMetadataProcessorTests
 
         MediaAiMetadataProcessor.Apply(media, AiImageMetadata.Generated("gpt-image"));
 
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, DropdownValue.Encode(Constants.GeneratedDisclosureValue));
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "gpt-image");
-        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.C2paDisclosureSourceValue));
         media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, string.Empty);
     }
 
@@ -50,9 +50,9 @@ public sealed class MediaAiMetadataProcessorTests
 
         MediaAiMetadataProcessor.Apply(media, AiImageMetadata.Modified("Adobe Firefly"));
 
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.ModifiedDisclosureValue);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, DropdownValue.Encode(Constants.ModifiedDisclosureValue));
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "Adobe Firefly");
-        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.C2paDisclosureSourceValue));
     }
 
     [Fact]
@@ -62,9 +62,9 @@ public sealed class MediaAiMetadataProcessorTests
 
         MediaAiMetadataProcessor.Apply(media, AiImageMetadata.NotDetected);
 
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, null);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
-        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, null);
         media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, "No AI declaration");
     }
 
@@ -75,9 +75,9 @@ public sealed class MediaAiMetadataProcessorTests
 
         MediaAiMetadataProcessor.Apply(media, AiImageMetadata.InvalidMetadata);
 
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, null);
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
-        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.Received(1).SetValue(Constants.AiDisclosureSourcePropertyAlias, null);
         media.Received(1).SetValue(Constants.AiDisclosureReasonPropertyAlias, "Invalid content credentials");
     }
 
@@ -91,7 +91,7 @@ public sealed class MediaAiMetadataProcessorTests
 
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.ManualDisclosureSourceValue);
+            DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
         media.DidNotReceive().SetValue(Constants.AiDisclosurePropertyAlias, Arg.Any<object?>());
         media.DidNotReceive().SetValue(Constants.AiGeneratorPropertyAlias, Arg.Any<object?>());
     }
@@ -104,11 +104,11 @@ public sealed class MediaAiMetadataProcessorTests
 
         MediaAiMetadataProcessor.Apply(media, AiImageMetadata.Generated("gpt-image"));
 
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, DropdownValue.Encode(Constants.GeneratedDisclosureValue));
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "gpt-image");
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.C2paDisclosureSourceValue);
+            DropdownValue.Encode(Constants.C2paDisclosureSourceValue));
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public sealed class MediaAiMetadataProcessorTests
 
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.ManualDisclosureSourceValue);
+            DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
         media.DidNotReceive().SetValue(Constants.AiDisclosurePropertyAlias, Arg.Any<object?>());
         media.DidNotReceive().SetValue(Constants.AiGeneratorPropertyAlias, Arg.Any<object?>());
     }
@@ -137,11 +137,11 @@ public sealed class MediaAiMetadataProcessorTests
 
         MediaAiMetadataProcessor.ApplyAutomatic(media, AiImageMetadata.Generated("gpt-image"));
 
-        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
+        media.Received(1).SetValue(Constants.AiDisclosurePropertyAlias, DropdownValue.Encode(Constants.GeneratedDisclosureValue));
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, "gpt-image");
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.C2paDisclosureSourceValue);
+            DropdownValue.Encode(Constants.C2paDisclosureSourceValue));
     }
 
     [Theory]
@@ -164,7 +164,7 @@ public sealed class MediaAiMetadataProcessorTests
 
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.ManualDisclosureSourceValue);
+            DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
         media.DidNotReceive().SetValue(Constants.AiDisclosurePropertyAlias, Arg.Any<object?>());
         media.DidNotReceive().SetValue(Constants.AiGeneratorPropertyAlias, Arg.Any<object?>());
     }

@@ -39,7 +39,7 @@ public sealed class MediaSavingHandlerTests
         await processor.DidNotReceive().InspectAsync(Arg.Any<IMedia>(), TestContext.Current.CancellationToken);
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.ManualDisclosureSourceValue);
+            DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public sealed class MediaSavingHandlerTests
         media.Received(1).SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
         media.Received(1).SetValue(
             Constants.AiDisclosureSourcePropertyAlias,
-            Constants.ManualDisclosureSourceValue);
+            DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public sealed class MediaSavingHandlerTests
             Substitute.For<ILogger<AiImageDisclosureMediaSavingHandler>>());
         await handler.HandleAsync(new MediaSavingNotification([media], new EventMessages()), TestContext.Current.CancellationToken);
         await processor.DidNotReceive().ResumeAutomaticDetectionAsync(media, TestContext.Current.CancellationToken);
-        media.Received().SetValue(Constants.AiDisclosureSourcePropertyAlias, "Manual");
+        media.Received().SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
     }
 
     private static IMedia CreateMedia(bool isImage, bool fileDirty)

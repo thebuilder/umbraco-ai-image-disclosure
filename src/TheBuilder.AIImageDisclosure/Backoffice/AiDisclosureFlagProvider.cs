@@ -20,9 +20,6 @@ internal sealed class AiDisclosureFlagProvider(
     private readonly HashSet<string> detectedWatermarks = watermarkProviders.Select(provider => provider.DetectedValue)
         .Append(Constants.OpenAiWatermarkDetected).Append("AI watermark detected").ToHashSet(StringComparer.Ordinal);
 
-    private const string GeneratedDropdownValue = "[\"generated\"]";
-    private const string ModifiedDropdownValue = "[\"modified\"]";
-
     public bool CanProvideFlags<TItem>()
         where TItem : IHasFlags =>
         typeof(TItem) == typeof(MediaTreeItemResponseModel) ||
@@ -48,14 +45,12 @@ internal sealed class AiDisclosureFlagProvider(
                 continue;
             }
 
-            switch (values.Disclosure)
+            switch (DropdownValue.Decode(values.Disclosure))
             {
                 case Constants.GeneratedDisclosureValue:
-                case GeneratedDropdownValue:
                     item.AddFlag(Constants.GeneratedFlagAlias);
                     break;
                 case Constants.ModifiedDisclosureValue:
-                case ModifiedDropdownValue:
                     item.AddFlag(Constants.ModifiedFlagAlias);
                     break;
                 default:

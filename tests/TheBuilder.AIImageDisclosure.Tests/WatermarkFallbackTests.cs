@@ -46,8 +46,8 @@ public sealed class WatermarkFallbackTests
         await processor.InspectAsync(media, TestContext.Current.CancellationToken);
 
         await verifier.DidNotReceiveWithAnyArgs().VerifyAsync(default!, default!, TestContext.Current.CancellationToken);
-        Assert.Equal("Manual", values[Constants.AiDisclosureSourcePropertyAlias]);
-        Assert.Equal("modified", values[Constants.AiDisclosurePropertyAlias]);
+        Assert.Equal("Manual", DropdownValue.Decode(values[Constants.AiDisclosureSourcePropertyAlias] as string));
+        Assert.Equal("modified", DropdownValue.Decode(values[Constants.AiDisclosurePropertyAlias] as string));
         Assert.Equal(string.Empty, values[Constants.AiWatermarkPropertyAlias]);
     }
 

@@ -115,9 +115,9 @@ public sealed class MediaAiRescanServiceTests
         Assert.Equal(1, result.Scanned);
         Assert.Equal(1, result.SkippedManual);
         Assert.Equal(0, result.Failed);
-        Assert.Equal("C2PA", automaticValues[Constants.AiDisclosureSourcePropertyAlias]);
-        Assert.Equal("modified", automaticValues[Constants.AiDisclosurePropertyAlias]);
-        Assert.Equal("Manual", manualValues[Constants.AiDisclosureSourcePropertyAlias]);
+        Assert.Equal("C2PA", DropdownValue.Decode(automaticValues[Constants.AiDisclosureSourcePropertyAlias] as string));
+        Assert.Equal("modified", DropdownValue.Decode(automaticValues[Constants.AiDisclosurePropertyAlias] as string));
+        Assert.Equal("Manual", DropdownValue.Decode(manualValues[Constants.AiDisclosureSourcePropertyAlias] as string));
         processor.Received(1).ResumeAutomaticDetectionAsync(automatic, Arg.Any<CancellationToken>());
         processor.DidNotReceive().ResumeAutomaticDetectionAsync(manual, Arg.Any<CancellationToken>());
         fixture.Media.DidNotReceive().Save(manual, Arg.Any<int>());
