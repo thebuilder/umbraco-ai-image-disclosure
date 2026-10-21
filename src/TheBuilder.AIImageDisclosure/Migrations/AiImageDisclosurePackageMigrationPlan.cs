@@ -14,6 +14,5 @@ internal sealed class AiImageDisclosurePackageMigrationPlan : PackageMigrationPl
         To<UpgradePreviewAiImageDisclosureSchema>(new Guid("72a663b7-ff33-47b5-96e8-25cfbe4d5d53"));
         To<AddAiDisclosureReasonSchema>(new Guid("db1c4fbf-7d9f-4d0a-9747-9473ad858f91"));
         To<AddAiWatermarkSchema>(new Guid("7b75cb3b-df90-4054-bd17-e87f4b295924"));
-        To<EncodeAiDisclosureDropdownValues>(new Guid("e0b6a317-89fe-4ac8-b270-01475d8de952"));
     }
 }

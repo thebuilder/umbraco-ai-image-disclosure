@@ -7,8 +7,8 @@ namespace TheBuilder.AIImageDisclosure.Media;
 /// </summary>
 /// <remarks>
 /// Umbraco's dropdown stores its selection as a JSON array. A plain string is sent to the editor unchanged
-/// and comes back empty on the next save, which would clear the disclosure. Older package versions stored
-/// plain strings, so reads accept both forms.
+/// and comes back empty on the next save, which would clear the disclosure. Images detected by earlier
+/// versions still hold plain strings, so reads accept both forms.
 /// </remarks>
 internal static class DropdownValue
 {
