@@ -9,7 +9,7 @@
   Editors review the result, and your website decides how to label it.
 </p>
 
-[![NuGet version](https://img.shields.io/nuget/vpre/TheBuilder.AIImageDisclosure)](https://www.nuget.org/packages/TheBuilder.AIImageDisclosure)
+[![NuGet version](https://img.shields.io/nuget/v/TheBuilder.AIImageDisclosure)](https://www.nuget.org/packages/TheBuilder.AIImageDisclosure)
 [![NuGet downloads](https://img.shields.io/nuget/dt/TheBuilder.AIImageDisclosure)](https://www.nuget.org/packages/TheBuilder.AIImageDisclosure)
 [![Umbraco Marketplace](https://img.shields.io/badge/Umbraco-Marketplace-3544b1)](https://marketplace.umbraco.com/package/thebuilder.aiimagedisclosure)
 [![License](https://img.shields.io/github/license/thebuilder/umbraco-ai-image-disclosure)](https://github.com/thebuilder/umbraco-ai-image-disclosure/blob/main/LICENSE)
