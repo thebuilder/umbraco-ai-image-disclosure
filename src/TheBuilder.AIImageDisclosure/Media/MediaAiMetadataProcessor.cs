@@ -91,7 +91,7 @@ internal sealed class MediaAiMetadataProcessor(
     {
         if (HasManualMetadata(media))
         {
-            media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.ManualDisclosureSourceValue);
+            media.SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
             return;
         }
 
@@ -103,15 +103,15 @@ internal sealed class MediaAiMetadataProcessor(
         switch (result.Status)
         {
             case AiImageDetectionStatus.Generated:
-                media.SetValue(Constants.AiDisclosurePropertyAlias, Constants.GeneratedDisclosureValue);
+                media.SetValue(Constants.AiDisclosurePropertyAlias, DropdownValue.Encode(Constants.GeneratedDisclosureValue));
                 media.SetValue(Constants.AiGeneratorPropertyAlias, result.Generator ?? string.Empty);
-                media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+                media.SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.C2paDisclosureSourceValue));
                 SetReason(media, result);
                 break;
             case AiImageDetectionStatus.Modified:
-                media.SetValue(Constants.AiDisclosurePropertyAlias, Constants.ModifiedDisclosureValue);
+                media.SetValue(Constants.AiDisclosurePropertyAlias, DropdownValue.Encode(Constants.ModifiedDisclosureValue));
                 media.SetValue(Constants.AiGeneratorPropertyAlias, result.Generator ?? string.Empty);
-                media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.C2paDisclosureSourceValue);
+                media.SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.C2paDisclosureSourceValue));
                 SetReason(media, result);
                 break;
             case AiImageDetectionStatus.NotDetected:
@@ -129,16 +129,17 @@ internal sealed class MediaAiMetadataProcessor(
         || IsManualSource(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias));
 
     internal static bool IsManualSource(string? value) =>
-        value is Constants.ManualDisclosureSourceValue or "[\"Manual\"]";
+        DropdownValue.Decode(value) == Constants.ManualDisclosureSourceValue;
 
     private static bool HasDirtyMetadata(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias);
 
+    // The dropdowns are cleared with null: an empty string would not survive the editor and would count as a manual change.
     private static void ClearAutomaticMetadata(IMedia media)
     {
-        media.SetValue(Constants.AiDisclosurePropertyAlias, string.Empty);
+        media.SetValue(Constants.AiDisclosurePropertyAlias, null);
         media.SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
-        media.SetValue(Constants.AiDisclosureSourcePropertyAlias, string.Empty);
+        media.SetValue(Constants.AiDisclosureSourcePropertyAlias, null);
     }
 
     private static void SetReason(IMedia media, AiImageMetadata result) =>

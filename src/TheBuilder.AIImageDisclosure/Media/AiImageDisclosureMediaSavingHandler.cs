@@ -25,12 +25,12 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
             else if (HasManualMetadataChange(media))
             {
                 if (media.IsPropertyDirty(Constants.AiDisclosurePropertyAlias)
-                    && string.IsNullOrWhiteSpace(media.GetValue<string>(Constants.AiDisclosurePropertyAlias)))
+                    && DropdownValue.Decode(media.GetValue<string>(Constants.AiDisclosurePropertyAlias)) is null)
                 {
                     media.SetValue(Constants.AiGeneratorPropertyAlias, string.Empty);
                 }
 
-                media.SetValue(Constants.AiDisclosureSourcePropertyAlias, Constants.ManualDisclosureSourceValue);
+                media.SetValue(Constants.AiDisclosureSourcePropertyAlias, DropdownValue.Encode(Constants.ManualDisclosureSourceValue));
             }
         }
     }
@@ -58,6 +58,6 @@ internal sealed class AiImageDisclosureMediaSavingHandler(
 
     private static bool ShouldResumeAutomaticDetection(IMedia media) =>
         media.IsPropertyDirty(Constants.AiDisclosureSourcePropertyAlias)
-        && media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias) is
-            Constants.ResumeAutomaticDisclosureSourceValue or "[\"Resume automatic detection\"]";
+        && DropdownValue.Decode(media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias))
+            == Constants.ResumeAutomaticDisclosureSourceValue;
 }
