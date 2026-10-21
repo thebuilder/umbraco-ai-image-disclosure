@@ -14,7 +14,8 @@
         "TheBuilder.AIImageDisclosure.Generated"
       ],
       "meta": {
-        "label": "AI generated"
+        "label": "AI generated",
+        "euIcon": "generated"
       }
     },
     {
@@ -29,8 +30,20 @@
         "TheBuilder.AIImageDisclosure.Modified"
       ],
       "meta": {
-        "label": "AI modified"
+        "label": "AI modified",
+        "euIcon": "modified"
       }
+    },
+    {
+      "type": "entityCollectionItemCard",
+      "alias": "TheBuilder.AIImageDisclosure.MediaCollectionItemCard",
+      "name": "Media card with AI disclosure",
+      "overwrites": "Umb.EntityCollectionItemCard.Media",
+      "element": "/App_Plugins/TheBuilder.AIImageDisclosure/ai-disclosure-media-card.js",
+      "forEntityTypes": [
+        "media",
+        "umb-media-placeholder"
+      ]
     },
     {
       "type": "dashboard",
@@ -64,7 +77,8 @@
         "TheBuilder.AIImageDisclosure.Watermark"
       ],
       "meta": {
-        "label": "AI detected"
+        "label": "AI detected",
+        "euIcon": "ai"
       }
     },
     {

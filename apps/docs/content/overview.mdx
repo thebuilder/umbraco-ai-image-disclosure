@@ -33,7 +33,7 @@ The empty value means **not determined**. It does not mean the image is human-ma
 
 Editors can review and change the disclosure when metadata is absent or the classification needs correction. Administrators also get an **AI disclosure scan** tab in Media for bounded batches of existing Image media. It reports progress, preserves manual values, and can stop after the current batch. The [official EU icon guidance](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content) explains the public label variants and their intended use.
 
-The package does not replace or decorate Umbraco's Media Grid, table view, media pickers, or other thumbnail presentations. This keeps the extension compatible with Umbraco's native collection UI and with packages that provide their own collection views.
+The package adds the EU icon to Umbraco's own Media Grid card by extending it, so the grid keeps its native thumbnails, selection and actions. The table view, media pickers and other thumbnail presentations are unchanged.
 
 Configure the [optional OpenAI watermark check](/openai-watermarks) through standard .NET app settings. Umbraco.AI is not required. A separate adapter can reuse an existing Umbraco.AI connection. The **AI image disclosure** tab under **Settings** shows the current configuration and provides a test button. Only images without C2PA metadata are eligible.
 

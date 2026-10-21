@@ -20,4 +20,10 @@ AI Image Disclosure depends on third-party software distributed through NuGet. T
 - License: MIT
 - Purpose: package host APIs and media lifecycle integration.
 
+## EU icons for labelling AI-generated content
+
+- Source: [European Commission](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content)
+- Terms: freely available, no attribution required.
+- Purpose: the AI, AI generated and AI modified icons shown in the backoffice, shipped unmodified.
+
 Consult the NuGet package metadata and the dependency archives for the complete license texts and transitive dependency notices for the exact versions restored by your application.

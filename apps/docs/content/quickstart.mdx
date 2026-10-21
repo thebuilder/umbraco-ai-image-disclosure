@@ -7,7 +7,7 @@ seo:
 
 ## Requirements
 
-- Umbraco CMS 17.1 through 18.x
+- Umbraco CMS 17.3 through 18.x
 - .NET 10
 - A supported native platform listed under [Operations](/operations)
 - Umbraco's default media type with the exact alias `Image`
@@ -15,7 +15,7 @@ seo:
 :::note[Package scope]
 - Processes new uploads and file replacements automatically.
 - Existing media is scanned only when an administrator starts the Media section's **AI disclosure scan** dashboard.
-- Uses Umbraco's native signs without replacing its Media collection views.
+- Marks classified images in the Media tree and Media Grid with the EU AI icons.
 - Does not add disclosure labels to public pages.
 :::
 
@@ -51,11 +51,13 @@ aiGenerator: gpt-image
 aiDisclosureSource: C2PA
 ```
 
+![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
+
 Detection runs when an image file is uploaded or replaced. A detection failure never blocks the media save.
 
-Images classified as `generated` or `modified` receive a native Umbraco sign in the Media tree. Signs are enabled by default. Set `AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection. Umbraco's current Media Grid cards do not render entity signs, so the package leaves those cards unchanged.
+Images classified as `generated` or `modified` show the EU **AI** icon in the Media tree, and an **AI generated** or **AI modified** label on their Media Grid thumbnail. Badges are enabled by default. Set `AIImageDisclosure:ShowBackofficeBadges` to `false` to hide them without disabling detection.
 
-![Detected AI disclosure properties on an Umbraco Image media item](./screenshots/media-details.png)
+![Media Grid thumbnails labelled with the EU AI generated and AI modified icons](./screenshots/media-grid.png)
 
 ## Set a manual value
 
