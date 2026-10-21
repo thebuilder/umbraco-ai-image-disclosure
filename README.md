@@ -136,7 +136,7 @@ Read the complete documentation at [ai-image-disclosure.thebuilder.dk](https://a
 ## Development
 
 ```sh
-dotnet test TheBuilder.AIImageDisclosure.slnx
+dotnet test --solution TheBuilder.AIImageDisclosure.slnx
 dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj
 dotnet pack src/TheBuilder.AIImageDisclosure/TheBuilder.AIImageDisclosure.csproj --configuration Release
 pnpm docs:dev
