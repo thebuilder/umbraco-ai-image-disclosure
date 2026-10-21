@@ -34,22 +34,20 @@ export const euIconStyles = `
   }
 `;
 
-/**
- * Returns `{ icon, label }` for the first flag that one of this package's entity signs handles.
- * The signs in umbraco-package.json own the flag aliases, labels and EU icon choice.
- */
-export function euIconForFlags(flags) {
-  const aliases = flags?.map((flag) => flag.alias) ?? [];
-  if (aliases.length === 0) return undefined;
-
-  const [sign] = umbExtensionsRegistry.getByTypeAndFilter(
-    "entitySign",
-    (manifest) =>
-      manifest.meta?.euIcon in icons &&
-      manifest.forEntityTypes?.includes("media") &&
-      manifest.forEntityFlags?.some((alias) => aliases.includes(alias)),
+// The signs in umbraco-package.json own the flag aliases, labels and EU icon choice.
+// Map them once, and again only when the registered signs change, not on every card render.
+let iconsByFlag = new Map();
+umbExtensionsRegistry.byType("entitySign").subscribe((signs) => {
+  iconsByFlag = new Map(
+    signs
+      .filter((sign) => Object.hasOwn(icons, sign.meta?.euIcon) && sign.forEntityTypes?.includes("media"))
+      .flatMap((sign) => (sign.forEntityFlags ?? []).map((alias) => [alias, { icon: sign.meta.euIcon, label: sign.meta.label }])),
   );
-  return sign ? { icon: sign.meta.euIcon, label: sign.meta.label } : undefined;
+});
+
+/** Returns `{ icon, label }` for the first flag that one of this package's entity signs handles. */
+export function euIconForFlags(flags) {
+  return flags?.map((flag) => iconsByFlag.get(flag.alias)).find(Boolean);
 }
 
 /** Returns markup for an EU icon cropped to its shape. Size it with `--eu-ai-icon-height`. */

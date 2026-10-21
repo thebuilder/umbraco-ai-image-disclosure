@@ -100,6 +100,7 @@ public sealed class AiDisclosureFlagProviderTests
     [InlineData("tree", "[\"Manual\"]", false)]
     [InlineData("collection", "", true)]
     [InlineData("collection", "Manual", false)]
+    [InlineData("collection", "[\"Manual\"]", false)]
     public async Task WatermarkFlagDoesNotOverrideAnExplicitManualUndeterminedChoice(string kind, string source, bool expected)
     {
         Guid key = Guid.NewGuid();
@@ -132,17 +133,17 @@ public sealed class AiDisclosureFlagProviderTests
     }
 
     [Fact]
-    public void ReaderLoadsMediaOnceAndKeepsOnlyImages()
+    public void ReaderLoadsMediaOnceAndMapsTheirValues()
     {
-        IMedia image = CreateMedia(Constants.DefaultImageMediaTypeAlias, Constants.GeneratedDisclosureValue);
-        IMedia file = CreateMedia("File", Constants.GeneratedDisclosureValue);
+        IMedia generated = CreateMedia(Constants.GeneratedDisclosureValue);
+        IMedia modified = CreateMedia(Constants.ModifiedDisclosureValue);
         var mediaService = Substitute.For<IMediaService>();
-        mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([image, file]);
+        mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([generated, modified]);
 
-        var values = new MediaAiDisclosureValueReader(mediaService).GetImageValues([image.Key, file.Key]);
+        var values = new MediaAiDisclosureValueReader(mediaService).GetImageValues([generated.Key, modified.Key]);
 
-        Assert.Equal(Constants.GeneratedDisclosureValue, Assert.Single(values, pair => pair.Key == image.Key).Value.Disclosure);
-        Assert.DoesNotContain(file.Key, values.Keys);
+        Assert.Equal(Constants.GeneratedDisclosureValue, values[generated.Key].Disclosure);
+        Assert.Equal(Constants.ModifiedDisclosureValue, values[modified.Key].Disclosure);
         mediaService.Received(1).GetByIds(Arg.Any<IEnumerable<Guid>>());
     }
 
@@ -180,13 +181,10 @@ public sealed class AiDisclosureFlagProviderTests
             ? provider.PopulateFlagsAsync(items.Cast<MediaTreeItemResponseModel>())
             : provider.PopulateFlagsAsync(items.Cast<MediaCollectionResponseModel>());
 
-    private static IMedia CreateMedia(string mediaTypeAlias, string disclosure)
+    private static IMedia CreateMedia(string disclosure)
     {
         var media = Substitute.For<IMedia>();
-        var contentType = Substitute.For<ISimpleContentType>();
-        contentType.Alias.Returns(mediaTypeAlias);
         media.Key.Returns(Guid.NewGuid());
-        media.ContentType.Returns(contentType);
         media.GetValue<string>(Constants.AiDisclosurePropertyAlias).Returns(disclosure);
         return media;
     }

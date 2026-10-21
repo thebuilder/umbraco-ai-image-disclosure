@@ -10,10 +10,13 @@ const elementName = "thebuilder-ai-disclosure-media-card";
 // Our manifest overwrites Umbraco's media card, but the core manifest stays registered.
 // Extending its element keeps the thumbnail, selection, actions and upload placeholders.
 async function loadCoreCard() {
+  const coreCard = umbExtensionsRegistry.getByAlias(coreCardAlias);
+  // Retry once, so a single failed chunk request doesn't switch the badges off for the session.
+  const load = () => loadManifestElement(coreCard.element);
   try {
-    const coreCard = umbExtensionsRegistry.getByAlias(coreCardAlias);
-    const element = coreCard ? await loadManifestElement(coreCard.element) : undefined;
-    if (!element) throw new Error(`${coreCardAlias} is not registered.`);
+    if (!coreCard) throw new Error(`${coreCardAlias} is not registered.`);
+    const element = await load().catch(() => new Promise((resolve) => setTimeout(resolve, 1000)).then(load));
+    if (!element) throw new Error(`${coreCardAlias} did not provide an element.`);
     return element;
   } catch (error) {
     // Nothing to extend, so step aside and let Umbraco render its own card again.

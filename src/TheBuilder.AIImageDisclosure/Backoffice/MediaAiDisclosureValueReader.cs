@@ -10,7 +10,7 @@ internal sealed record MediaAiDisclosureValues(string? Disclosure, string? Water
 /// <summary>Reads stored AI disclosure values for a batch of media items.</summary>
 internal interface IMediaAiDisclosureValueReader
 {
-    /// <summary>Returns the values of the given media keys that are Image media items.</summary>
+    /// <summary>Returns the values of the given media keys. Callers pass only Image media keys.</summary>
     IReadOnlyDictionary<Guid, MediaAiDisclosureValues> GetImageValues(IReadOnlyCollection<Guid> keys);
 }
 
@@ -24,7 +24,6 @@ internal sealed class MediaAiDisclosureValueReader(IMediaService mediaService) :
         }
 
         return mediaService.GetByIds(keys)
-            .Where(media => media.ContentType.Alias.Equals(Constants.DefaultImageMediaTypeAlias, StringComparison.OrdinalIgnoreCase))
             .ToDictionary(
                 media => media.Key,
                 media => new MediaAiDisclosureValues(
