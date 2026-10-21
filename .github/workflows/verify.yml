@@ -58,7 +58,7 @@ jobs:
 
       - name: Test package
         run: >-
-          dotnet test tests/TheBuilder.AIImageDisclosure.Tests/TheBuilder.AIImageDisclosure.Tests.csproj
+          dotnet test --project tests/TheBuilder.AIImageDisclosure.Tests/TheBuilder.AIImageDisclosure.Tests.csproj
           --configuration Release
           '-p:UmbracoVersion=${{ matrix.umbraco-version }}'
 
@@ -84,7 +84,7 @@ jobs:
 
       - name: Test optional integration
         run: >-
-          dotnet test tests/TheBuilder.AIImageDisclosure.OpenAI.Tests/TheBuilder.AIImageDisclosure.OpenAI.Tests.csproj
+          dotnet test --project tests/TheBuilder.AIImageDisclosure.OpenAI.Tests/TheBuilder.AIImageDisclosure.OpenAI.Tests.csproj
           --configuration Release
           '-p:UmbracoVersion=${{ matrix.umbraco-version }}'
           '-p:UmbracoAiCoreVersion=${{ matrix.ai-version }}'
