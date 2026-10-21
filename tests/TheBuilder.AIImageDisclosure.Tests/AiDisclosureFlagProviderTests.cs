@@ -2,6 +2,9 @@ using Microsoft.Extensions.Configuration;
 using NSubstitute;
 using TheBuilder.AIImageDisclosure.Backoffice;
 using TheBuilder.AIImageDisclosure.Watermarks;
+using Umbraco.Cms.Api.Management.ViewModels;
+using Umbraco.Cms.Api.Management.ViewModels.Media.Collection;
+using Umbraco.Cms.Api.Management.ViewModels.MediaType;
 using Umbraco.Cms.Api.Management.ViewModels.Tree;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -11,70 +14,103 @@ namespace TheBuilder.AIImageDisclosure.Tests;
 
 public sealed class AiDisclosureFlagProviderTests
 {
+    private static readonly Guid ImageTypeKey = Guid.NewGuid();
+    private static readonly Dictionary<Guid, MediaAiDisclosureValues> NoValues = [];
+
+    public static TheoryData<string> ItemKinds => ["tree", "collection"];
+
     [Fact]
-    public async Task AddsDisclosureFlagsForDetectedAndEditorValuesWithOneMediaLookup()
+    public void ProvidesFlagsForMediaTreeAndCollectionItems()
+    {
+        var provider = CreateProvider(CreateReader(NoValues));
+
+        Assert.True(provider.CanProvideFlags<MediaTreeItemResponseModel>());
+        Assert.True(provider.CanProvideFlags<MediaCollectionResponseModel>());
+    }
+
+    [Theory]
+    [MemberData(nameof(ItemKinds))]
+    public async Task AddsDisclosureFlagsForDetectedAndEditorValues(string kind)
     {
         Guid generatedKey = Guid.NewGuid();
         Guid modifiedKey = Guid.NewGuid();
         Guid editorGeneratedKey = Guid.NewGuid();
         Guid editorModifiedKey = Guid.NewGuid();
-        IMedia generated = CreateImage(generatedKey, Constants.GeneratedDisclosureValue);
-        IMedia modified = CreateImage(modifiedKey, Constants.ModifiedDisclosureValue);
-        IMedia editorGenerated = CreateImage(editorGeneratedKey, "[\"generated\"]");
-        IMedia editorModified = CreateImage(editorModifiedKey, "[\"modified\"]");
-        var mediaService = Substitute.For<IMediaService>();
-        mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([generated, modified, editorGenerated, editorModified]);
-        var provider = new AiDisclosureFlagProvider(mediaService, new ConfigurationBuilder().Build(), []);
-        var items = new[]
+        var reader = CreateReader(new Dictionary<Guid, MediaAiDisclosureValues>
         {
-            new MediaTreeItemResponseModel { Id = generatedKey },
-            new MediaTreeItemResponseModel { Id = modifiedKey },
-            new MediaTreeItemResponseModel { Id = editorGeneratedKey },
-            new MediaTreeItemResponseModel { Id = editorModifiedKey },
-        };
+            [generatedKey] = new(Constants.GeneratedDisclosureValue, null, null),
+            [modifiedKey] = new(Constants.ModifiedDisclosureValue, null, null),
+            [editorGeneratedKey] = new("[\"generated\"]", null, null),
+            [editorModifiedKey] = new("[\"modified\"]", null, null),
+        });
+        var provider = CreateProvider(reader);
+        IHasFlags[] items =
+        [
+            CreateItem(kind, generatedKey),
+            CreateItem(kind, modifiedKey),
+            CreateItem(kind, editorGeneratedKey),
+            CreateItem(kind, editorModifiedKey),
+        ];
 
-        Assert.True(provider.CanProvideFlags<MediaTreeItemResponseModel>());
-        await provider.PopulateFlagsAsync(items);
+        await PopulateAsync(provider, kind, items);
 
         Assert.Contains(items[0].Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
         Assert.Contains(items[1].Flags, flag => flag.Alias == Constants.ModifiedFlagAlias);
         Assert.Contains(items[2].Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
         Assert.Contains(items[3].Flags, flag => flag.Alias == Constants.ModifiedFlagAlias);
-        mediaService.Received(1).GetByIds(Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { generatedKey, modifiedKey, editorGeneratedKey, editorModifiedKey })));
+        reader.Received(1).GetImageValues(Arg.Is<IReadOnlyCollection<Guid>>(keys =>
+            keys.ToHashSet().SetEquals(new[] { generatedKey, modifiedKey, editorGeneratedKey, editorModifiedKey })));
     }
 
-    [Fact]
-    public async Task CanDisableBackofficeBadges()
+    [Theory]
+    [MemberData(nameof(ItemKinds))]
+    public async Task SkipsOtherMediaTypesBeforeReadingValues(string kind)
     {
-        var mediaService = Substitute.For<IMediaService>();
+        Guid imageKey = Guid.NewGuid();
+        var reader = CreateReader(NoValues);
+        IHasFlags[] items = [CreateItem(kind, imageKey), CreateItem(kind, Guid.NewGuid(), mediaTypeKey: Guid.NewGuid())];
+
+        await PopulateAsync(CreateProvider(reader), kind, items);
+
+        reader.Received(1).GetImageValues(Arg.Is<IReadOnlyCollection<Guid>>(keys => keys.SequenceEqual(new[] { imageKey })));
+    }
+
+    [Theory]
+    [MemberData(nameof(ItemKinds))]
+    public async Task CanDisableBackofficeBadges(string kind)
+    {
+        var reader = CreateReader(NoValues);
         IConfiguration configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 [Constants.ShowBackofficeBadgesSetting] = "false",
             })
             .Build();
-        var provider = new AiDisclosureFlagProvider(mediaService, configuration, []);
-        var item = new MediaTreeItemResponseModel { Id = Guid.NewGuid() };
+        IHasFlags item = CreateItem(kind, Guid.NewGuid());
 
-        await provider.PopulateFlagsAsync([item]);
+        await PopulateAsync(CreateProvider(reader, configuration), kind, [item]);
 
         Assert.Empty(item.Flags);
-        mediaService.DidNotReceive().GetByIds(Arg.Any<IEnumerable<Guid>>());
+        reader.DidNotReceive().GetImageValues(Arg.Any<IReadOnlyCollection<Guid>>());
     }
 
     [Theory]
-    [InlineData("", true)]
-    [InlineData("Manual", false)]
-    [InlineData("[\"Manual\"]", false)]
-    public async Task WatermarkFlagDoesNotOverrideAnExplicitManualUndeterminedChoice(string source, bool expected)
+    [InlineData("tree", "", true)]
+    [InlineData("tree", "Manual", false)]
+    [InlineData("tree", "[\"Manual\"]", false)]
+    [InlineData("collection", "", true)]
+    [InlineData("collection", "Manual", false)]
+    public async Task WatermarkFlagDoesNotOverrideAnExplicitManualUndeterminedChoice(string kind, string source, bool expected)
     {
-        var media = CreateImage(Guid.NewGuid(), string.Empty);
-        media.GetValue<string>(Constants.AiWatermarkPropertyAlias).Returns(Constants.OpenAiWatermarkDetected);
-        media.GetValue<string>(Constants.AiDisclosureSourcePropertyAlias).Returns(source);
-        var service = Substitute.For<IMediaService>();
-        service.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([media]);
-        var item = new MediaTreeItemResponseModel { Id = media.Key };
-        await new AiDisclosureFlagProvider(service, new ConfigurationBuilder().Build(), []).PopulateFlagsAsync([item]);
+        Guid key = Guid.NewGuid();
+        var reader = CreateReader(new Dictionary<Guid, MediaAiDisclosureValues>
+        {
+            [key] = new(string.Empty, Constants.OpenAiWatermarkDetected, source),
+        });
+        IHasFlags item = CreateItem(kind, key);
+
+        await PopulateAsync(CreateProvider(reader), kind, [item]);
+
         Assert.Equal(expected, item.Flags.Any(flag => flag.Alias == Constants.WatermarkFlagAlias));
         Assert.DoesNotContain(item.Flags, flag => flag.Alias == Constants.GeneratedFlagAlias);
     }
@@ -83,21 +119,73 @@ public sealed class AiDisclosureFlagProviderTests
     public async Task RecognizesRegisteredProviderEvidenceWithoutOpenAiAttribution()
     {
         var watermarkProvider = new ImageWatermarkProvider("Example", "TestMark");
-        var media = CreateImage(Guid.NewGuid(), string.Empty);
-        media.GetValue<string>(Constants.AiWatermarkPropertyAlias).Returns(watermarkProvider.DetectedValue);
-        var service = Substitute.For<IMediaService>();
-        service.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([media]);
-        var item = new MediaTreeItemResponseModel { Id = media.Key };
-        await new AiDisclosureFlagProvider(service, new ConfigurationBuilder().Build(), [watermarkProvider]).PopulateFlagsAsync([item]);
+        Guid key = Guid.NewGuid();
+        var reader = CreateReader(new Dictionary<Guid, MediaAiDisclosureValues>
+        {
+            [key] = new(string.Empty, watermarkProvider.DetectedValue, null),
+        });
+        IHasFlags item = CreateItem("collection", key);
+
+        await PopulateAsync(CreateProvider(reader, watermarkProviders: [watermarkProvider]), "collection", [item]);
+
         Assert.Contains(item.Flags, flag => flag.Alias == Constants.WatermarkFlagAlias);
     }
 
-    private static IMedia CreateImage(Guid key, string disclosure)
+    [Fact]
+    public void ReaderLoadsMediaOnceAndKeepsOnlyImages()
+    {
+        IMedia image = CreateMedia(Constants.DefaultImageMediaTypeAlias, Constants.GeneratedDisclosureValue);
+        IMedia file = CreateMedia("File", Constants.GeneratedDisclosureValue);
+        var mediaService = Substitute.For<IMediaService>();
+        mediaService.GetByIds(Arg.Any<IEnumerable<Guid>>()).Returns([image, file]);
+
+        var values = new MediaAiDisclosureValueReader(mediaService).GetImageValues([image.Key, file.Key]);
+
+        Assert.Equal(Constants.GeneratedDisclosureValue, Assert.Single(values, pair => pair.Key == image.Key).Value.Disclosure);
+        Assert.DoesNotContain(file.Key, values.Keys);
+        mediaService.Received(1).GetByIds(Arg.Any<IEnumerable<Guid>>());
+    }
+
+    private static IMediaAiDisclosureValueReader CreateReader(IReadOnlyDictionary<Guid, MediaAiDisclosureValues> values)
+    {
+        var reader = Substitute.For<IMediaAiDisclosureValueReader>();
+        reader.GetImageValues(Arg.Any<IReadOnlyCollection<Guid>>()).Returns(values);
+        return reader;
+    }
+
+    private static AiDisclosureFlagProvider CreateProvider(
+        IMediaAiDisclosureValueReader reader,
+        IConfiguration? configuration = null,
+        IEnumerable<ImageWatermarkProvider>? watermarkProviders = null)
+    {
+        var imageType = Substitute.For<IMediaType>();
+        imageType.Key.Returns(ImageTypeKey);
+        var mediaTypeService = Substitute.For<IMediaTypeService>();
+        mediaTypeService.Get(Constants.DefaultImageMediaTypeAlias).Returns(imageType);
+
+        return new AiDisclosureFlagProvider(
+            reader,
+            mediaTypeService,
+            configuration ?? new ConfigurationBuilder().Build(),
+            watermarkProviders ?? []);
+    }
+
+    private static IHasFlags CreateItem(string kind, Guid key, Guid? mediaTypeKey = null) =>
+        kind == "tree"
+            ? new MediaTreeItemResponseModel { Id = key, MediaType = new MediaTypeReferenceResponseModel { Id = mediaTypeKey ?? ImageTypeKey } }
+            : new MediaCollectionResponseModel { Id = key, MediaType = new MediaTypeCollectionReferenceResponseModel { Id = mediaTypeKey ?? ImageTypeKey } };
+
+    private static Task PopulateAsync(AiDisclosureFlagProvider provider, string kind, IHasFlags[] items) =>
+        kind == "tree"
+            ? provider.PopulateFlagsAsync(items.Cast<MediaTreeItemResponseModel>())
+            : provider.PopulateFlagsAsync(items.Cast<MediaCollectionResponseModel>());
+
+    private static IMedia CreateMedia(string mediaTypeAlias, string disclosure)
     {
         var media = Substitute.For<IMedia>();
         var contentType = Substitute.For<ISimpleContentType>();
-        contentType.Alias.Returns(Constants.DefaultImageMediaTypeAlias);
-        media.Key.Returns(key);
+        contentType.Alias.Returns(mediaTypeAlias);
+        media.Key.Returns(Guid.NewGuid());
         media.ContentType.Returns(contentType);
         media.GetValue<string>(Constants.AiDisclosurePropertyAlias).Returns(disclosure);
         return media;

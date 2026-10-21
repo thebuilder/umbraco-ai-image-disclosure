@@ -1,42 +1,34 @@
+import { euIconMarkup, euIconStyles } from "./eu-ai-icons.js";
+
 const elementName = "thebuilder-ai-disclosure-entity-sign";
 
 class AiDisclosureEntitySignElement extends HTMLElement {
   constructor() {
     super();
-
-    const shadowRoot = this.attachShadow({ mode: "open" });
-    shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: inline-flex;
-          vertical-align: top;
-        }
-
-        span {
-          display: inline-flex;
-          box-sizing: border-box;
-          min-width: 0.75rem;
-          height: 0.625rem;
-          align-items: center;
-          justify-content: center;
-          padding-inline: 0;
-          border: 1px solid var(--uui-color-surface, #fff);
-          border-radius: 999px;
-          background: var(--uui-color-text, #1b264f);
-          color: var(--uui-color-surface, #fff);
-          font: 700 0.5rem/1 var(--uui-font-family, sans-serif);
-          letter-spacing: 0.02em;
-          transform: translateX(-0.125rem);
-        }
-      </style>
-      <span aria-hidden="true">AI</span>
-    `;
+    this.attachShadow({ mode: "open" });
   }
 
   set manifest(value) {
     this._manifest = value;
-    this.setAttribute("role", "img");
-    this.setAttribute("aria-label", value?.meta?.label ?? "AI image disclosure");
+    const label = value?.meta?.label ?? "AI image disclosure";
+
+    // Tree signs are too small for the worded labels, so every flag uses the basic EU icon.
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: inline-flex;
+          vertical-align: top;
+          --eu-ai-icon-height: 0.75rem;
+        }
+
+        ${euIconStyles}
+
+        .eu-ai-icon {
+          margin-inline-start: -0.125rem;
+        }
+      </style>
+      ${euIconMarkup("ai", label, "solid")}
+    `;
   }
 
   get manifest() {

@@ -32,9 +32,9 @@ The package adds five properties to the default Image media type:
 - `aiDisclosureReason`: read-only human-readable reason for the latest automatic result; empty after positive AI detection.
 - `aiWatermark`: read-only OpenAI watermark evidence when the optional fallback is enabled.
 
-Editors can review the classification, generator evidence, and detection source on the media item. Umbraco's native signs mark classified items in the Media tree. Public sites decide where and how to render their own label.
+Editors can review the classification, generator evidence, and detection source on the media item. The EU AI icons mark classified items in the Media tree and on Media Grid thumbnails. Public sites decide where and how to render their own label.
 
-Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package does not replace Umbraco's Media Grid, table view, media pickers, or public pages.
+Detection applies only to Umbraco's default `Image` media type and only when `umbracoFile` is uploaded or replaced. The package does not change Umbraco's table view, media pickers, or public pages.
 
 ## C2PA and EU disclosure
 
@@ -44,7 +44,7 @@ The European Commission provides optional icons for fully AI-generated and parti
 
 ## Install
 
-AI Image Disclosure supports Umbraco CMS 17.1 through 18.x on .NET 10.
+AI Image Disclosure supports Umbraco CMS 17.3 through 18.x on .NET 10.
 
 ```sh
 dotnet add package TheBuilder.AIImageDisclosure
@@ -54,7 +54,7 @@ Restart the application after installation. The package creates the **AI image d
 
 Editors can override the disclosure. This matters because metadata is easy to remove and many AI tools do not emit Content Credentials. Choose **Resume automatic detection** in `aiDisclosureSource` to reprocess the current file and leave manual mode.
 
-Backoffice signs are enabled by default. Umbraco's current Media Grid cards do not render entity signs, and this package does not replace the grid or its card renderer. To hide signs while keeping detection and the media properties active, add:
+Backoffice badges are enabled by default. Generated and modified images get an **AI generated** or **AI modified** label on their Media Grid thumbnail, and the basic EU **AI** icon in the Media tree. Watermark-only evidence uses the basic icon in both places. The grid badge extends Umbraco's own media card, so thumbnails, selection and actions stay native. To hide badges while keeping detection and the media properties active, add:
 
 ```json
 {
@@ -81,7 +81,7 @@ The core package works without OpenAI. To add the check, install `TheBuilder.AII
 
 Supply the key through .NET user secrets or `AIImageDisclosure__OpenAI__ApiKey` in your hosting environment. Set `Enabled` to `true` to allow image uploads. A key alone does not enable the check. The Settings panel shows configuration status and provides a test using a bundled sample image, without exposing the key.
 
-To reuse an existing Umbraco.AI connection, install the separate `TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI` adapter and matching Umbraco.AI provider packages. The adapter requires CMS 17.5 or later on 17.x, or CMS 18.x. The direct-key package supports CMS 17.1 through 18.x. Explicit OpenAI configuration settings take precedence over saved connection settings.
+To reuse an existing Umbraco.AI connection, install the separate `TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI` adapter and matching Umbraco.AI provider packages. The adapter requires CMS 17.5 or later on 17.x, or CMS 18.x. The direct-key package supports CMS 17.3 through 18.x. Explicit OpenAI configuration settings take precedence over saved connection settings.
 
 Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. When OpenAI reports a watermark, the package stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign. This does not distinguish generation from editing. A negative result does not prove the image is human-made. See the [setup and privacy notes](https://ai-image-disclosure.thebuilder.dk/openai-watermarks).
 

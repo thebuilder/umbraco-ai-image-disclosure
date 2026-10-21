@@ -17,7 +17,7 @@ Saving a name, crop, or another media property does not rerun detection. Existin
 
 ## Optional watermark evidence
 
-**AI watermark** is a separate read-only result from the [optional OpenAI watermark check](/openai-watermarks). `OpenAI SynthID detected` means the API reported a supported watermark. The media tree shows an **AI detected** sign. It does not set `generated` or `modified`, because the watermark cannot distinguish them.
+**AI watermark** is a separate read-only result from the [optional OpenAI watermark check](/openai-watermarks). `OpenAI SynthID detected` means the API reported a supported watermark. The Media tree and Media Grid show the basic EU **AI** icon, labelled **AI detected**. It does not set `generated` or `modified`, because the watermark cannot distinguish them.
 
 The check requires a separate package and starts disabled. Neither the C2PA check nor the OpenAI check can identify every AI-generated image. Missing evidence leaves the origin unknown. The package does not guess from the image's appearance.
 
