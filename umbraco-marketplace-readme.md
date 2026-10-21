@@ -14,7 +14,7 @@ The stored values align with the European Commission's optional labels for fully
 
 - Verifies signed C2PA manifests before using their claims.
 - Stores a simple `generated` or `modified` value for frontend use.
-- Leaves Umbraco's native Media Grid and other collection views unchanged.
+- Marks classified images in the Media tree and on Media Grid thumbnails with the EU AI icons.
 - Records the software agent attached to the relevant AI action, when available.
 - Lets editors override a classification and resume automatic detection later.
 - Exposes all stored values through Umbraco's media Delivery API.
@@ -26,7 +26,7 @@ The stored values align with the European Commission's optional labels for fully
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-The package supports Umbraco CMS 17.1 through 18.x on .NET 10.
+The package supports Umbraco CMS 17.3 through 18.x on .NET 10.
 
 Detection processes new uploads and file replacements only. Existing media is not scanned automatically, custom media type aliases are ignored, and public sites remain responsible for rendering an accessible disclosure.
 

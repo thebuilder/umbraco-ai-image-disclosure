@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         umbraco-version:
-          - 17.1.0
+          - 17.3.0
           - 17.*
           - 18.*
     steps:
@@ -194,21 +194,27 @@ jobs:
           grep -Fqx 'THIRD-PARTY-NOTICES.md' <<< "$entries"
           grep -Fqx "$plugin/umbraco-package.json" <<< "$entries"
           grep -Fqx "$plugin/ai-disclosure-entity-sign.js" <<< "$entries"
+          grep -Fqx "$plugin/ai-disclosure-media-card.js" <<< "$entries"
+          grep -Fqx "$plugin/eu-ai-icons.js" <<< "$entries"
+          grep -Fqx "$plugin/icons/eu-ai.svg" <<< "$entries"
+          grep -Fqx "$plugin/icons/eu-ai-transparent.svg" <<< "$entries"
+          grep -Fqx "$plugin/icons/eu-ai-generated-transparent.svg" <<< "$entries"
+          grep -Fqx "$plugin/icons/eu-ai-modified-transparent.svg" <<< "$entries"
           grep -Fqx "$plugin/openai-settings-dashboard.js" <<< "$entries"
           grep -Fqx "$plugin/rescan-dashboard.js" <<< "$entries"
           test "$manifest_version" = "$PACKAGE_VERSION"
 
-      - name: Restore package in an Umbraco 17.1 consumer
+      - name: Restore package in an Umbraco 17.3 consumer
         env:
           PACKAGE_VERSION: ${{ inputs.package-version }}
         run: |
           dotnet new classlib --name PackageConsumer --output "$RUNNER_TEMP/package-consumer" --framework net10.0
           dotnet nuget add source "$GITHUB_WORKSPACE/artifacts" --name ai-image-disclosure-artifacts
-          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package Umbraco.Cms.Web.Common --version 17.1.0
+          dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package Umbraco.Cms.Web.Common --version 17.3.0
           dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package TheBuilder.AIImageDisclosure --version "$PACKAGE_VERSION"
           dotnet restore "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj"
 
-      - name: Restore direct-key package without Umbraco AI on CMS 17.1
+      - name: Restore direct-key package without Umbraco AI on CMS 17.3
         env:
           PACKAGE_VERSION: ${{ inputs.package-version }}
         run: |

@@ -27,7 +27,7 @@ The trusted publishing policy must be active before the first release. It exchan
 
 Before creating a release:
 
-1. Confirm all CI jobs pass for the commit to publish, including Umbraco 17.1, the latest 17.x, the latest 18.x, and both OpenAI integration targets.
+1. Confirm all CI jobs pass for the commit to publish, including Umbraco 17.3, the latest 17.x, the latest 18.x, and both OpenAI integration targets.
 2. Run `dotnet list TheBuilder.AIImageDisclosure.slnx package --vulnerable --include-transitive` and resolve any runtime high or critical findings.
 3. Inspect the packages produced by CI before approving the `nuget` environment deployment.
 

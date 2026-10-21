@@ -25,6 +25,7 @@ public sealed class AiImageDisclosureComposer : IComposer
         builder.Services.AddSingleton<MediaAiRescanService>();
         builder.Services.AddControllers().AddApplicationPart(typeof(Controllers.AiImageDisclosureController).Assembly);
         builder.AddNotificationAsyncHandler<MediaSavingNotification, AiImageDisclosureMediaSavingHandler>();
+        builder.Services.AddSingleton<IMediaAiDisclosureValueReader, MediaAiDisclosureValueReader>();
         builder.FlagProviders().Append<AiDisclosureFlagProvider>();
         builder.PackageMigrationPlans().Add(typeof(AiImageDisclosurePackageMigrationPlan));
     }
