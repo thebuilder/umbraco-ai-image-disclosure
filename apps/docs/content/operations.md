@@ -32,6 +32,7 @@ The pinned `ContentAuthenticity` dependency bundles native C2PA binaries for:
 
 - Windows x64 and Arm64
 - Linux x64 and Arm64
+- Linux musl x64 (Alpine)
 - macOS Arm64
 
 Intel macOS is not included by that dependency release. The native binaries also make restore and publish output larger than a managed-only package.

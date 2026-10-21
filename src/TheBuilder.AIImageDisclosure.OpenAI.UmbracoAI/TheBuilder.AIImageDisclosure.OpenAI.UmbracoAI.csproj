@@ -13,7 +13,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <Description>Optional Umbraco.AI connection adapter for AI Image Disclosure OpenAI provenance.</Description>
-    <PackageTags>umbraco;umbraco-cms;umbraco-ai;image;c2pa;ai;content-credentials;openai;watermark</PackageTags>
+    <PackageTags>umbraco;umbraco-cms;umbraco-ai;image;c2pa;ai;content-credentials;openai;synthid;watermark</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UmbracoAiCoreVersion Condition="'$(UmbracoAiCoreVersion)' == ''">[17.3.0,19.0.0)</UmbracoAiCoreVersion>
   </PropertyGroup>

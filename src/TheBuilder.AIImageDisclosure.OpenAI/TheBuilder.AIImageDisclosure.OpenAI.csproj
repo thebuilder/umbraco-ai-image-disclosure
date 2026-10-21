@@ -13,7 +13,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <Description>Optional OpenAI SynthID verification fallback for AI Image Disclosure.</Description>
-    <PackageTags>umbraco;umbraco-cms;image;c2pa;ai;content-credentials;openai;watermark</PackageTags>
+    <PackageTags>umbraco;umbraco-cms;image;c2pa;ai;content-credentials;openai;synthid;watermark</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
