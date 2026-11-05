@@ -66,7 +66,6 @@ const features = [
   <LandingRoot class="home">
     <LandingHero
       layout="split"
-      eyebrow="C2PA Content Credentials for Umbraco"
       title="Check images for"
       accent="evidence of AI use."
       description="Read signed C2PA claims about AI use in Umbraco images. Editors can review and change the result. Add the optional OpenAI check to look for supported watermarks when credentials are absent."
@@ -95,22 +94,20 @@ const features = [
         <span class="rule" aria-hidden="true"></span>
         <h2 id="standards-title">Content Credentials and public labels</h2>
         <p>The package stores the result in media properties. Your website decides whether and how to display a label.</p>
+        <a class="text-link" href="/c2pa-eu-ai-act">How C2PA and EU disclosure fit together <span aria-hidden="true">→</span></a>
       </div>
       <div class="standards-grid">
         <article class="standards-card reveal" style="--i: 1">
-          <p class="standards-card__eyebrow">Signed claims</p>
           <h3>What is C2PA?</h3>
           <p>C2PA is an open standard for cryptographically verifiable media provenance. Its Content Credentials can describe an asset's origin, edits, tools, and use of AI.</p>
           <a class="text-link" href="https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html" rel="noopener">Read the official C2PA explainer <span aria-hidden="true">↗</span></a>
         </article>
         <article class="standards-card reveal" style="--i: 2">
-          <p class="standards-card__eyebrow">Public labels</p>
           <h3>EU AI Act labels</h3>
           <p>The European Commission provides optional icons for certain fully AI-generated and partially AI-modified content. The labels support Article 50 disclosure workflows, but using an icon does not establish legal compliance by itself.</p>
           <a class="text-link" href="https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content" rel="noopener">View the official EU icons and guidance <span aria-hidden="true">↗</span></a>
         </article>
       </div>
-      <a class="standards__more text-link" href="/c2pa-eu-ai-act">How C2PA and EU disclosure fit together <span aria-hidden="true">→</span></a>
     </section>
 
     <section class="shell section" aria-labelledby="features-title">
@@ -122,7 +119,6 @@ const features = [
       <div class="feature-grid">
         {features.map((feature, index) => (
           <article class="feature-card reveal" style={`--i: ${index + 1}`}>
-            <span aria-hidden="true">0{index + 1}</span>
             <h3>{feature.title}</h3>
             <p>{feature.body}</p>
           </article>
