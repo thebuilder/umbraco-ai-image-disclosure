@@ -13,8 +13,8 @@ importers:
   apps/docs:
     dependencies:
       '@thebuilder/umbraco-docs':
-        specifier: ^1.7.0
-        version: 1.7.0(@types/node@26.6.6)(blume@2.2.7(@asyncapi/converter@2.0.2)(@shikijs/themes@4.6.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@vercel/functions@3.11.0)(babel-plugin-react-compiler@1.0.0)(csstype@3.2.3)(esbuild@0.28.2)(prettier@3.9.10)(rollup@4.63.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(yaml@2.9.1))(vgpu@0.6.0)
+        specifier: ^1.8.0
+        version: 1.8.0(@types/node@26.6.6)(blume@2.2.7(@asyncapi/converter@2.0.2)(@shikijs/themes@4.6.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@vercel/functions@3.11.0)(babel-plugin-react-compiler@1.0.0)(csstype@3.2.3)(esbuild@0.28.2)(prettier@3.9.10)(rollup@4.63.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(yaml@2.9.1))(vgpu@0.6.0)
       blume:
         specifier: ^2.2.7
         version: 2.2.7(@asyncapi/converter@2.0.2)(@shikijs/themes@4.6.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@vercel/functions@3.11.0)(babel-plugin-react-compiler@1.0.0)(csstype@3.2.3)(esbuild@0.28.2)(prettier@3.9.10)(rollup@4.63.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(yaml@2.9.1)
@@ -1743,8 +1743,8 @@ packages:
       csstype:
         optional: true
 
-  '@thebuilder/umbraco-docs@1.7.0':
-    resolution: {integrity: sha512-y6SE73KzBFu2S3Lk5jxicV6bcGnico5EkbJqINLhH4o3fI9mFlfYPJhmjzLkmLtAOOY41G3vI6jlglnoY8LYNg==}
+  '@thebuilder/umbraco-docs@1.8.0':
+    resolution: {integrity: sha512-+z6tIFOFBJXsV5qumbENuu/5pzE78djqDRPPop2KNcFjjqVkev1g7AAuATtMERh8wtbHknDKYQyKlkT8A7jaUA==}
     engines: {node: '>=22.12'}
     hasBin: true
     peerDependencies:
@@ -6043,7 +6043,7 @@ snapshots:
 
   '@stoplight/json-ref-readers@1.2.2':
     dependencies:
-      node-fetch: 2.6.7
+      node-fetch: 2.7.0
       tslib: 1.14.1
     transitivePeerDependencies:
       - encoding
@@ -6323,7 +6323,7 @@ snapshots:
       - preact
       - react
 
-  '@thebuilder/umbraco-docs@1.7.0(@types/node@26.6.6)(blume@2.2.7(@asyncapi/converter@2.0.2)(@shikijs/themes@4.6.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@vercel/functions@3.11.0)(babel-plugin-react-compiler@1.0.0)(csstype@3.2.3)(esbuild@0.28.2)(prettier@3.9.10)(rollup@4.63.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(yaml@2.9.1))(vgpu@0.6.0)':
+  '@thebuilder/umbraco-docs@1.8.0(@types/node@26.6.6)(blume@2.2.7(@asyncapi/converter@2.0.2)(@shikijs/themes@4.6.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@vercel/functions@3.11.0)(babel-plugin-react-compiler@1.0.0)(csstype@3.2.3)(esbuild@0.28.2)(prettier@3.9.10)(rollup@4.63.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(yaml@2.9.1))(vgpu@0.6.0)':
     dependencies:
       gray-matter: 4.0.3
       sharp: 0.35.5(@types/node@26.6.6)
