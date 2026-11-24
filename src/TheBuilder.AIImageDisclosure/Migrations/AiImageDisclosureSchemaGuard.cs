@@ -28,11 +28,17 @@ internal static class AiImageDisclosureSchemaGuard
         string dataTypeName,
         IReadOnlyCollection<string> expectedItems)
     {
+#if NET11_0_OR_GREATER
+        var configuration = dataType.ConfigurationObject as SingleDropDownConfiguration;
+        var holdsMultipleValues = false;
+#else
         var configuration = dataType.ConfigurationObject as DropDownFlexibleConfiguration;
+        var holdsMultipleValues = configuration?.Multiple ?? false;
+#endif
         if (dataType.EditorAlias != Constants.DropDownPropertyEditorAlias
             || dataType.EditorUiAlias != Constants.DropDownPropertyEditorUiAlias
             || configuration is null
-            || configuration.Multiple
+            || holdsMultipleValues
             || configuration.Items is not { } items
             || !items.SequenceEqual(expectedItems, StringComparer.Ordinal))
         {

@@ -44,7 +44,7 @@ The European Commission provides optional icons for fully AI-generated and parti
 
 ## Install
 
-AI Image Disclosure supports Umbraco CMS 17.3 through 18.x on .NET 10.
+AI Image Disclosure supports Umbraco CMS 17.3 through 19.x: Umbraco 17 and 18 on .NET 10, Umbraco 19 on .NET 11.
 
 ```sh
 dotnet add package TheBuilder.AIImageDisclosure
@@ -81,7 +81,7 @@ The core package works without OpenAI. To add the check, install `TheBuilder.AII
 
 Supply the key through .NET user secrets or `AIImageDisclosure__OpenAI__ApiKey` in your hosting environment. Set `Enabled` to `true` to allow image uploads. A key alone does not enable the check. The Settings panel shows configuration status and provides a test using a bundled sample image, without exposing the key.
 
-To reuse an existing Umbraco.AI connection, install the separate `TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI` adapter and matching Umbraco.AI provider packages. The adapter requires CMS 17.5 or later on 17.x, or CMS 18.x. The direct-key package supports CMS 17.3 through 18.x. Explicit OpenAI configuration settings take precedence over saved connection settings.
+To reuse an existing Umbraco.AI connection, install the separate `TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI` adapter and matching Umbraco.AI provider packages. The adapter requires CMS 17.5 or later on 17.x, CMS 18.x, or CMS 19.x. The direct-key package supports CMS 17.3 through 19.x. Explicit OpenAI configuration settings take precedence over saved connection settings.
 
 Only automatic inspections that find **No content credentials** can upload an image. Invalid credentials, existing non-AI credentials, and manual overrides do not trigger this fallback. When OpenAI reports a watermark, the package stores `OpenAI SynthID detected` in `aiWatermark` and shows an **AI detected** sign. This does not distinguish generation from editing. A negative result does not prove the image is human-made. See the [setup and privacy notes](https://ai-image-disclosure.thebuilder.dk/openai-watermarks).
 

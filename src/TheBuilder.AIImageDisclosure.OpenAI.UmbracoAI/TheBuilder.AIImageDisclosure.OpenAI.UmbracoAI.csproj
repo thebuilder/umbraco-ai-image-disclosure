@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI</PackageId>
@@ -16,10 +16,14 @@
     <PackageTags>umbraco;umbraco-cms;umbraco-ai;image;c2pa;ai;content-credentials;openai;synthid;watermark</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UmbracoAiCoreVersion Condition="'$(UmbracoAiCoreVersion)' == ''">[17.3.0,19.0.0)</UmbracoAiCoreVersion>
+    <!-- Umbraco.AI 19 needs Umbraco 19 on .NET 11. An Umbraco.AI 17 or 18 version passed on the command line
+         applies to the .NET 10 build only, so a .NET 10 sample can pick one without breaking the .NET 11 restore. -->
+    <ResolvedUmbracoAiCoreVersion>$(UmbracoAiCoreVersion)</ResolvedUmbracoAiCoreVersion>
+    <ResolvedUmbracoAiCoreVersion Condition="'$(TargetFramework)' == 'net11.0' and !$(UmbracoAiCoreVersion.StartsWith('19'))">[19.0.0-rc.1,20.0.0)</ResolvedUmbracoAiCoreVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../TheBuilder.AIImageDisclosure.OpenAI/TheBuilder.AIImageDisclosure.OpenAI.csproj" />
-    <PackageReference Include="Umbraco.AI.Core" VersionOverride="$(UmbracoAiCoreVersion)" />
+    <PackageReference Include="Umbraco.AI.Core" VersionOverride="$(ResolvedUmbracoAiCoreVersion)" />
   </ItemGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />

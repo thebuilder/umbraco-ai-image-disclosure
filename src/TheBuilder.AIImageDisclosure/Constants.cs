@@ -21,8 +21,15 @@ internal static class Constants
     public const string AiDisclosureSourceDataTypeName = "AI image disclosure source";
     public const string AiGeneratorPropertyDescription =
         "Read-only software agent attached to the AI-relevant C2PA action, when provided by the credential.";
+#if NET11_0_OR_GREATER
+    // Umbraco 19 gave a dropdown holding one value its own editor, and moves single-value
+    // Umbraco.DropDown.Flexible data types onto it when a site upgrades.
+    public const string DropDownPropertyEditorAlias = "Umbraco.DropDown.Single";
+    public const string DropDownPropertyEditorUiAlias = "Umb.PropertyEditorUi.Dropdown.Single";
+#else
     public const string DropDownPropertyEditorAlias = "Umbraco.DropDown.Flexible";
     public const string DropDownPropertyEditorUiAlias = "Umb.PropertyEditorUi.Dropdown";
+#endif
     public const string GeneratedDisclosureValue = "generated";
     public const string ModifiedDisclosureValue = "modified";
     public const string C2paDisclosureSourceValue = "C2PA";
