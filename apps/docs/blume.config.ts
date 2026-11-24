@@ -1,4 +1,5 @@
 import { docsTheme } from "@thebuilder/umbraco-docs";
+import { pageflock } from "@thebuilder/umbraco-docs/analytics";
 import { defineConfig } from "blume";
 import { vercel } from "blume/analytics";
 import { aiImageDisclosurePackage } from "./umbraco-package";
@@ -28,7 +29,7 @@ export default defineConfig({
   seo: {
     og: { enabled: false },
   },
-  analytics: [vercel()],
+  analytics: [vercel(), pageflock("ai-image-disclosure-thebuilder-dk")],
   // The docs family's shared accent and fonts, so every package site looks alike.
   theme: { ...docsTheme },
   agents: {
