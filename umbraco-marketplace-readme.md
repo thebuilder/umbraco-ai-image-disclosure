@@ -26,7 +26,7 @@ The stored values align with the European Commission's optional labels for fully
 dotnet add package TheBuilder.AIImageDisclosure
 ```
 
-The package supports Umbraco CMS 17.3 through 18.x on .NET 10.
+The package supports Umbraco CMS 17.3 through 19.x: Umbraco 17 and 18 on .NET 10, Umbraco 19 on .NET 11.
 
 Detection processes new uploads and file replacements only. Existing media is not scanned automatically, custom media type aliases are ignored, and public sites remain responsible for rendering an accessible disclosure.
 

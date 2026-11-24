@@ -43,10 +43,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        umbraco-version:
-          - 17.3.0
-          - 17.*
-          - 18.*
+        include:
+          - umbraco-version: 17.3.0
+            framework: net10.0
+          - umbraco-version: 17.*
+            framework: net10.0
+          - umbraco-version: 18.*
+            framework: net10.0
+          # Umbraco 19 runs on .NET 11 only. The prerelease wildcard picks up release candidates until 19.0.0 ships.
+          - umbraco-version: 19.*-*
+            framework: net11.0
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -54,12 +60,15 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Test package
         run: >-
           dotnet test --project tests/TheBuilder.AIImageDisclosure.Tests/TheBuilder.AIImageDisclosure.Tests.csproj
           --configuration Release
+          '-p:TargetFrameworks=${{ matrix.framework }}'
           '-p:UmbracoVersion=${{ matrix.umbraco-version }}'
 
   openai:
@@ -71,8 +80,13 @@ jobs:
         include:
           - umbraco-version: 17.5.0
             ai-version: 17.3.0
+            framework: net10.0
           - umbraco-version: 18.1.1
             ai-version: 18.3.0
+            framework: net10.0
+          - umbraco-version: 19.*-*
+            ai-version: 19.*-*
+            framework: net11.0
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -80,12 +94,15 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Test optional integration
         run: >-
           dotnet test --project tests/TheBuilder.AIImageDisclosure.OpenAI.Tests/TheBuilder.AIImageDisclosure.OpenAI.Tests.csproj
           --configuration Release
+          '-p:TargetFrameworks=${{ matrix.framework }}'
           '-p:UmbracoVersion=${{ matrix.umbraco-version }}'
           '-p:UmbracoAiCoreVersion=${{ matrix.ai-version }}'
 
@@ -99,7 +116,9 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Build sample host
         run: dotnet build samples/TheBuilder.AIImageDisclosure.Example/TheBuilder.AIImageDisclosure.Example.csproj --configuration Release
@@ -125,7 +144,9 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Stamp Umbraco package manifest version
         shell: bash
@@ -234,6 +255,26 @@ jobs:
           dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package Umbraco.Cms.Web.Common --version 17.5.0
           dotnet add "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj" package TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI --version "$PACKAGE_VERSION"
           dotnet restore "$RUNNER_TEMP/package-consumer/PackageConsumer.csproj"
+
+      - name: Restore every package in an Umbraco 19 consumer on .NET 11
+        env:
+          PACKAGE_VERSION: ${{ inputs.package-version }}
+          # Move to 19.0.0 once Umbraco 19 is released.
+          UMBRACO_19_VERSION: 19.0.0-rc2
+        run: |
+          consumer="$RUNNER_TEMP/package-consumer-19/PackageConsumer.csproj"
+          dotnet new classlib --name PackageConsumer --output "$RUNNER_TEMP/package-consumer-19" --framework net11.0
+          dotnet add "$consumer" package Umbraco.Cms.Web.Common --version "$UMBRACO_19_VERSION"
+          dotnet add "$consumer" package TheBuilder.AIImageDisclosure --version "$PACKAGE_VERSION"
+          dotnet add "$consumer" package TheBuilder.AIImageDisclosure.OpenAI.UmbracoAI --version "$PACKAGE_VERSION"
+          dotnet restore "$consumer"
+          python3 - "$RUNNER_TEMP/package-consumer-19/obj/project.assets.json" <<'PYTHON'
+          import json, sys
+          with open(sys.argv[1]) as assets:
+              target = json.load(assets)["targets"]["net11.0"]
+          package = next(value for name, value in target.items() if name.startswith("TheBuilder.AIImageDisclosure/"))
+          assert any(path.startswith("lib/net11.0/") for path in package["compile"]), "Umbraco 19 must get the .NET 11 build"
+          PYTHON
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4

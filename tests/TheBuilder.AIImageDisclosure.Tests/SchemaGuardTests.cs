@@ -56,10 +56,7 @@ public sealed class SchemaGuardTests
     public void RejectsDisclosureDataTypeWithModifiedOptions()
     {
         var dataType = DisclosureDataType();
-        dataType.ConfigurationObject.Returns(new DropDownFlexibleConfiguration
-        {
-            Items = [Constants.GeneratedDisclosureValue],
-        });
+        dataType.ConfigurationObject.Returns(SingleSelectConfiguration([Constants.GeneratedDisclosureValue]));
 
         Assert.Throws<AiImageDisclosureSchemaCollisionException>(() =>
             AiImageDisclosureSchemaGuard.EnsureDisclosureDataTypeIsCompatible(dataType));
@@ -135,18 +132,46 @@ public sealed class SchemaGuardTests
                 Guid.NewGuid()));
     }
 
+#if NET11_0_OR_GREATER
+    [Fact]
+    public void RejectsFlexibleDropDownOnUmbraco19()
+    {
+        // Umbraco 19 moves single-value dropdowns onto their own editor when a site upgrades, so a data
+        // type still on the flexible editor holds any number of values and is not one the package made.
+        var dataType = Substitute.For<IDataType>();
+        dataType.EditorAlias.Returns("Umbraco.DropDown.Flexible");
+        dataType.EditorUiAlias.Returns("Umb.PropertyEditorUi.Dropdown");
+        dataType.ConfigurationObject.Returns(new DropDownFlexibleConfiguration
+        {
+            Items = [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
+        });
+
+        Assert.Throws<AiImageDisclosureSchemaCollisionException>(() =>
+            AiImageDisclosureSchemaGuard.EnsureDisclosureDataTypeIsCompatible(dataType));
+    }
+
+    // The single dropdown editor Umbraco 19 moves single-value dropdowns onto.
+    private const string SingleSelectEditorAlias = "Umbraco.DropDown.Single";
+    private const string SingleSelectEditorUiAlias = "Umb.PropertyEditorUi.Dropdown.Single";
+
+    private static object SingleSelectConfiguration(List<string> items) => new SingleDropDownConfiguration { Items = items };
+#else
+    private const string SingleSelectEditorAlias = "Umbraco.DropDown.Flexible";
+    private const string SingleSelectEditorUiAlias = "Umb.PropertyEditorUi.Dropdown";
+
+    private static object SingleSelectConfiguration(List<string> items) =>
+        new DropDownFlexibleConfiguration { Items = items, Multiple = false };
+#endif
+
     private static IDataType DisclosureDataType(params string[] items)
     {
         var dataType = Substitute.For<IDataType>();
-        dataType.EditorAlias.Returns(Constants.DropDownPropertyEditorAlias);
-        dataType.EditorUiAlias.Returns(Constants.DropDownPropertyEditorUiAlias);
-        dataType.ConfigurationObject.Returns(new DropDownFlexibleConfiguration
-        {
-            Items = items.Length > 0
+        dataType.EditorAlias.Returns(SingleSelectEditorAlias);
+        dataType.EditorUiAlias.Returns(SingleSelectEditorUiAlias);
+        dataType.ConfigurationObject.Returns(SingleSelectConfiguration(
+            items.Length > 0
                 ? items.ToList()
-                : [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue],
-            Multiple = false,
-        });
+                : [Constants.GeneratedDisclosureValue, Constants.ModifiedDisclosureValue]));
         return dataType;
     }
 }

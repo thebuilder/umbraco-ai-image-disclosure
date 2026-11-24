@@ -14,7 +14,7 @@ export const aiImageDisclosurePackage = defineUmbracoPackage({
   },
   logo: "/logo-mark.svg",
   compatibility: {
-    umbraco: ">=17.3 <19",
+    umbraco: ">=17.3 <20",
     dotnet: ">=10",
   },
   status: "preview",

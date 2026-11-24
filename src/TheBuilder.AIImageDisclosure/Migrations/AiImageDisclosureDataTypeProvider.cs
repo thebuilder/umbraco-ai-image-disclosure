@@ -58,7 +58,9 @@ internal sealed class AiImageDisclosureDataTypeProvider(
             EditorUiAlias = Constants.DropDownPropertyEditorUiAlias,
             ConfigurationData = new Dictionary<string, object>
             {
+#if !NET11_0_OR_GREATER
                 ["multiple"] = false,
+#endif
                 ["items"] = items,
             },
         };
